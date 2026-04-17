@@ -42,7 +42,7 @@ The MVP covers the following core capabilities:
 
 
 
-## 1.4 Definitions & Abbreviations
+## 1.4 Definitions & Abbreviations.
 
 | **Term / Abbreviation** | **Definition** |
 |---|---|
