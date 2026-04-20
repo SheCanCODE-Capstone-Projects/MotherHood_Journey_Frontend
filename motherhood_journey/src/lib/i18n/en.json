@@ -1,9 +1,16 @@
 {
   "login": {
     "title": "Welcome back",
+    "signInTab": "Sign in",
+    "signUpTab": "Sign up",
     "phone": "Phone number",
     "password": "Password",
-    "submit": "Sign in",
-    "error": "Please fix the highlighted fields and try again."
+    "confirmPassword": "Confirm password",
+    "submitSignIn": "Sign in",
+    "submitSignUp": "Create account",
+    "error": "Please fix the highlighted fields and try again.",
+    "languageNotice": "You can use these languages:",
+    "switchToSignUp": "First time here? Create an account",
+    "switchToSignIn": "Already have an account? Sign in"
   }
 }

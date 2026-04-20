@@ -1,9 +1,16 @@
 {
   "login": {
     "title": "Bon retour",
+    "signInTab": "Se connecter",
+    "signUpTab": "Creer un compte",
     "phone": "Numero de telephone",
     "password": "Mot de passe",
-    "submit": "Se connecter",
-    "error": "Corrigez les champs en erreur puis reessayez."
+    "confirmPassword": "Confirmer le mot de passe",
+    "submitSignIn": "Se connecter",
+    "submitSignUp": "Creer un compte",
+    "error": "Corrigez les champs en erreur puis reessayez.",
+    "languageNotice": "Langues disponibles:",
+    "switchToSignUp": "Premiere visite? Creez un compte",
+    "switchToSignIn": "Vous avez deja un compte? Connectez-vous"
   }
 }

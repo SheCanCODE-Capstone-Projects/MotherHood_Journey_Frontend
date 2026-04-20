@@ -1,9 +1,16 @@
 {
   "login": {
     "title": "Murakaza neza",
+    "signInTab": "Injira",
+    "signUpTab": "Iyandikishe",
     "phone": "Nimero ya telefoni",
     "password": "Ijambo ry'ibanga",
-    "submit": "Injira",
-    "error": "Kosora amakosa agaragara hanyuma wongere ugerageze."
+    "confirmPassword": "Emeza ijambo ry'ibanga",
+    "submitSignIn": "Injira",
+    "submitSignUp": "Kora konti",
+    "error": "Kosora amakosa agaragara hanyuma wongere ugerageze.",
+    "languageNotice": "Indimi ushobora gukoresha ni izi:",
+    "switchToSignUp": "Ni ubwa mbere? Kora konti",
+    "switchToSignIn": "Usanzwe ufite konti? Injira"
   }
 }
