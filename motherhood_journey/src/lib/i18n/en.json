@@ -1,0 +1,9 @@
+{
+  "login": {
+    "title": "Welcome back",
+    "phone": "Phone number",
+    "password": "Password",
+    "submit": "Sign in",
+    "error": "Please fix the highlighted fields and try again."
+  }
+}

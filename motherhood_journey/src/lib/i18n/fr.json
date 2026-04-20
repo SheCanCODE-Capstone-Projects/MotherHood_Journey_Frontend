@@ -1,0 +1,9 @@
+{
+  "login": {
+    "title": "Bon retour",
+    "phone": "Numero de telephone",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "error": "Corrigez les champs en erreur puis reessayez."
+  }
+}
