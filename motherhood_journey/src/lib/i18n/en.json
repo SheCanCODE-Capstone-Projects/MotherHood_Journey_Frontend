@@ -6,11 +6,20 @@
     "phone": "Phone number",
     "password": "Password",
     "confirmPassword": "Confirm password",
+    "submit": "Sign in",
     "submitSignIn": "Sign in",
     "submitSignUp": "Create account",
     "error": "Please fix the highlighted fields and try again.",
-    "languageNotice": "You can use these languages:",
+    "languageNotice": "Language",
+    "languageMenuHint": "Choose between Kinyarwanda, English, and French.",
     "switchToSignUp": "First time here? Create an account",
-    "switchToSignIn": "Already have an account? Sign in"
+    "switchToSignIn": "Already have an account? Sign in",
+    "accountCreated": "Account created successfully. You are now logged in.",
+    "accountExists": "This phone number already has an account.",
+    "invalidCredentials": "Invalid phone number or password.",
+    "loggedInSuccess": "Login successful.",
+    "loggedOutSuccess": "You have logged out successfully.",
+    "loggedInAs": "Logged in as {{phone}}",
+    "logout": "Log out"
   }
 }
