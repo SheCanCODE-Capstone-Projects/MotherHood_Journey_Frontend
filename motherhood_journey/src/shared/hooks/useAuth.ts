@@ -26,7 +26,7 @@ export const useAuth = create<AuthState>()(
 		(set, get) => ({
 			accounts: [],
 			currentUser: null,
-			signUp: ({ phone, password }) => {
+			signUp: ({ phone, password, role = "patient" }) => {
 				const normalizedPhone = normalizePhone(phone);
 				const accountExists = get().accounts.some(
 					(account) => account.phone === normalizedPhone,
@@ -44,11 +44,13 @@ export const useAuth = create<AuthState>()(
 						{
 							phone: normalizedPhone,
 							password,
+							role,
 							createdAt: nowIso,
 						},
 					],
 					currentUser: {
 						phone: normalizedPhone,
+						role,
 						loggedInAt: nowIso,
 					},
 				}));
@@ -69,6 +71,7 @@ export const useAuth = create<AuthState>()(
 				set({
 					currentUser: {
 						phone: normalizedPhone,
+						role: matchingAccount.role,
 						loggedInAt: new Date().toISOString(),
 					},
 				});
