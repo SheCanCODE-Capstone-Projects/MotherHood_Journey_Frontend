@@ -21,7 +21,16 @@ interface FetchOptions extends RequestInit {
   headers?: Record<string, string>;
 }
 
-export function createApiClient() {
+export interface ApiClient {
+  get<T>(endpoint: string, options?: FetchOptions): Promise<T>;
+  post<T>(endpoint: string, body?: unknown, options?: FetchOptions): Promise<T>;
+  put<T>(endpoint: string, body?: unknown, options?: FetchOptions): Promise<T>;
+  patch<T>(endpoint: string, body?: unknown, options?: FetchOptions): Promise<T>;
+  delete<T = void>(endpoint: string, options?: FetchOptions): Promise<T>;
+  getToken(): string | null;
+}
+
+export function createApiClient(): ApiClient {
   /**
    * Get the current bearer token from auth store
    * Synchronously reads from zustand store (client-side only)
