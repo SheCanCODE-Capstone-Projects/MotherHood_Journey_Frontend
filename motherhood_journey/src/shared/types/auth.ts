@@ -33,7 +33,9 @@ declare module "next-auth/jwt" {
     canExport?: boolean;
     canPushHmis?: boolean;
   }
-}export type SignInPayload = {
+}
+
+export type SignInPayload = {
 	phone: string;
 	password: string;
 };
