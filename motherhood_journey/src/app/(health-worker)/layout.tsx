@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { PortalShell } from "@/shared/components/layout";
+
 type HealthWorkerLayoutProps = {
   children: ReactNode;
 };
@@ -7,5 +9,5 @@ type HealthWorkerLayoutProps = {
 export default function HealthWorkerLayout({
   children,
 }: HealthWorkerLayoutProps) {
-  return children;
+  return <PortalShell fallbackRole="health_worker">{children}</PortalShell>;
 }
