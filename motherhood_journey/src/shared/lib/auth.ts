@@ -7,16 +7,19 @@ export const authOptions: NextAuthConfig = {
       name: "Credentials",
 
       credentials: {
-        phone: { label: "Phone", type: "phone" },
+        phone: { label: "Phone", type: "tel" },
         password: { label: "Password", type: "password" },
       },
 
       async authorize(credentials) {
         try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
           const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
             {
               method: "POST",
+              signal: controller.signal,
               headers: {
                 "Content-Type": "application/json",
               },
@@ -26,6 +29,7 @@ export const authOptions: NextAuthConfig = {
               }),
             }
           );
+          clearTimeout(timeoutId);
 
           
           if (!res.ok) {
@@ -34,6 +38,16 @@ export const authOptions: NextAuthConfig = {
           }
 
           const user = await res.json();
+          if(
+            !user ||
+            typeof user !== "object" ||
+            typeof user.token !== "string" ||
+            user.token.length === 0
+          ) {
+            console.warn("login response missing token");
+            return null;
+          }
+          
 
           return user;
         } catch (error) {
