@@ -47,6 +47,14 @@ export function useCanAccess(resource: Resource): boolean {
   return canAccess(session, resource);
 }
 
+/**
+ * Returns the current user's role, or null if unauthenticated.
+ */
+export function useRole(): Role | null {
+  const { data: session } = useSession();
+  return session?.user?.role ?? null;
+}
+
 // ---------------------------------------------------------------------------
 // useIsAuthenticated
 // ---------------------------------------------------------------------------
