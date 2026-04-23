@@ -1,12 +1,39 @@
-export const USER_ROLES = [
-	"patient",
-	"health_worker",
-	"facility_admin",
-	"district_officer",
-	"government",
-] as const;
+import "next-auth";
+import { DefaultSession } from "next-auth";
+import "next-auth/jwt";
 
-export type UserRole = (typeof USER_ROLES)[number];
+declare module "next-auth" {
+  interface User {
+    token?: string;
+    role?: string;
+    facilityId?: number;
+    geoScopeIds?: number[];
+    canExport?: boolean;
+    canPushHmis?: boolean;
+  }
+
+  interface Session {
+    user: {
+      accessToken?: string;
+      role?: string;
+      facilityId?: number;
+      geoScopeIds?: number[];
+      canExport?: boolean;
+      canPushHmis?: boolean;
+    } & DefaultSession["user"];
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    accessToken?: string;
+    role?: string;
+    facilityId?: number;
+    geoScopeIds?: number[];
+    canExport?: boolean;
+    canPushHmis?: boolean;
+  }
+}
 
 export type SignInPayload = {
 	phone: string;
