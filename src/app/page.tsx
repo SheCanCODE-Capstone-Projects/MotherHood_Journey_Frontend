@@ -5,7 +5,15 @@ import { useState } from "react";
 import { PageHeader, PortalShell } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui/button";
 import { ROLE_LABELS } from "@/shared/config/rbac";
-import { USER_ROLES, type UserRole } from "@/shared/types/auth";
+import type { UserRole } from "@/shared/types/auth";
+
+const USER_ROLES: UserRole[] = [
+  "patient",
+  "health_worker",
+  "facility_admin",
+  "district_officer",
+  "government",
+];
 
 const previewHighlights: Record<UserRole, string[]> = {
   patient: [

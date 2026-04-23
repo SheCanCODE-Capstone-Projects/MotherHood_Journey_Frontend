@@ -22,6 +22,10 @@ declare module "next-auth" {
       canPushHmis?: boolean;
     } & DefaultSession["user"];
   }
+
+  interface UserRole {
+    role : string;
+  }
 }
 
 declare module "next-auth/jwt" {
@@ -35,6 +39,7 @@ declare module "next-auth/jwt" {
   }
 }
 
+export type UserRole = "patient" | "health_worker" | "facility_admin" | "district_officer" | "government";
 export type SignInPayload = {
 	phone: string;
 	password: string;
