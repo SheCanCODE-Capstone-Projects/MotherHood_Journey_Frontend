@@ -130,6 +130,16 @@ export const PERMISSIONS: Record<Role, Resource[]> = {
 // ---------------------------------------------------------------------------
 
 export const ROUTE_ROLE_MAP: Array<{ pattern: RegExp; allowedRoles: Role[] }> = [
+  // Admin-only routes (as per snippet requirements)
+  {
+    pattern: /^\/admin(\/.*)?$/,
+    allowedRoles: ["ADMIN"],
+  },
+  // Nurse-only routes (Nurse + Admin register patients)
+  {
+    pattern: /^\/register(\/.*)?$/,
+    allowedRoles: ["NURSE", "ADMIN"],
+  },
   // Admin dashboard — ADMIN only
   {
     pattern: /^\/dashboard\/admin(\/.*)?$/,
