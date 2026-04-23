@@ -1,0 +1,25 @@
+{
+  "login": {
+    "title": "Murakaza neza",
+    "signInTab": "Injira",
+    "signUpTab": "Iyandikishe",
+    "phone": "Nimero ya telefoni",
+    "password": "Ijambo ry'ibanga",
+    "confirmPassword": "Emeza ijambo ry'ibanga",
+    "submit": "Injira",
+    "submitSignIn": "Injira",
+    "submitSignUp": "Kora konti",
+    "error": "Kosora amakosa agaragara hanyuma wongere ugerageze.",
+    "languageNotice": "Ururimi",
+    "languageMenuHint": "Hitamo Kinyarwanda, Icyongereza, cyangwa Igifaransa.",
+    "switchToSignUp": "Ni ubwa mbere? Kora konti",
+    "switchToSignIn": "Usanzwe ufite konti? Injira",
+    "accountCreated": "Konti yakozwe neza. Ubahise winjira.",
+    "accountExists": "Iyi nimero ya telefoni isanzwe ifite konti.",
+    "invalidCredentials": "Nimero ya telefoni cyangwa ijambo ry'ibanga si byo.",
+    "loggedInSuccess": "Winjiye neza.",
+    "loggedOutSuccess": "Wasohotse neza.",
+    "loggedInAs": "Winjiye nka {{phone}}",
+    "logout": "Sohoka"
+  }
+}

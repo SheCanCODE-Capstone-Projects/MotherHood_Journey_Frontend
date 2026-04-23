@@ -1,0 +1,25 @@
+{
+  "login": {
+    "title": "Bon retour",
+    "signInTab": "Se connecter",
+    "signUpTab": "Creer un compte",
+    "phone": "Numero de telephone",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "submit": "Se connecter",
+    "submitSignIn": "Se connecter",
+    "submitSignUp": "Creer un compte",
+    "error": "Corrigez les champs en erreur puis reessayez.",
+    "languageNotice": "Langue",
+    "languageMenuHint": "Choisissez entre Kinyarwanda, Anglais et Francais.",
+    "switchToSignUp": "Premiere visite? Creez un compte",
+    "switchToSignIn": "Vous avez deja un compte? Connectez-vous",
+    "accountCreated": "Compte cree avec succes. Vous etes maintenant connecte.",
+    "accountExists": "Ce numero de telephone a deja un compte.",
+    "invalidCredentials": "Numero de telephone ou mot de passe invalide.",
+    "loggedInSuccess": "Connexion reussie.",
+    "loggedOutSuccess": "Deconnexion reussie.",
+    "loggedInAs": "Connecte en tant que {{phone}}",
+    "logout": "Se deconnecter"
+  }
+}
