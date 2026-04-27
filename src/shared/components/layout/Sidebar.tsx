@@ -17,13 +17,12 @@ import {
 
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
-import type { RoleNavItem } from "@/shared/config/rbac";
+import { useRole } from "@/shared/hooks/useRole";
 import type { UserRole } from "@/shared/types/auth";
 
 type SidebarProps = {
-  role: UserRole;
-  roleLabel: string;
-  navItems: RoleNavItem[];
+  fallbackRole: UserRole;
+  previewRole?: UserRole;
 };
 
 const iconByHref: Record<string, LucideIcon> = {
@@ -40,7 +39,8 @@ const iconByHref: Record<string, LucideIcon> = {
   "/sync": RefreshCcw,
 };
 
-export function Sidebar({ role, roleLabel, navItems }: SidebarProps) {
+export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
+  const { role, roleLabel, navItems } = useRole({ fallbackRole, previewRole });
   const pathname = usePathname();
 
   return (
