@@ -10,9 +10,17 @@
 export type ErrorResponseDTO = {
   message: string;
   statusCode: number;
+  status?: number;
+  error?: string;
   timestamp?: string;
   path?: string;
 };
+
+/**
+ * Geo location response item returned by the geo endpoints.
+ * The backend returns location names as strings for the hierarchy lists.
+ */
+export type GeoLocationDTO = string;
 
 /**
  * Typed API Error thrown by fetch client on non-2xx responses

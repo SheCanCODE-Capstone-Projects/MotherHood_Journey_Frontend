@@ -8,6 +8,7 @@ import "@/lib/i18n";
 import { useAuth } from "@/shared/hooks/useAuth";
 
 const signInSchema = z.object({
+  fullName: z.string().min(2, "Name must be at least 2 characters"),
   phone: z
     .string()
     .regex(/^\+250\d{9}$/, "Phone number must be in format +250XXXXXXXXX"),
@@ -24,6 +25,7 @@ const signUpSchema = signInSchema
   });
 
 type LoginForm = {
+  fullName: string;
   phone: string;
   password: string;
   confirmPassword: string;
@@ -43,6 +45,7 @@ export default function LoginPage() {
   const { currentUser, signIn, signUp, logout } = useAuth();
   const [mode, setMode] = useState<AuthMode>("signin");
   const [formData, setFormData] = useState<LoginForm>({
+    fullName: "",
     phone: "",
     password: "",
     confirmPassword: "",
@@ -94,7 +97,11 @@ export default function LoginPage() {
     const payload =
       mode === "signup"
         ? formData
-        : { phone: formData.phone, password: formData.password };
+        : {
+            fullName: formData.fullName,
+            phone: formData.phone,
+            password: formData.password,
+          };
     const result = schema.safeParse(payload);
 
     if (!result.success) {
@@ -124,6 +131,7 @@ export default function LoginPage() {
     setErrors({});
     setHasSubmitError(false);
     setFormData({
+      fullName: "",
       phone: "",
       password: "",
       confirmPassword: "",
@@ -254,6 +262,31 @@ export default function LoginPage() {
               </div>
 
               <form onSubmit={onSubmit} className="space-y-5" noValidate>
+              <div>
+                <label
+                  htmlFor="fullName"
+                  className="mb-2 block text-sm font-medium text-[#1D5052]"
+                >
+                  {t("login.fullName")}
+                </label>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  value={formData.fullName}
+                  onChange={(event) => onChangeField("fullName", event.target.value)}
+                  placeholder="Jane Doe"
+                  className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
+                    errors.fullName
+                      ? "border-red-500 ring-2 ring-red-100"
+                      : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
+                  }`}
+                />
+                {errors.fullName && (
+                  <p className="mt-1.5 text-sm text-red-600">{errors.fullName}</p>
+                )}
+              </div>
+
               <div>
                 <label
                   htmlFor="phone"

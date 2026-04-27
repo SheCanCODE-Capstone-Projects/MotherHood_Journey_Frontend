@@ -1,9 +1,17 @@
 "use client";
 
-import type { ApiError } from "@/shared/types/api";
 import { ApiError as ApiErrorClass } from "@/shared/types/api";
 import type { ErrorResponseDTO } from "@/shared/types/api";
 import { useAuth } from "@/shared/hooks/useAuth";
+
+type SessionTokenCarrier = {
+  accessToken?: string;
+  token?: string;
+  user?: {
+    accessToken?: string;
+    token?: string;
+  };
+};
 
 /**
  * Typed fetch client with automatic bearer token attachment
@@ -21,6 +29,10 @@ interface FetchOptions extends RequestInit {
   headers?: Record<string, string>;
 }
 
+function isErrorResponseDTO(value: unknown): value is ErrorResponseDTO {
+  return Boolean(value && typeof value === "object" && "message" in value);
+}
+
 export interface ApiClient {
   get<T>(endpoint: string, options?: FetchOptions): Promise<T>;
   post<T>(endpoint: string, body?: unknown, options?: FetchOptions): Promise<T>;
@@ -32,22 +44,56 @@ export interface ApiClient {
 
 export function createApiClient(): ApiClient {
   /**
-   * Get the current bearer token from auth store
-   * Synchronously reads from zustand store (client-side only)
+   * Extract token from common NextAuth session token fields.
    */
-  function getBearerToken(): string | null {
+  function getTokenFromSession(session: unknown): string | null {
+    if (!session || typeof session !== "object") {
+      return null;
+    }
+
+    const typedSession = session as SessionTokenCarrier;
+
+    return (
+      typedSession.accessToken ||
+      typedSession.token ||
+      typedSession.user?.accessToken ||
+      typedSession.user?.token ||
+      null
+    );
+  }
+
+  /**
+   * Resolve token from local persisted auth state.
+   */
+  function getFallbackToken(): string | null {
     try {
-      // Import the hook's returned store state directly
       const authStore = useAuth.getState();
       if (authStore.currentUser) {
-        // In production, this would be retrieved from NextAuth session or a token store
-        // For now, we use a placeholder - the actual token should come from your auth provider
         return localStorage.getItem("auth_token");
       }
       return null;
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Resolve bearer token from NextAuth first, with a fallback to persisted auth token.
+   */
+  async function getBearerToken(): Promise<string | null> {
+    try {
+      const { getSession } = await import("next-auth/react");
+      const session = await getSession();
+      const sessionToken = getTokenFromSession(session);
+
+      if (sessionToken) {
+        return sessionToken;
+      }
+    } catch {
+      // Continue with fallback token lookup.
+    }
+
+    return getFallbackToken();
   }
 
   /**
@@ -65,12 +111,20 @@ export function createApiClient(): ApiClient {
 
     // If response is not OK (non-2xx), throw ApiError
     if (!response.ok) {
-      const errorData = typeof data === "object" ? (data as ErrorResponseDTO) : null;
+      const errorData = isErrorResponseDTO(data) ? data : null;
+      const statusCode = errorData?.statusCode ?? errorData?.status ?? response.status;
       const errorMessage =
         errorData?.message ||
         (typeof data === "string" ? data : `HTTP ${response.status}`);
 
-      throw new ApiErrorClass(response.status, errorMessage, errorData || undefined);
+      const normalizedError = errorData
+        ? {
+            ...errorData,
+            statusCode,
+          }
+        : undefined;
+
+      throw new ApiErrorClass(statusCode, errorMessage, normalizedError);
     }
 
     return data as T;
@@ -93,7 +147,7 @@ export function createApiClient(): ApiClient {
     };
 
     // Auto-attach bearer token if available
-    const token = getBearerToken();
+    const token = await getBearerToken();
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
@@ -200,7 +254,7 @@ export function createApiClient(): ApiClient {
      * Useful for direct fetch or debugging
      */
     getToken(): string | null {
-      return getBearerToken();
+      return getFallbackToken();
     },
   };
 }

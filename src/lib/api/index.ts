@@ -54,6 +54,18 @@
  */
 
 export { apiClient, createApiClient, isApiError } from "./client";
+export {
+  getCells,
+  getDistricts,
+  getProvinces,
+  getSectors,
+  getVillages,
+} from "./geo";
+export type {
+  CellQueryContext,
+  SectorQueryContext,
+  VillageQueryContext,
+} from "./geo";
 export type { ApiClient } from "./client";
 export { useApi } from "./useApi";
 
@@ -62,6 +74,7 @@ export type {
   ApiResponse,
   ApiResponse as ApiResponseEnvelope,
   ErrorResponseDTO,
+  GeoLocationDTO,
   AuthTokenResponse,
   AuthenticatedUserInfo,
   PageResponse,
