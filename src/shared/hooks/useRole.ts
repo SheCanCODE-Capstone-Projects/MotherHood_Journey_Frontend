@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { useSession } from "next-auth/react";
 
 import {
   ROLE_LABELS,
@@ -19,15 +18,11 @@ type UseRoleOptions = {
 };
 
 export function useRole(options?: UseRoleOptions) {
-  const { data: session } = useSession();
   const currentUser = useAuth((state) => state.currentUser);
   const logout = useAuth((state) => state.logout);
 
-  const sessionRole = session?.user?.role as UserRole | undefined;
-
   const role =
     options?.previewRole ??
-    sessionRole ??
     currentUser?.role ??
     options?.fallbackRole ??
     "patient";
@@ -36,10 +31,9 @@ export function useRole(options?: UseRoleOptions) {
     const roleLabel = ROLE_LABELS[role];
     const roleTheme = ROLE_THEMES[role];
     const phoneSuffix = currentUser?.phone?.slice(-4) ?? "0000";
-    const displayName =
-      session?.user?.name ||
-      session?.user?.email ||
-      (currentUser?.phone ? `${roleLabel} ${phoneSuffix}` : `${roleLabel} User`);
+    const displayName = currentUser?.phone
+      ? `${roleLabel} ${phoneSuffix}`
+      : `${roleLabel} User`;
 
     return {
       role,
@@ -50,8 +44,7 @@ export function useRole(options?: UseRoleOptions) {
       organizationLabel: ROLE_ORGANIZATION_LABELS[role],
       organizationName: ROLE_ORGANIZATION_NAMES[role],
       currentUser,
-      session,
       logout,
     };
-  }, [currentUser, logout, role, session]);
+  }, [currentUser, logout, role]);
 }
