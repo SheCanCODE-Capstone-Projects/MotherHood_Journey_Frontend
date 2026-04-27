@@ -29,6 +29,10 @@ interface FetchOptions extends RequestInit {
   headers?: Record<string, string>;
 }
 
+function isErrorResponseDTO(value: unknown): value is ErrorResponseDTO {
+  return Boolean(value && typeof value === "object" && "message" in value);
+}
+
 export interface ApiClient {
   get<T>(endpoint: string, options?: FetchOptions): Promise<T>;
   post<T>(endpoint: string, body?: unknown, options?: FetchOptions): Promise<T>;
@@ -107,12 +111,20 @@ export function createApiClient(): ApiClient {
 
     // If response is not OK (non-2xx), throw ApiError
     if (!response.ok) {
-      const errorData = typeof data === "object" ? (data as ErrorResponseDTO) : null;
+      const errorData = isErrorResponseDTO(data) ? data : null;
+      const statusCode = errorData?.statusCode ?? errorData?.status ?? response.status;
       const errorMessage =
         errorData?.message ||
         (typeof data === "string" ? data : `HTTP ${response.status}`);
 
-      throw new ApiErrorClass(response.status, errorMessage, errorData || undefined);
+      const normalizedError = errorData
+        ? {
+            ...errorData,
+            statusCode,
+          }
+        : undefined;
+
+      throw new ApiErrorClass(statusCode, errorMessage, normalizedError);
     }
 
     return data as T;
