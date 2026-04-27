@@ -41,7 +41,7 @@ export function MobileNav({ fallbackRole, previewRole }: MobileNavProps) {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 border-t bg-white/95 px-2 py-2 backdrop-blur lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t bg-white/95 px-2 py-2 shadow-[0_-10px_30px_-20px_rgba(39,111,117,0.45)] backdrop-blur lg:hidden"
       style={{ borderColor: roleTheme.border }}
     >
       <div className="grid grid-cols-4 gap-1">
