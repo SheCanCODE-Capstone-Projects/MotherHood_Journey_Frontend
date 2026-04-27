@@ -40,19 +40,25 @@ const iconByHref: Record<string, LucideIcon> = {
 };
 
 export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
-  const { role, roleLabel, navItems } = useRole({ fallbackRole, previewRole });
+  const { role, roleLabel, navItems, roleTheme } = useRole({
+    fallbackRole,
+    previewRole,
+  });
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-72 shrink-0 border-r border-[#D6E7E5] bg-[#F5FBFA] lg:flex lg:flex-col">
-      <div className="border-b border-[#D6E7E5] px-6 py-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5B8784]">
+    <aside
+      className="hidden w-72 shrink-0 border-r bg-[#F5FBFA] lg:flex lg:flex-col"
+      style={{ borderColor: roleTheme.border }}
+    >
+      <div className="border-b px-6 py-6" style={{ borderColor: roleTheme.border }}>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em]" style={{ color: roleTheme.text }}>
           Motherhood Journey
         </p>
-        <h2 className="mt-2 text-2xl font-semibold text-[#1D5052]">
+        <h2 className="mt-2 text-2xl font-semibold" style={{ color: roleTheme.text }}>
           {roleLabel} Portal
         </h2>
-        <p className="mt-2 text-sm text-[#54797C]">
+        <p className="mt-2 text-sm" style={{ color: roleTheme.text }}>
           Role-aware navigation for {role.replaceAll("_", " ")} workflows.
         </p>
       </div>
@@ -71,9 +77,14 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
               className={cn(
                 "h-11 w-full justify-start rounded-2xl px-4",
                 isActive
-                  ? "bg-[#2C6F73] text-white hover:bg-[#245C60]"
-                  : "text-[#24585B] hover:bg-[#E0F0ED] hover:text-[#1D5052]",
+                  ? "text-white"
+                  : "hover:text-[#1D5052]",
               )}
+              style={
+                isActive
+                  ? { backgroundColor: roleTheme.accent }
+                  : { color: roleTheme.text, backgroundColor: "transparent" }
+              }
             >
               <Link href={item.href}>
                 <Icon className="size-4" />
