@@ -1,12 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
+import { useSession } from "next-auth/react";
 
 import {
   ROLE_LABELS,
   ROLE_NAV_ITEMS,
   ROLE_ORGANIZATION_LABELS,
   ROLE_ORGANIZATION_NAMES,
+  ROLE_THEMES,
 } from "@/shared/config/rbac";
 import { useAuth } from "@/shared/hooks/useAuth";
 import type { UserRole } from "@/shared/types/auth";
@@ -17,31 +19,39 @@ type UseRoleOptions = {
 };
 
 export function useRole(options?: UseRoleOptions) {
+  const { data: session } = useSession();
   const currentUser = useAuth((state) => state.currentUser);
   const logout = useAuth((state) => state.logout);
 
+  const sessionRole = session?.user?.role as UserRole | undefined;
+
   const role =
     options?.previewRole ??
+    sessionRole ??
     currentUser?.role ??
     options?.fallbackRole ??
     "patient";
 
   return useMemo(() => {
     const roleLabel = ROLE_LABELS[role];
+    const roleTheme = ROLE_THEMES[role];
     const phoneSuffix = currentUser?.phone?.slice(-4) ?? "0000";
-    const displayName = currentUser?.phone
-      ? `${roleLabel} ${phoneSuffix}`
-      : `${roleLabel} User`;
+    const displayName =
+      session?.user?.name ||
+      session?.user?.email ||
+      (currentUser?.phone ? `${roleLabel} ${phoneSuffix}` : `${roleLabel} User`);
 
     return {
       role,
       roleLabel,
+      roleTheme,
       navItems: ROLE_NAV_ITEMS[role],
       displayName,
       organizationLabel: ROLE_ORGANIZATION_LABELS[role],
       organizationName: ROLE_ORGANIZATION_NAMES[role],
       currentUser,
+      session,
       logout,
     };
-  }, [currentUser, logout, role]);
+  }, [currentUser, logout, role, session]);
 }
