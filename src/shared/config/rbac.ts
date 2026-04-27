@@ -14,6 +14,13 @@ export type RoleNavItem = {
   shortLabel: string;
 };
 
+export type RoleTheme = {
+  accent: string;
+  accentSoft: string;
+  border: string;
+  text: string;
+};
+
 export const ROLE_LABELS: Record<UserRole, string> = {
   patient: "Patient",
   health_worker: "Health Worker",
@@ -36,6 +43,39 @@ export const ROLE_ORGANIZATION_NAMES: Record<UserRole, string> = {
   facility_admin: "Nyamata District Hospital",
   district_officer: "Bugesera District Health Office",
   government: "Ministry of Health",
+};
+
+export const ROLE_THEMES: Record<UserRole, RoleTheme> = {
+  patient: {
+    accent: "#2C6F73",
+    accentSoft: "#E1F2EF",
+    border: "#D0E8E4",
+    text: "#1C4F53",
+  },
+  health_worker: {
+    accent: "#2A7F8A",
+    accentSoft: "#E1F3F6",
+    border: "#CCE6EB",
+    text: "#1B5360",
+  },
+  facility_admin: {
+    accent: "#2F7F7A",
+    accentSoft: "#E4F4F1",
+    border: "#CEE6E1",
+    text: "#1D5551",
+  },
+  district_officer: {
+    accent: "#3A8F85",
+    accentSoft: "#E8F6F3",
+    border: "#CFE8E3",
+    text: "#215C57",
+  },
+  government: {
+    accent: "#1F7280",
+    accentSoft: "#E2F2F5",
+    border: "#CFE3E9",
+    text: "#194D56",
+  },
 };
 
 export const ROLE_NAV_ITEMS: Record<UserRole, RoleNavItem[]> = {
