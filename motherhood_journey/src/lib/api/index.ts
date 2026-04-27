@@ -61,6 +61,11 @@ export {
   getSectors,
   getVillages,
 } from "./geo";
+export type {
+  CellQueryContext,
+  SectorQueryContext,
+  VillageQueryContext,
+} from "./geo";
 export type { ApiClient } from "./client";
 export { useApi } from "./useApi";
 
