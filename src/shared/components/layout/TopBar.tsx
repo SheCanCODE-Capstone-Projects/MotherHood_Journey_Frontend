@@ -1,35 +1,40 @@
 "use client";
 
 import { LogOut } from "lucide-react";
+import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/shared/components/ui/button";
+import { useRole } from "@/shared/hooks/useRole";
 import type { UserRole } from "@/shared/types/auth";
 
 type TopBarProps = {
-  role: UserRole;
-  displayName: string;
-  organizationLabel: string;
-  organizationName: string;
-  onLogout: () => void;
+  fallbackRole: UserRole;
+  previewRole?: UserRole;
 };
 
-export function TopBar({
-  role,
-  displayName,
-  organizationLabel,
-  organizationName,
-  onLogout,
-}: TopBarProps) {
+export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
   const router = useRouter();
+  const {
+    role,
+    roleTheme,
+    displayName,
+    organizationLabel,
+    organizationName,
+    logout,
+  } = useRole({ fallbackRole, previewRole });
 
-  const handleLogout = () => {
-    onLogout();
+  const handleLogout = async () => {
+    logout();
+    await signOut({ redirect: false });
     router.push("/login");
   };
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-[#D6E7E5] bg-white/95 px-4 py-4 backdrop-blur sm:px-6">
+    <header
+      className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b bg-white/95 px-4 py-4 backdrop-blur sm:px-6"
+      style={{ borderColor: roleTheme.border }}
+    >
       <div className="min-w-0">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5B8784]">
           {role.replaceAll("_", " ")}
@@ -45,8 +50,9 @@ export function TopBar({
       <Button
         type="button"
         variant="outline"
-        className="h-10 rounded-xl border-[#B9D8D5] bg-white px-4 text-[#24585B]"
-        onClick={handleLogout}
+        className="h-10 rounded-xl bg-white px-4"
+        style={{ borderColor: roleTheme.border, color: roleTheme.text }}
+        onClick={() => void handleLogout()}
       >
         <LogOut className="size-4" />
         <span>Logout</span>
