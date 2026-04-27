@@ -28,7 +28,6 @@ import type { Role } from "@/shared/types/auth";
 
 const PUBLIC_PATHS: RegExp[] = [
   /^\/login(\/.*)?$/,
-  /^\/register(\/.*)?$/,
   /^\/password-reset(\/.*)?$/,
   /^\/api\/auth(\/.*)?$/, // NextAuth internal endpoints
   /^\/_next(\/.*)?$/,     // Next.js static assets
