@@ -160,11 +160,13 @@ export default async function MotherProfilePage({
                 <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-[#1D5052] to-[#2C6F73] text-3xl font-bold text-white shadow-md">
                   {initials}
                 </div>
-                <div className="absolute -bottom-1 -right-1 rounded-full bg-white p-0.5 shadow">
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#2C6F73]">
-                    <CheckCircle2 className="h-3 w-3 text-white" />
-                  </div>
-                </div>
+               {mother.nidaStatus === "verified" && (
+  <div className="absolute -bottom-1 -right-1 rounded-full bg-white p-0.5 shadow">
+    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#2C6F73]">
+      <CheckCircle2 className="h-3 w-3 text-white" />
+    </div>
+  </div>
+)}
               </div>
 
               <div className="flex-1">
