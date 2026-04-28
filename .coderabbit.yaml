@@ -1,0 +1,11 @@
+reviews:
+  auto_review:
+    enabled: true
+    base_branches:
+      - "main"
+      - "roles"
+      - "login"
+      - "feat/.*"
+      - "docs/.*"
+      - "improve/.*"
+      - "test/.*"
