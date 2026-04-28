@@ -78,7 +78,7 @@ export function openPregnancy(
   data: Pick<PregnancyDTO, "lmpDate">
 ): Promise<PregnancyDTO> {
   return apiClient.post<PregnancyDTO>(
-    `${MOTHERS_BASE_PATH}/${motherId}/pregnancies`,
+    `${MOTHERS_BASE_PATH}/${encodeURIComponent(motherId)}/pregnancies`,
     data
   );
 }
@@ -88,7 +88,7 @@ export function closePregnancy(
   pregnancyId: string
 ): Promise<PregnancyDTO> {
   return apiClient.patch<PregnancyDTO>(
-    `${MOTHERS_BASE_PATH}/${motherId}/pregnancies/${pregnancyId}/close`,
+    `${MOTHERS_BASE_PATH}/${encodeURIComponent(motherId)}/pregnancies/${encodeURIComponent(pregnancyId)}/close`,
     {}
   );
 }
