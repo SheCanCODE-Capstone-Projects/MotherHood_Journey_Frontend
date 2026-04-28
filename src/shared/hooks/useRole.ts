@@ -7,6 +7,7 @@ import {
   ROLE_NAV_ITEMS,
   ROLE_ORGANIZATION_LABELS,
   ROLE_ORGANIZATION_NAMES,
+  ROLE_THEMES,
 } from "@/shared/config/rbac";
 import { useAuth } from "@/shared/hooks/useAuth";
 import type { UserRole } from "@/shared/types/auth";
@@ -28,6 +29,7 @@ export function useRole(options?: UseRoleOptions) {
 
   return useMemo(() => {
     const roleLabel = ROLE_LABELS[role];
+    const roleTheme = ROLE_THEMES[role];
     const phoneSuffix = currentUser?.phone?.slice(-4) ?? "0000";
     const displayName = currentUser?.phone
       ? `${roleLabel} ${phoneSuffix}`
@@ -36,6 +38,7 @@ export function useRole(options?: UseRoleOptions) {
     return {
       role,
       roleLabel,
+      roleTheme,
       navItems: ROLE_NAV_ITEMS[role],
       displayName,
       organizationLabel: ROLE_ORGANIZATION_LABELS[role],
