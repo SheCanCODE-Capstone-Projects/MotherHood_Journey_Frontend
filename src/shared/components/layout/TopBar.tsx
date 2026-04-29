@@ -32,7 +32,7 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
 
   return (
     <header
-      className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b bg-white/95 px-4 py-4 backdrop-blur sm:px-6"
+      className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b bg-white/95 px-4 py-4 backdrop-blur print:hidden sm:px-6"
       style={{ borderColor: roleTheme.border }}
     >
       <div className="min-w-0 flex items-center gap-3">
