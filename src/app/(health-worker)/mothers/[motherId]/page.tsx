@@ -150,7 +150,7 @@ export default async function MotherProfilePage({
     .toUpperCase();
 
   return (
-    <div className="space-y-5">
+    <div className="mx-auto max-w-7xl space-y-5">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
         <div className="min-w-0 flex-1 space-y-5">
           <section className="rounded-3xl border border-[#D5E9E6] bg-white p-6 shadow-sm">
