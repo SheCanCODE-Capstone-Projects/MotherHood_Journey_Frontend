@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, use } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -26,9 +26,9 @@ import type {
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 type PatientVaccinationPageProps = {
-  params: {
+  params: Promise<{
     childId: string;
-  };
+  }>;
 };
 
 type LoadState = {
@@ -181,7 +181,8 @@ function getSoonestPending(vaccines: VaccinationRecord[]) {
 }
 
 export default function PatientVaccinationCardPage({ params }: PatientVaccinationPageProps) {
-  const childId = normalizeChildId(params.childId);
+  const resolvedParams = use(params);
+  const childId = normalizeChildId(resolvedParams.childId);
   const [refreshToken, setRefreshToken] = useState(0);
   const [loadState, setLoadState] = useState<LoadState>({
     data: null,
