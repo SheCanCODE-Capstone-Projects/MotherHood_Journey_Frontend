@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, CheckCircle2, Search, X } from "lucide-react";
 
 import { PageHeader } from "@/shared/components/layout";
@@ -59,6 +59,7 @@ export default function VaccinationSessionPage() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [toast, setToast] = useState<ToastState>(null);
   const [adminDialog, setAdminDialog] = useState<AdminDialogState>(null);
+  const lotNumberInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -81,6 +82,8 @@ export default function VaccinationSessionPage() {
     if (!adminDialog) {
       return undefined;
     }
+
+    lotNumberInputRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -321,6 +324,7 @@ export default function VaccinationSessionPage() {
               </label>
               <input
                 id="lot-number"
+                ref={lotNumberInputRef}
                 value={adminDialog.lotNumber}
                 onChange={(event) => setAdminDialog((current) => (current ? { ...current, lotNumber: event.target.value } : current))}
                 onKeyDown={(event) => {
