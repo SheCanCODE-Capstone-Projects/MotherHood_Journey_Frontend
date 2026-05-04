@@ -77,6 +77,22 @@ export default function VaccinationSessionPage() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
+  useEffect(() => {
+    if (!adminDialog) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setAdminDialog(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [adminDialog]);
+
   const sessionQuery = useVaccinationSessionSearch(debouncedSearchTerm);
   const administerMutation = useAdministerVaccination();
 
