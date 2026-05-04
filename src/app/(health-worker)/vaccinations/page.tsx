@@ -133,9 +133,28 @@ export default function VaccinationSessionPage() {
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Search by health ID or birth certificate number"
-            className="h-12 w-full rounded-2xl border border-[#D5E9E6] bg-white pl-11 pr-4 text-sm text-slate-950 shadow-sm outline-none transition focus:border-[#1D5551] focus:ring-2 focus:ring-[#1D5551]/15"
+            className="h-12 w-full rounded-2xl border border-[#D5E9E6] bg-white pl-11 pr-12 text-sm text-slate-950 shadow-sm outline-none transition focus:border-[#1D5551] focus:ring-2 focus:ring-[#1D5551]/15"
           />
+          {searchTerm ? (
+            <button
+              type="button"
+              onClick={() => setSearchTerm("")}
+              className="absolute right-2 top-1/2 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-xl text-[#54797C] transition hover:bg-[#F3FAF9] hover:text-[#1D5551]"
+              aria-label="Clear search"
+            >
+              <X className="size-4" />
+            </button>
+          ) : null}
         </div>
+        <p className="mt-3 text-sm text-[#54797C]">
+          {debouncedSearchTerm.length === 0
+            ? "Enter a child health ID or birth certificate number to load the vaccination session."
+            : sessionQuery.isFetching
+              ? "Searching for the child record..."
+              : session
+                ? `Loaded session for ${session.child.fullName}.`
+                : "Waiting for the backend response."}
+        </p>
       </section>
 
       {sessionQuery.isLoading ? <SessionLoadingCard /> : null}
