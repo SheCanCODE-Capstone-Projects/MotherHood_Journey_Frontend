@@ -323,6 +323,11 @@ export default function VaccinationSessionPage() {
                 id="lot-number"
                 value={adminDialog.lotNumber}
                 onChange={(event) => setAdminDialog((current) => (current ? { ...current, lotNumber: event.target.value } : current))}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && canConfirmAdministration) {
+                    handleConfirmAdministration();
+                  }
+                }}
                 placeholder="Enter lot number"
                 className="h-12 w-full rounded-2xl border border-[#D5E9E6] px-4 text-sm outline-none transition focus:border-[#1D5551] focus:ring-2 focus:ring-[#1D5551]/15"
               />
