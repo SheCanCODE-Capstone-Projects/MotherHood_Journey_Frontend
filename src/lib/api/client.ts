@@ -109,9 +109,16 @@ export function createApiClient(): ApiClient {
     endpoint: string,
     options: FetchOptions = {},
   ): Promise<T> {
-    const url = endpoint.startsWith("http")
-      ? endpoint
-      : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}${endpoint}`;
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+
+    if (!endpoint.startsWith("http") && !apiBaseUrl) {
+      throw new ApiErrorClass(
+        500,
+        `NEXT_PUBLIC_API_URL is not configured for backend API request: ${endpoint}`,
+      );
+    }
+
+    const url = endpoint.startsWith("http") ? endpoint : `${apiBaseUrl}${endpoint}`;
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
