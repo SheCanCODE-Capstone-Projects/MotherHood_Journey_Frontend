@@ -44,25 +44,6 @@ export interface ApiClient {
 
 export function createApiClient(): ApiClient {
   /**
-   * Extract token from common NextAuth session token fields.
-   */
-  function getTokenFromSession(session: unknown): string | null {
-    if (!session || typeof session !== "object") {
-      return null;
-    }
-
-    const typedSession = session as SessionTokenCarrier;
-
-    return (
-      typedSession.accessToken ||
-      typedSession.token ||
-      typedSession.user?.accessToken ||
-      typedSession.user?.token ||
-      null
-    );
-  }
-
-  /**
    * Resolve token from local persisted auth state.
    */
   function getFallbackToken(): string | null {
@@ -78,21 +59,12 @@ export function createApiClient(): ApiClient {
   }
 
   /**
-   * Resolve bearer token from NextAuth first, with a fallback to persisted auth token.
+   * Resolve bearer token from persisted auth state.
+   *
+   * The app currently serves local demo API routes for routes that do not have
+   * backend coverage yet, so we avoid probing NextAuth session endpoints here.
    */
   async function getBearerToken(): Promise<string | null> {
-    try {
-      const { getSession } = await import("next-auth/react");
-      const session = await getSession();
-      const sessionToken = getTokenFromSession(session);
-
-      if (sessionToken) {
-        return sessionToken;
-      }
-    } catch {
-      // Continue with fallback token lookup.
-    }
-
     return getFallbackToken();
   }
 
@@ -137,9 +109,16 @@ export function createApiClient(): ApiClient {
     endpoint: string,
     options: FetchOptions = {},
   ): Promise<T> {
-    const url = endpoint.startsWith("http")
-      ? endpoint
-      : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}${endpoint}`;
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+
+    if (!endpoint.startsWith("http") && !apiBaseUrl) {
+      throw new ApiErrorClass(
+        500,
+        `NEXT_PUBLIC_API_URL is not configured for backend API request: ${endpoint}`,
+      );
+    }
+
+    const url = endpoint.startsWith("http") ? endpoint : `${apiBaseUrl}${endpoint}`;
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
