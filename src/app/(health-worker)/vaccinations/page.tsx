@@ -275,8 +275,11 @@ export default function VaccinationSessionPage() {
       ) : null}
 
       {adminDialog ? (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/40 px-4 py-6 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-[1.75rem] bg-white p-6 shadow-2xl">
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/40 px-4 py-6 backdrop-blur-sm"
+          onClick={() => setAdminDialog(null)}
+        >
+          <div className="w-full max-w-lg rounded-[1.75rem] bg-white p-6 shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5B8784]">Mark administered</p>
