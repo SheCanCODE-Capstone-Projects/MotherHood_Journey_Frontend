@@ -16,6 +16,7 @@ import {
 
 import { PageHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui/button";
+import { VaccinationStatusPill } from "@/shared/components/status";
 import { cn } from "@/shared/lib/utils";
 import type {
   VaccinationCardCache,
@@ -44,8 +45,6 @@ type StatusConfig = {
   label: string;
   icon: LucideIcon;
   cardClass: string;
-  badgeClass: string;
-  textClass: string;
 };
 
 const statusConfig: Record<VaccinationStatus, StatusConfig> = {
@@ -53,31 +52,39 @@ const statusConfig: Record<VaccinationStatus, StatusConfig> = {
     label: "Completed",
     icon: CheckCircle2,
     cardClass: "border-[#B9E4D8] bg-[#F5FCF8]",
-    badgeClass: "bg-[#E3F7ED] text-[#166534]",
-    textClass: "text-[#14532D]",
   },
   due: {
     label: "Due Soon",
     icon: Clock3,
     cardClass: "border-[#F4D49A] bg-[#FFFCF3]",
-    badgeClass: "bg-[#FEF0C7] text-[#8A4B00]",
-    textClass: "text-[#7C2D12]",
   },
   overdue: {
     label: "Overdue",
     icon: AlertTriangle,
     cardClass: "border-[#F4A5A5] bg-[#FFF7F7]",
-    badgeClass: "bg-[#FDE2E2] text-[#9F1239]",
-    textClass: "text-[#991B1B]",
   },
   upcoming: {
     label: "Upcoming",
     icon: CalendarClock,
     cardClass: "border-[#BFD7EA] bg-[#F5FAFF]",
-    badgeClass: "bg-[#E5F1FB] text-[#1D4ED8]",
-    textClass: "text-[#1E3A8A]",
   },
 };
+
+function mapVaccinationPillStatus(status: VaccinationStatus) {
+  if (status === "completed") {
+    return "ADMINISTERED";
+  }
+
+  if (status === "overdue") {
+    return "OVERDUE";
+  }
+
+  if (status === "due") {
+    return "MISSED";
+  }
+
+  return "PENDING";
+}
 
 function formatDate(value: string | null | undefined) {
   if (!value) {
@@ -465,16 +472,19 @@ export default function PatientVaccinationCardPage({ params }: PatientVaccinatio
                       </h2>
                     </div>
 
-                    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold", config.badgeClass)}>
-                      <StatusIcon className="size-3.5" />
-                      {config.label}
-                    </span>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-[#54797C]">
+                        <StatusIcon className="size-3.5" />
+                        {config.label}
+                      </span>
+                      <VaccinationStatusPill status={mapVaccinationPillStatus(vaccine.status)} />
+                    </div>
                   </div>
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-2xl bg-white/75 px-4 py-3">
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6A7F7A]">Due date</p>
-                      <p className={cn("mt-1 text-lg font-semibold", config.textClass)}>
+                      <p className="mt-1 text-lg font-semibold text-[#14532D]">
                         {formatDate(vaccine.dueDate)}
                       </p>
                     </div>
