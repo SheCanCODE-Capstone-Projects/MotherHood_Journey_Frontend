@@ -39,6 +39,12 @@ export async function middleware(req: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   });
 
+  const cookieRole = req.cookies.get("mh_role")?.value as UserRole | undefined;
+
+  if (!token && cookieRole && match.roles.includes(cookieRole)) {
+    return NextResponse.next();
+  }
+
   if (!token) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", `${pathname}${search}`);
