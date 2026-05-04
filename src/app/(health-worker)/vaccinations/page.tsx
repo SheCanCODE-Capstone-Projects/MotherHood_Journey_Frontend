@@ -1,15 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, Search, X } from "lucide-react";
 
 import { PageHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui/button";
 import { VaccinationStatusPill } from "@/shared/components/status";
 import { ApiError } from "@/shared/types/api";
-import { administerVaccination, searchChildVaccinationSession } from "@/lib/api/children";
 import type { ChildVaccinationSessionRecord } from "@/features/child/types";
+import {
+  useAdministerVaccination,
+  useVaccinationSessionSearch,
+} from "@/features/child/hooks/useVaccinationSession";
 import { cn } from "@/shared/lib/utils";
 
 type ToastState = {
@@ -53,7 +55,6 @@ function SessionLoadingCard() {
 }
 
 export default function VaccinationSessionPage() {
-  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [toast, setToast] = useState<ToastState>(null);
@@ -76,29 +77,8 @@ export default function VaccinationSessionPage() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  const sessionQuery = useQuery({
-    queryKey: ["vaccination-session", debouncedSearchTerm],
-    queryFn: () => searchChildVaccinationSession(debouncedSearchTerm),
-    enabled: debouncedSearchTerm.length > 0,
-    retry: false,
-  });
-
-  const administerMutation = useMutation({
-    mutationFn: ({ vaccinationId, lotNumber }: { vaccinationId: string; lotNumber: string }) =>
-      administerVaccination(vaccinationId, { lotNumber }),
-    onSuccess: async (_response, variables) => {
-      await queryClient.invalidateQueries({ queryKey: ["vaccination-session", debouncedSearchTerm] });
-      setAdminDialog(null);
-      setToast({
-        tone: "success",
-        message: `Vaccination ${variables.vaccinationId} marked as administered.`,
-      });
-    },
-    onError: (error) => {
-      const message = error instanceof ApiError ? error.message : "Unable to administer vaccination.";
-      setToast({ tone: "error", message });
-    },
-  });
+  const sessionQuery = useVaccinationSessionSearch(debouncedSearchTerm);
+  const administerMutation = useAdministerVaccination();
 
   const session = sessionQuery.data;
   const dueVaccines = session?.dueVaccines ?? [];
@@ -109,10 +89,25 @@ export default function VaccinationSessionPage() {
       return;
     }
 
-    administerMutation.mutate({
+    administerMutation.mutate(
+      {
       vaccinationId: adminDialog.vaccination.id,
       lotNumber: adminDialog.lotNumber.trim(),
-    });
+      },
+      {
+        onSuccess: () => {
+          setAdminDialog(null);
+          setToast({
+            tone: "success",
+            message: `${adminDialog.vaccination.vaccineName} marked as administered.`,
+          });
+        },
+        onError: (error) => {
+          const message = error instanceof ApiError ? error.message : "Unable to administer vaccination.";
+          setToast({ tone: "error", message });
+        },
+      },
+    );
   }, [adminDialog, administerMutation]);
 
   const canConfirmAdministration = useMemo(() => {
