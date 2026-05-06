@@ -88,6 +88,7 @@ export const ROLE_NAV_ITEMS: Record<UserRole, RoleNavItem[]> = {
   health_worker: [
     { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
     { href: "/mothers", label: "Mothers", shortLabel: "Mothers" },
+    { href: "/children", label: "Children", shortLabel: "Children" },
     { href: "/visits", label: "Visits", shortLabel: "Visits" },
     { href: "/diagnoses", label: "Diagnoses", shortLabel: "Cases" },
   ],

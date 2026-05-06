@@ -268,7 +268,6 @@ export default async function MotherProfilePage({
 
         <div className="w-full space-y-4 lg:w-72 lg:shrink-0">
 
-          {/* Active Pregnancy Card */}
           {activePregnancy ? (
             <div className="rounded-3xl bg-gradient-to-br from-[#1D5052] to-[#2C6F73] p-5 shadow-md">
               <p className="text-xs font-semibold uppercase tracking-widest text-[#B9D8D5]">
