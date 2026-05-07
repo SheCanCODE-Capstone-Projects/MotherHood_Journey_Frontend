@@ -61,6 +61,7 @@ export default function VaccinationSessionPage() {
   const [toast, setToast] = useState<ToastState>(null);
   const [adminDialog, setAdminDialog] = useState<AdminDialogState>(null);
   const lotNumberInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -129,6 +130,10 @@ export default function VaccinationSessionPage() {
             tone: "success",
             message: `${adminDialog.vaccination.vaccineName} marked as administered.`,
           });
+          // Prepare for the next child: clear search and focus the search input
+          setSearchTerm("");
+          setDebouncedSearchTerm("");
+          setTimeout(() => searchInputRef.current?.focus(), 50);
         },
         onError: (error) => {
           const message =
@@ -161,9 +166,11 @@ export default function VaccinationSessionPage() {
           <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#54797C]" />
           <input
             id="child-search"
+            ref={searchInputRef}
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Search by health ID or birth certificate number"
+            aria-label="Child health ID or birth certificate search"
             className="h-12 w-full rounded-2xl border border-[#D5E9E6] bg-white pl-11 pr-12 text-sm text-slate-950 shadow-sm outline-none transition focus:border-[#1D5551] focus:ring-2 focus:ring-[#1D5551]/15"
           />
           {searchTerm ? (
@@ -297,6 +304,8 @@ export default function VaccinationSessionPage() {
               ? "border-emerald-200 bg-emerald-50 text-emerald-700"
               : "border-red-200 bg-red-50 text-red-700",
           )}
+          role="status"
+          aria-live="polite"
         >
           <span className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-white/70">
             {toast.tone === "success" ? <CheckCircle2 className="size-4" /> : <AlertTriangle className="size-4" />}
