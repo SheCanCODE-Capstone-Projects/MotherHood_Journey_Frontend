@@ -4,7 +4,7 @@ import { PageHeader } from "@/shared/components/layout";
 import { useRole } from "@/shared/hooks/useRole";
 
 export default function MothersPage() {
-  const role = useRole();
+  useRole();
 
   return (
     <div className="space-y-6">

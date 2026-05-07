@@ -48,7 +48,7 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
 
   return (
     <aside
-      className="hidden w-72 shrink-0 border-r bg-[#F5FBFA] lg:flex lg:flex-col"
+      className="hidden w-72 shrink-0 border-r bg-[#F5FBFA] lg:flex lg:flex-col print:hidden"
       style={{ borderColor: roleTheme.border }}
     >
       <div className="border-b px-6 py-6" style={{ borderColor: roleTheme.border }}>
