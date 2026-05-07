@@ -51,10 +51,17 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
   const breadcrumb = getBreadcrumb(pathname);
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-[#e5e7eb] bg-white px-4 sm:px-6">
-      <div className="min-w-0 text-sm font-medium text-gray-700">
-        {breadcrumb || "Dashboard"}
-      </div>
+    <header
+      className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b bg-white/95 px-4 py-4 backdrop-blur print:hidden sm:px-6"
+      style={{ borderColor: roleTheme.border }}
+    >
+      <div className="min-w-0 flex items-center gap-3">
+        <div
+          className="grid size-11 shrink-0 place-items-center rounded-2xl font-semibold text-white"
+          style={{ backgroundColor: roleTheme.accent }}
+        >
+          {displayName.slice(0, 1).toUpperCase()}
+        </div>
 
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700">

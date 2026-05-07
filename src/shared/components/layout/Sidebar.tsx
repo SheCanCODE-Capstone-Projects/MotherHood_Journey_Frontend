@@ -85,14 +85,20 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
   };
 
   return (
-    <aside className="hidden w-64 shrink-0 flex-col bg-[#085041] lg:flex">
-      <div className="flex h-16 items-center border-b border-white/10 px-5">
-        <div className="flex items-center gap-2.5">
-          <div className="grid size-8 place-items-center rounded-lg bg-[#5DCAA5] font-bold text-[#085041] text-sm">
-            MJ
-          </div>
-          <span className="text-sm font-bold text-white">Motherhood Journey</span>
-        </div>
+    <aside
+      className="hidden w-72 shrink-0 border-r bg-[#F5FBFA] lg:flex lg:flex-col print:hidden"
+      style={{ borderColor: roleTheme.border }}
+    >
+      <div className="border-b px-6 py-6" style={{ borderColor: roleTheme.border }}>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em]" style={{ color: roleTheme.text }}>
+          Motherhood Journey
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold" style={{ color: roleTheme.text }}>
+          {roleLabel} Portal
+        </h2>
+        <p className="mt-2 text-sm" style={{ color: roleTheme.text }}>
+          Role-aware navigation for {role.replaceAll("_", " ")} workflows.
+        </p>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-5">
