@@ -70,7 +70,6 @@ export type { ApiClient } from "./client";
 export { useApi } from "./useApi";
 
 export type {
-  ApiError,
   ApiResponse,
   ApiResponse as ApiResponseEnvelope,
   ErrorResponseDTO,
