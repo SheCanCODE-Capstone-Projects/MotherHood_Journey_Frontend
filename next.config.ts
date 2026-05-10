@@ -14,7 +14,10 @@ const syncServiceWorker = () => {
     // Strip TypeScript and remove comments
     content = content
       .replace(/\/\/ eslint-disable-next-line no-undef\n/g, "")
-      .replace(/: any/g, "")
+      .replace(/: [A-Za-z<>|&() ,\[\]]*\)/g, ")") // Remove type annotations from function parameters
+      .replace(/: [A-Za-z<>|&() ,\[\]]*;/g, ";") // Remove type annotations from variable declarations
+      .replace(/\): [A-Za-z<>|&() ,\[\]]*\s*{/g, ") {") // Remove return type annotations
+      .replace(/^(import|export) type /gm, "// ") // Comment out type imports/exports
       .replace(/\/\/ Service Worker.*\n/g, "")
       .replace(/\/\/ This file is copied.*\n/g, "")
       .replace(/\/\/ DO NOT use ES6.*\n/g, "");
