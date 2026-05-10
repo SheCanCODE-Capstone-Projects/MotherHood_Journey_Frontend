@@ -1,59 +1,66 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CalendarCheck2, FileText, Stethoscope } from "lucide-react";
-
+import { Users, Calendar } from "lucide-react";
 import { PageHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui/button";
 
 export default function VisitsPage() {
-  const cards = [
-    { title: "Visit schedule", description: "Review the day’s clinical flow and patient appointments.", icon: CalendarCheck2 },
-    { title: "Encounter notes", description: "Capture the important observations from each visit.", icon: FileText },
-    { title: "Clinical follow-up", description: "Keep track of next steps and pending reviews.", icon: Stethoscope },
-  ];
-
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 pb-8">
-      <PageHeader title="Visits" subtitle="Manage health facility visits and patient follow-ups." />
+      <PageHeader
+        title="Patient Visits"
+        subtitle="Record and manage health facility visits and patient follow-ups."
+      />
 
-      <section className="rounded-[2rem] border border-[#E8F6F5] bg-gradient-to-br from-white via-[#FAFFFE] to-[#F0FBF9] p-6 shadow-sm">
-        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5B8784]">Clinical workflow</p>
-            <h2 className="mt-3 text-3xl font-semibold text-[#11403F]">A cleaner space for recording and reviewing visits.</h2>
-            <p className="mt-3 text-sm leading-6 text-[#54797C]">Organize clinic encounters with a layout that feels lighter and easier to scan.</p>
+      <section className="grid gap-6 md:grid-cols-2">
+        <div className="rounded-3xl border border-[#E8F6F5] bg-white p-6 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#5B8784]">Today's schedule</p>
+              <h3 className="mt-3 text-2xl font-semibold text-[#11403F]">Visit Management</h3>
+              <p className="mt-2 text-sm text-[#54797C]">Track clinic visits, record outcomes, and follow-ups.</p>
+            </div>
+            <Users className="size-8 text-[#1D5551]" />
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="mt-5 flex gap-3">
+            <Link href="/mothers">
+              <Button variant="default" size="sm">View patients</Button>
+            </Link>
             <Link href="/dashboard">
-              <Button variant="default">Open dashboard <ArrowRight className="size-4" /></Button>
+              <Button variant="outline" size="sm">Dashboard</Button>
             </Link>
-            <Link href="/reports">
-              <Button variant="outline">Reports</Button>
-            </Link>
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-[#E8F6F5] bg-gradient-to-br from-purple-50 to-purple-100 p-6 shadow-sm">
+          <div className="flex items-start gap-4">
+            <Calendar className="mt-0.5 size-6 text-purple-600" />
+            <div>
+              <p className="font-semibold text-purple-900">No visits recorded today</p>
+              <p className="mt-1 text-sm text-purple-800">Visits will be displayed here as they are recorded in the system.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        {cards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <article key={card.title} className="rounded-3xl border border-[#E6F1F0] bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">Module</p>
-                  <h3 className="mt-2 text-lg font-semibold text-[#1D5052]">{card.title}</h3>
-                </div>
-                <div className="rounded-2xl bg-[#F3FAF9] p-3 text-[#1D5551]">
-                  <Icon className="size-5" />
-                </div>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-[#54797C]">{card.description}</p>
-            </article>
-          );
-        })}
+      <section className="rounded-3xl border border-[#F0F6F6] bg-white p-6 shadow-sm">
+        <h3 className="text-lg font-semibold text-[#1D5052]">Quick Actions</h3>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-[#EEF6F5] bg-[#FAFFFE] p-4 hover:bg-[#F5FFFE] transition">
+            <p className="font-medium text-[#11403F]">New Visit</p>
+            <p className="mt-1 text-xs text-[#54797C]">Record a patient clinic visit or checkup.</p>
+          </div>
+          <div className="rounded-2xl border border-[#EEF6F5] bg-[#FAFFTE] p-4 hover:bg-[#F5FFFE] transition">
+            <p className="font-medium text-[#11403F]">View History</p>
+            <p className="mt-1 text-xs text-[#54797C]">Review patient visit history and outcomes.</p>
+          </div>
+          <div className="rounded-2xl border border-[#EEF6F5] bg-[#FAFFTE] p-4 hover:bg-[#F5FFFE] transition">
+            <p className="font-medium text-[#11403F]">Schedule Follow-up</p>
+            <p className="mt-1 text-xs text-[#54797C]">Book follow-up appointments for patients.</p>
+          </div>
+        </div>
       </section>
     </div>
   );
