@@ -1,16 +1,23 @@
+// Service Worker for vaccination data caching
+// This file is copied to public/sw.js during build
+// DO NOT use ES6 modules - this runs in a service worker context
+
 const CACHE_NAME = "motherhood-vaccination-card-v1";
 const VACCINATION_ROUTE_PATTERN = /\/api\/children\/[^/]+\/vaccinations$/;
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
-self.addEventListener("install", (event) => {
+// eslint-disable-next-line no-undef
+self.addEventListener("install", (event: any) => {
   event.waitUntil(self.skipWaiting());
 });
 
-self.addEventListener("activate", (event) => {
+// eslint-disable-next-line no-undef
+self.addEventListener("activate", (event: any) => {
   event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener("fetch", (event) => {
+// eslint-disable-next-line no-undef
+self.addEventListener("fetch", (event: any) => {
   const requestUrl = new URL(event.request.url);
 
   if (event.request.method !== "GET" || !VACCINATION_ROUTE_PATTERN.test(requestUrl.pathname)) {
@@ -20,7 +27,7 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(handleVaccinationFetch(event.request));
 });
 
-async function handleVaccinationFetch(request) {
+async function handleVaccinationFetch(request: any) {
   const cache = await caches.open(CACHE_NAME);
   const cachedResponse = await cache.match(request, { ignoreSearch: true });
 
@@ -46,7 +53,7 @@ async function handleVaccinationFetch(request) {
   }
 }
 
-async function buildCachedResponse(response) {
+async function buildCachedResponse(response: any) {
   const body = await response.clone().text();
   const headers = new Headers(response.headers);
 
@@ -59,7 +66,7 @@ async function buildCachedResponse(response) {
   });
 }
 
-function isFresh(response) {
+function isFresh(response: any) {
   const cachedAt = response.headers.get("x-cached-at");
 
   if (!cachedAt) {
