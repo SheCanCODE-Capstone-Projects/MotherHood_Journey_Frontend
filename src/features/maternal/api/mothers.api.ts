@@ -5,7 +5,6 @@
  */
 
 import { apiClient } from "@/lib/api/client";
-import type { PageResponse } from "@/shared/types/api";
 import type { Mother, MotherPageResponse } from "../types";
 
 /**

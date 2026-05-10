@@ -37,14 +37,14 @@ export default function PregnanciesPage() {
             <Calendar className="mt-0.5 size-6 text-blue-600" />
             <div>
               <p className="font-semibold text-blue-900">Ready to start tracking?</p>
-              <p className="mt-1 text-sm text-blue-800">Once your clinic connects your pregnancy record, you'll see detailed tracking and progress here.</p>
+              <p className="mt-1 text-sm text-blue-800">Once your clinic connects your pregnancy record, you&apos;ll see detailed tracking and progress here.</p>
             </div>
           </div>
         </div>
       </section>
 
       <section className="rounded-3xl border border-[#F0F6F6] bg-white p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-[#1D5052]">What you'll track</h3>
+        <h3 className="text-lg font-semibold text-[#1D5052]">What you&apos;ll track</h3>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl border border-[#EEF6F5] bg-[#FAFFFE] p-4">
             <p className="font-medium text-[#11403F]">Weekly Progress</p>

@@ -17,7 +17,7 @@ export default function VisitsPage() {
         <div className="rounded-3xl border border-[#E8F6F5] bg-white p-6 shadow-sm">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#5B8784]">Today's schedule</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#5B8784]">Today&apos;s schedule</p>
               <h3 className="mt-3 text-2xl font-semibold text-[#11403F]">Visit Management</h3>
               <p className="mt-2 text-sm text-[#54797C]">Track clinic visits, record outcomes, and follow-ups.</p>
             </div>

@@ -2,7 +2,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { searchMothers, getMothers, getMotherById } from "../api/mothers.api";
-import type { Mother, MotherPageResponse } from "../types";
 
 /**
  * Query key factory for mother-related queries
