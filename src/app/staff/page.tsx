@@ -1,59 +1,66 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, BriefcaseMedical, Users } from "lucide-react";
-
+import { Users, UserCheck } from "lucide-react";
 import { PageHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui/button";
 
 export default function StaffPage() {
-  const cards = [
-    { title: "Team overview", description: "Show the active staff list with a cleaner hierarchy.", icon: Users },
-    { title: "Role coverage", description: "Visualize clinical and administrative coverage.", icon: BadgeCheck },
-    { title: "Assignments", description: "Keep shift and duty assignments easy to scan.", icon: BriefcaseMedical },
-  ];
-
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 pb-8">
-      <PageHeader title="Staff" subtitle="Manage facility staff members and their assignments." />
+      <PageHeader
+        title="Staff Management"
+        subtitle="View facility staff members, roles, and assignments."
+      />
 
-      <section className="rounded-[2rem] border border-[#E8F6F5] bg-gradient-to-br from-white via-[#FAFFFE] to-[#F1FBFA] p-6 shadow-sm">
-        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5B8784]">Workforce</p>
-            <h2 className="mt-3 text-3xl font-semibold text-[#11403F]">A more legible staff workspace.</h2>
-            <p className="mt-3 text-sm leading-6 text-[#54797C]">Display team members, roles, and duties with stronger visual separation.</p>
+      <section className="grid gap-6 md:grid-cols-2">
+        <div className="rounded-3xl border border-[#E8F6F5] bg-white p-6 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#5B8784]">Team directory</p>
+              <h3 className="mt-3 text-2xl font-semibold text-[#11403F]">Staff Members</h3>
+              <p className="mt-2 text-sm text-[#54797C]">Manage facility team and role assignments.</p>
+            </div>
+            <Users className="size-8 text-[#1D5551]" />
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Link href="/dashboard">
-              <Button variant="default">Open dashboard <ArrowRight className="size-4" /></Button>
-            </Link>
+          <div className="mt-5 flex gap-3">
             <Link href="/reports">
-              <Button variant="outline">Reports</Button>
+              <Button variant="default" size="sm">View reports</Button>
             </Link>
+            <Link href="/dashboard">
+              <Button variant="outline" size="sm">Dashboard</Button>
+            </Link>
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-[#E8F6F5] bg-gradient-to-br from-green-50 to-green-100 p-6 shadow-sm">
+          <div className="flex items-start gap-4">
+            <UserCheck className="mt-0.5 size-6 text-green-600" />
+            <div>
+              <p className="font-semibold text-green-900">Team information loading</p>
+              <p className="mt-1 text-sm text-green-800">Facility staff directory and role information will display here.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        {cards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <article key={card.title} className="rounded-3xl border border-[#E6F1F0] bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">Module</p>
-                  <h3 className="mt-2 text-lg font-semibold text-[#1D5052]">{card.title}</h3>
-                </div>
-                <div className="rounded-2xl bg-[#F3FAF9] p-3 text-[#1D5551]">
-                  <Icon className="size-5" />
-                </div>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-[#54797C]">{card.description}</p>
-            </article>
-          );
-        })}
+      <section className="rounded-3xl border border-[#F0F6F6] bg-white p-6 shadow-sm">
+        <h3 className="text-lg font-semibold text-[#1D5052]">Staff Categories</h3>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-[#EEF6F5] bg-[#FAFFTE] p-4">
+            <p className="font-medium text-[#11403F]">Health Workers</p>
+            <p className="mt-1 text-xs text-[#54797C]">Nurses and community health workers.</p>
+          </div>
+          <div className="rounded-2xl border border-[#EEF6F5] bg-[#FAFFTE] p-4">
+            <p className="font-medium text-[#11403F]">Administrators</p>
+            <p className="mt-1 text-xs text-[#54797C]">Facility managers and coordinators.</p>
+          </div>
+          <div className="rounded-2xl border border-[#EEF6F5] bg-[#FAFFTE] p-4">
+            <p className="font-medium text-[#11403F]">Support Staff</p>
+            <p className="mt-1 text-xs text-[#54797C]">Administrative and support personnel.</p>
+          </div>
+        </div>
       </section>
     </div>
   );

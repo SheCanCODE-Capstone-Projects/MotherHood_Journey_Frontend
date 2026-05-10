@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BarChart3, ClipboardList, FilePieChart } from "lucide-react";
-
+import { FileText, BarChart3 } from "lucide-react";
 import { PageHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui/button";
 import { useRole } from "@/shared/hooks/useRole";
@@ -11,55 +10,61 @@ export default function ReportsPage() {
   const { role } = useRole();
 
   const isGovernment = role === "government";
-  const title = isGovernment ? "National Reports" : "Reports";
-  const subtitle = isGovernment ? "Facility performance and operational reports." : "National maternal health program reports and statistics.";
-  const cards = [
-    { title: "Summary metrics", description: "Present key totals and trends at a glance.", icon: BarChart3 },
-    { title: "Operational reports", description: "Keep service delivery and activity reports close by.", icon: ClipboardList },
-    { title: "Insight panels", description: "Offer visual summaries for faster decision making.", icon: FilePieChart },
-  ];
+  const title = isGovernment ? "National Reports" : "Facility Reports";
+  const subtitle = isGovernment ? "National maternal health program analytics and performance." : "Facility performance metrics and operational reports.";
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 pb-8">
       <PageHeader title={title} subtitle={subtitle} />
 
-      <section className="rounded-[2rem] border border-[#E8F6F5] bg-gradient-to-br from-white via-[#FAFFFE] to-[#F0FBF9] p-6 shadow-sm">
-        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5B8784]">Insights</p>
-            <h2 className="mt-3 text-3xl font-semibold text-[#11403F]">Reporting that feels more like a dashboard.</h2>
-            <p className="mt-3 text-sm leading-6 text-[#54797C]">Use a cleaner, more visual presentation for performance, operations, and program summaries.</p>
+      <section className="grid gap-6 md:grid-cols-2">
+        <div className="rounded-3xl border border-[#E8F6F5] bg-white p-6 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#5B8784]">Reports & Analytics</p>
+              <h3 className="mt-3 text-2xl font-semibold text-[#11403F]">{isGovernment ? "Program Reports" : "Facility Reports"}</h3>
+              <p className="mt-2 text-sm text-[#54797C]">{isGovernment ? "Access national health statistics and program performance data." : "View facility performance metrics and operational data."}</p>
+            </div>
+            <FileText className="size-8 text-[#1D5551]" />
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="mt-5 flex gap-3">
             <Link href="/analytics">
-              <Button variant="default">Analytics <ArrowRight className="size-4" /></Button>
+              <Button variant="default" size="sm">View analytics</Button>
             </Link>
-            <Link href="/sync">
-              <Button variant="outline">Sync status</Button>
+            <Link href="/dashboard">
+              <Button variant="outline" size="sm">Dashboard</Button>
             </Link>
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-[#E8F6F5] bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 shadow-sm">
+          <div className="flex items-start gap-4">
+            <BarChart3 className="mt-0.5 size-6 text-indigo-600" />
+            <div>
+              <p className="font-semibold text-indigo-900">Reports coming soon</p>
+              <p className="mt-1 text-sm text-indigo-800">Detailed reports and analytics will be available here as data is processed.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        {cards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <article key={card.title} className="rounded-3xl border border-[#E6F1F0] bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">Module</p>
-                  <h3 className="mt-2 text-lg font-semibold text-[#1D5052]">{card.title}</h3>
-                </div>
-                <div className="rounded-2xl bg-[#F3FAF9] p-3 text-[#1D5551]">
-                  <Icon className="size-5" />
-                </div>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-[#54797C]">{card.description}</p>
-            </article>
-          );
-        })}
+      <section className="rounded-3xl border border-[#F0F6F6] bg-white p-6 shadow-sm">
+        <h3 className="text-lg font-semibold text-[#1D5052]">Available Reports</h3>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-[#EEF6F5] bg-[#FAFFTE] p-4">
+            <p className="font-medium text-[#11403F]">Performance Metrics</p>
+            <p className="mt-1 text-xs text-[#54797C]">Track coverage and outcome indicators.</p>
+          </div>
+          <div className="rounded-2xl border border-[#EEF6F5] bg-[#FAFFTE] p-4">
+            <p className="font-medium text-[#11403F]">Activity Reports</p>
+            <p className="mt-1 text-xs text-[#54797C]">Monthly activity summaries and trends.</p>
+          </div>
+          <div className="rounded-2xl border border-[#EEF6F5] bg-[#FAFFTE] p-4">
+            <p className="font-medium text-[#11403F]">Analytics Dashboard</p>
+            <p className="mt-1 text-xs text-[#54797C]">Interactive charts and statistics.</p>
+          </div>
+        </div>
       </section>
     </div>
   );
