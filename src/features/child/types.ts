@@ -1,5 +1,11 @@
 export type VaccinationStatus = "completed" | "due" | "overdue" | "upcoming";
 
+export type VaccinationSessionStatus =
+	| "PENDING"
+	| "ADMINISTERED"
+	| "MISSED"
+	| "OVERDUE";
+
 export type VaccinationRecord = {
 	id: string;
 	name: string;
@@ -31,24 +37,17 @@ export type VaccinationCardCache = {
 	payload: VaccinationCardData;
 };
 
-/**
- * Vaccination session record for health workers
- * Represents a single vaccination that can be administered in a session
- */
 export type ChildVaccinationSessionRecord = {
 	id: string;
 	vaccineName: string;
 	doseLabel: string;
-	status: "PENDING" | "OVERDUE" | "ADMINISTERED";
+	status: VaccinationSessionStatus;
 	dueDate: string;
+	administeredDate?: string | null;
 	note?: string;
 };
 
-/**
- * Child data for vaccination session
- * Contains basic child info and age calculation fields
- */
-export type VaccinationSessionChild = {
+export type ChildVaccinationSessionChild = {
 	id: string;
 	fullName: string;
 	healthId: string;
@@ -60,11 +59,15 @@ export type VaccinationSessionChild = {
 	facilityName: string;
 };
 
-/**
- * Complete vaccination session response
- * Includes child details and their due vaccines for today
- */
-export type VaccinationSessionData = {
-	child: VaccinationSessionChild;
+export type ChildVaccinationSessionResponse = {
+	child: ChildVaccinationSessionChild;
 	dueVaccines: ChildVaccinationSessionRecord[];
+	searchMatchedBy: "healthId" | "birthCertificateNo";
 };
+
+export type AdministerVaccinationRequest = {
+	lotNumber: string;
+};
+
+export type VaccinationSessionChild = ChildVaccinationSessionChild;
+export type VaccinationSessionData = ChildVaccinationSessionResponse;
