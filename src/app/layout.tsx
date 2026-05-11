@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Providers from "./providers";
-
 import { ServiceWorkerRegistration } from "@/shared/components/layout/ServiceWorkerRegistration";
-import { Providers } from "./providers";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "Motherhood Journey",
@@ -18,7 +16,6 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
         <Providers>
           {children}
         </Providers>
