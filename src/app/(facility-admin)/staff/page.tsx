@@ -104,6 +104,7 @@ export default function FacilityStaffPage() {
   const { roleTheme, organizationName } = useRole({ fallbackRole: "facility_admin" });
   const queryClient = useQueryClient();
   const [selectedMember, setSelectedMember] = useState<FacilityStaffMember | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const staffQuery = useQuery({
     queryKey: staffQueryKey,
@@ -152,6 +153,19 @@ export default function FacilityStaffPage() {
     [staffQuery.data],
   );
 
+  const visibleStaffMembers = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    if (!normalizedSearch) {
+      return staffMembers;
+    }
+
+    return staffMembers.filter((member) => {
+      const searchableValues = [member.fullName, member.phoneNumber, member.nationalId];
+      return searchableValues.some((value) => value.toLowerCase().includes(normalizedSearch));
+    });
+  }, [searchTerm, staffMembers]);
+
   const activeCount = useMemo(
     () => staffMembers.filter((member) => member.active).length,
     [staffMembers],
@@ -160,13 +174,13 @@ export default function FacilityStaffPage() {
   const inactiveCount = staffMembers.length - activeCount;
 
   const lastLoginLabel = useMemo(() => {
-    const latestLogin = staffMembers
+    const latestLogin = visibleStaffMembers
       .map((member) => member.lastLogin)
       .filter((value): value is string => Boolean(value))
       .sort((left, right) => new Date(right).getTime() - new Date(left).getTime())[0];
 
     return latestLogin ? formatLastLogin(latestLogin) : "No logins yet";
-  }, [staffMembers]);
+  }, [visibleStaffMembers]);
 
   const openDeactivateDialog = (member: FacilityStaffMember) => {
     setSelectedMember(member);
@@ -275,7 +289,31 @@ export default function FacilityStaffPage() {
 
           <div className="flex items-center gap-2 rounded-full bg-[#F3FAF8] px-4 py-2 text-sm text-[#54797C]">
             <CalendarClock className="size-4" />
-            <span>{staffMembers.length} total members</span>
+            <span>{visibleStaffMembers.length} visible / {staffMembers.length} total members</span>
+          </div>
+        </div>
+
+        <div className="px-5 pt-4">
+          <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[#5B8784]">
+            Search roster
+          </label>
+          <div className="mt-2 flex items-center gap-3 rounded-2xl border border-[#D5E9E6] bg-[#F8FCFB] px-4 py-3 shadow-sm">
+            <Users className="size-4 shrink-0 text-[#5B8784]" />
+            <input
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Search by name, phone number, or national ID"
+              className="w-full bg-transparent text-sm outline-none placeholder:text-[#8AA3A5]"
+            />
+            {searchTerm ? (
+              <button
+                type="button"
+                className="text-sm font-semibold text-[#2F7F7A] hover:underline"
+                onClick={() => setSearchTerm("")}
+              >
+                Clear
+              </button>
+            ) : null}
           </div>
         </div>
 
@@ -318,6 +356,22 @@ export default function FacilityStaffPage() {
               </Button>
             </div>
           </div>
+        ) : visibleStaffMembers.length === 0 ? (
+          <div className="space-y-3 px-5 py-12 text-center">
+            <p className="text-lg font-semibold" style={{ color: roleTheme.text }}>
+              No staff members match your search.
+            </p>
+            <p className="text-sm text-[#54797C]">
+              Try a different name, phone number, or national ID.
+            </p>
+            {searchTerm ? (
+              <div className="flex justify-center">
+                <Button variant="outline" className="rounded-full" onClick={() => setSearchTerm("") }>
+                  Clear search
+                </Button>
+              </div>
+            ) : null}
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-[#D5E9E6]">
@@ -332,7 +386,7 @@ export default function FacilityStaffPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E3EEEC]">
-                {staffMembers.map((member) => {
+                {visibleStaffMembers.map((member) => {
                   const rowMuted = !member.active;
 
                   return (
