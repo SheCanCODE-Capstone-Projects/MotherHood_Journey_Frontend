@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { useSearchParams } from "next/navigation";
 
 import "@/lib/i18n";
 import { useAuth } from "@/shared/hooks/useAuth";
@@ -42,8 +43,11 @@ const languageOptions: Array<{ code: LanguageCode; label: string }> = [
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
+  const searchParams = useSearchParams();
   const { currentUser, signIn, signUp, logout } = useAuth();
-  const [mode, setMode] = useState<AuthMode>("signin");
+  const [mode, setMode] = useState<AuthMode>(
+    searchParams.get("mode") === "signup" ? "signup" : "signin",
+  );
   const [formData, setFormData] = useState<LoginForm>({
     fullName: "",
     phone: "",
@@ -62,6 +66,14 @@ export default function LoginPage() {
     const code = i18n.language?.slice(0, 2) as LanguageCode | undefined;
     return code === "rw" || code === "fr" ? code : "en";
   }, [i18n.language]);
+
+  useEffect(() => {
+    const requestedMode = searchParams.get("mode");
+
+    if (requestedMode === "signup" || requestedMode === "signin") {
+      setMode(requestedMode);
+    }
+  }, [searchParams]);
 
   const switchMode = (nextMode: AuthMode) => {
     setMode(nextMode);
