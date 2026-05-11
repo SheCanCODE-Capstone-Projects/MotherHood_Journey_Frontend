@@ -30,3 +30,41 @@ export type VaccinationCardCache = {
 	source: "live" | "demo" | "cache";
 	payload: VaccinationCardData;
 };
+
+/**
+ * Vaccination session record for health workers
+ * Represents a single vaccination that can be administered in a session
+ */
+export type ChildVaccinationSessionRecord = {
+	id: string;
+	vaccineName: string;
+	doseLabel: string;
+	status: "PENDING" | "OVERDUE" | "ADMINISTERED";
+	dueDate: string;
+	note?: string;
+};
+
+/**
+ * Child data for vaccination session
+ * Contains basic child info and age calculation fields
+ */
+export type VaccinationSessionChild = {
+	id: string;
+	fullName: string;
+	healthId: string;
+	birthCertificateNo: string;
+	dateOfBirth: string;
+	ageInYears: number;
+	ageInMonths: number;
+	motherName: string;
+	facilityName: string;
+};
+
+/**
+ * Complete vaccination session response
+ * Includes child details and their due vaccines for today
+ */
+export type VaccinationSessionData = {
+	child: VaccinationSessionChild;
+	dueVaccines: ChildVaccinationSessionRecord[];
+};
