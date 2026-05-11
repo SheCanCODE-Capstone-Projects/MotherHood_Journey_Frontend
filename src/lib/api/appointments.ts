@@ -54,7 +54,7 @@ export async function cancelAppointment(
   const response = await apiClient.delete<CancelAppointmentResponse>(
     APPOINTMENT_ENDPOINTS.DELETE(id),
     {
-      body: request,
+      body: request ? JSON.stringify(request) : undefined,
     }
   );
   return response;
