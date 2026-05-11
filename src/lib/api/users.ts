@@ -160,6 +160,9 @@ function normalizeStaffMember(record: unknown): FacilityStaffMember | null {
   }
 
   const candidate = record as Record<string, unknown>;
+  const facility = candidate.facility && typeof candidate.facility === "object"
+    ? (candidate.facility as Record<string, unknown>)
+    : undefined;
   const firstName = typeof candidate.firstName === "string" ? candidate.firstName : "";
   const lastName = typeof candidate.lastName === "string" ? candidate.lastName : "";
   const fullNameValue = typeof candidate.fullName === "string" ? candidate.fullName : "";
@@ -183,8 +186,8 @@ function normalizeStaffMember(record: unknown): FacilityStaffMember | null {
     facilityName:
       typeof candidate.facilityName === "string"
         ? candidate.facilityName
-        : typeof candidate.facility?.name === "string"
-          ? String(candidate.facility.name)
+        : typeof facility?.name === "string"
+          ? String(facility.name)
           : undefined,
   };
 }
