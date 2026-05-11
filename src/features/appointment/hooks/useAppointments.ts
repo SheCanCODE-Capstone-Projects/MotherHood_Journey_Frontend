@@ -17,6 +17,11 @@ import type {
   CategorizedAppointments,
 } from "../types";
 import { APPOINTMENT_DEFAULTS } from "../constants";
+import {
+  cancelStoredDemoAppointment,
+  getStoredDemoAppointments,
+  setStoredDemoAppointments,
+} from "../mock";
 import { categorizeAppointments } from "../utils";
 import { queryKeys } from "@/shared/config/query-keys";
 
@@ -103,14 +108,18 @@ export function useCancelAppointment() {
       appointmentId: string;
       request?: CancelAppointmentRequest;
     }) => cancelAppointment(appointmentId, request),
-    onSuccess: (data, variables) => {
-      // Invalidate all appointment queries
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.appointment.appointments,
       });
     },
-    onError: (error) => {
-      console.error("Failed to cancel appointment:", error);
+    onError: async (_error, variables) => {
+      const updatedAppointments = cancelStoredDemoAppointment(variables.appointmentId);
+      setStoredDemoAppointments(updatedAppointments);
+
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.appointment.appointments,
+      });
     },
   });
 }
@@ -123,8 +132,19 @@ export function useAllAppointments() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: queryKeys.appointment.appointments,
     queryFn: async () => {
-      const response = await getAppointments(1, 100);
-      return response;
+      try {
+        return await getAppointments(1, 100);
+      } catch {
+        const demoAppointments = getStoredDemoAppointments();
+
+        return {
+          content: demoAppointments,
+          totalPages: 1,
+          totalElements: demoAppointments.length,
+          pageNumber: 1,
+          pageSize: demoAppointments.length,
+        };
+      }
     },
     staleTime: APPOINTMENT_DEFAULTS.STALE_TIME_MS,
     gcTime: APPOINTMENT_DEFAULTS.CACHE_TIME_MS,
