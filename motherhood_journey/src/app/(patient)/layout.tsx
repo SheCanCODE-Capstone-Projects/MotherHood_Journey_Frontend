@@ -36,6 +36,7 @@ export default function PatientLayout({
           <Link href="/records" className="hover:text-[#0D474F] transition-all hover:scale-105">My Records</Link>
           <Link href="/requests" className="text-[#0D474F] border-b-2 border-[#0D474F] pb-1">Requests</Link>
           <Link href="/chat" className="hover:text-[#0D474F] transition-all hover:scale-105">Chat</Link>
+          <Link href="/mothers/mother-1" className="hover:text-[#0D474F] transition-all hover:scale-105">My Profile</Link>
         </nav>
 
         <div className="flex items-center gap-2 md:gap-5">
@@ -83,6 +84,7 @@ export default function PatientLayout({
               <SidebarLink onClick={() => setIsMobileMenuOpen(false)} href="/records" icon={<FolderOpen size={18} />} label="MY RECORDS" />
               <SidebarLink onClick={() => setIsMobileMenuOpen(false)} href="/requests" icon={<ClipboardList size={18} />} label="REQUESTS" />
               <SidebarLink onClick={() => setIsMobileMenuOpen(false)} href="/chat" icon={<MessageSquare size={18} />} label="CHAT" />
+              <SidebarLink onClick={() => setIsMobileMenuOpen(false)} href="/mothers/mother-1" icon={<User size={18} />} label="MY PROFILE" />
               <SidebarLink onClick={() => setIsMobileMenuOpen(false)} href="/tips" icon={<HelpCircle size={18} />} label="TIPS" />
             </nav>
 
