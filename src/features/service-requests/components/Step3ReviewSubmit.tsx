@@ -1,30 +1,32 @@
 "use client";
- 
+
 import { ServiceTypeId, UploadedFiles } from "@/features/service-requests/types";
 import { SERVICE_TYPES } from "@/features/service-requests/constants";
- 
+
 interface Step3ReviewSubmitProps {
   service: ServiceTypeId;
   files: UploadedFiles;
   onBack: () => void;
   onSubmit: () => void;
   submitting: boolean;
+  error: string | null;
 }
- 
+
 export default function Step3ReviewSubmit({
   service,
   files,
   onBack,
   onSubmit,
   submitting,
+  error,
 }: Step3ReviewSubmitProps) {
   const svc = SERVICE_TYPES.find((s) => s.id === service)!;
- 
+
   return (
     <div>
       <div className="text-xs text-gray-400 mb-1">Service Requests &rsaquo; New Request</div>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Review &amp; Submit Request</h1>
- 
+
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-6">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2 font-semibold text-gray-800">
@@ -40,7 +42,7 @@ export default function Step3ReviewSubmit({
             Edit All
           </button>
         </div>
- 
+
         <div className="p-5 grid sm:grid-cols-2 gap-5">
           <div>
             <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">
@@ -87,7 +89,7 @@ export default function Step3ReviewSubmit({
             </div>
           </div>
         </div>
- 
+
         <div className="mx-5 mb-5 flex items-start gap-2.5 bg-teal-50 border border-teal-100 rounded-lg px-4 py-3 text-xs text-gray-600 italic">
           <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-teal-600 mt-0.5 shrink-0">
             <path
@@ -100,7 +102,7 @@ export default function Step3ReviewSubmit({
           matches the official medical records within the MotherHood Journey platform.
         </div>
       </div>
- 
+
       <div className="flex items-center justify-between pt-4 border-t border-gray-100 mb-6">
         <button
           onClick={onBack}
@@ -116,7 +118,13 @@ export default function Step3ReviewSubmit({
             className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-teal-800 text-white text-sm font-semibold hover:bg-teal-700 disabled:opacity-60 transition-colors"
           >
             {submitting ? (
-              "Submitting…"
+              <>
+                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+                Submitting…
+              </>
             ) : (
               <>
                 Submit Request
@@ -132,7 +140,23 @@ export default function Step3ReviewSubmit({
           </button>
         </div>
       </div>
- 
+
+      {error && (
+        <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-6">
+          <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-red-500 shrink-0 mt-0.5">
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <div>
+            <div className="text-sm font-semibold text-red-700">Submission Failed</div>
+            <div className="text-xs text-red-600 mt-0.5">{error}</div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3">
         <div className="w-9 h-9 rounded-full bg-teal-100 flex items-center justify-center shrink-0 mt-0.5">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5 text-teal-700">
