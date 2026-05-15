@@ -193,6 +193,34 @@ function Header() {
 }
 
 function NewRequestForm() {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setSelectedFile(file);
+    
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewUrl(null);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    const input = document.getElementById('file-upload') as HTMLInputElement;
+    if (input) input.value = '';
+  };
+
   return (
     <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
       <div className="mb-6">
@@ -220,15 +248,90 @@ function NewRequestForm() {
 
         <div>
           <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Upload ID Copy</label>
-          <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 md:p-8 text-center hover:border-teal-300 transition-colors cursor-pointer">
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-teal-50 rounded-full flex items-center justify-center mb-3">
-                <Upload size={20} className="text-teal-600" />
+          <input
+            type="file"
+            id="file-upload"
+            accept=".pdf,.jpg,.jpeg,.png,image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          {selectedFile ? (
+            <div className="border-2 border-teal-500 bg-white rounded-xl overflow-hidden">
+              {previewUrl ? (
+                <div className="relative">
+                  <img 
+                    src={previewUrl} 
+                    alt="Preview" 
+                    className="w-full h-64 object-contain bg-gray-50"
+                  />
+                  <div className="absolute top-2 right-2 flex gap-2">
+                    <label
+                      htmlFor="file-upload"
+                      className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors shadow-sm"
+                    >
+                      Change
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleRemoveFile}
+                      className="px-3 py-1.5 bg-red-600 rounded-lg text-xs font-semibold text-white hover:bg-red-700 transition-colors shadow-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 bg-gray-50">
+                  <div className="flex items-center justify-center py-8">
+                    <FileText size={48} className="text-gray-400" />
+                  </div>
+                </div>
+              )}
+              <div className="p-4 bg-teal-50 border-t border-teal-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <FileCheck size={18} className="text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{selectedFile.name}</p>
+                      <p className="text-xs text-gray-600">{(selectedFile.size / 1024).toFixed(2)} KB • {selectedFile.type || 'Unknown type'}</p>
+                    </div>
+                  </div>
+                  {!previewUrl && (
+                    <div className="flex gap-2">
+                      <label
+                        htmlFor="file-upload"
+                        className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+                      >
+                        Change
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleRemoveFile}
+                        className="px-3 py-1.5 bg-red-600 rounded-lg text-xs font-semibold text-white hover:bg-red-700 transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-              <p className="text-sm font-semibold text-gray-900 mb-1">Drag and drop <span className="text-teal-600 underline">or click</span> to upload</p>
-              <p className="text-xs text-gray-500">Supported formats: PDF, JPG, PNG</p>
             </div>
-          </div>
+          ) : (
+            <label
+              htmlFor="file-upload"
+              className="block border-2 border-dashed border-gray-200 rounded-xl p-6 md:p-8 text-center hover:border-teal-300 transition-colors cursor-pointer"
+            >
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 bg-teal-50 rounded-full flex items-center justify-center mb-3">
+                  <Upload size={20} className="text-teal-600" />
+                </div>
+                <p className="text-sm font-semibold text-gray-900 mb-1">Drag and drop <span className="text-teal-600 underline">or click</span> to upload</p>
+                <p className="text-xs text-gray-500">Supported formats: PDF, JPG, PNG</p>
+              </div>
+            </label>
+          )}
         </div>
 
         <button className="w-full bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3.5 rounded-xl transition-colors">
@@ -343,9 +446,11 @@ function RequestRow({ service, requestId, date, status, statusColor }: { service
         </span>
       </td>
       <td className="px-6 py-4">
-        <button className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors">
-          <Eye size={16} className="text-gray-600" />
-        </button>
+        <Link href={`/requests/${requestId}`}>
+          <button className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors">
+            <Eye size={16} className="text-gray-600" />
+          </button>
+        </Link>
       </td>
     </tr>
   );
@@ -377,9 +482,11 @@ function RequestCard({ service, requestId, date, status, statusColor }: { servic
       
       <div className="flex items-center justify-between pt-3 border-t border-gray-100">
         <span className="text-xs text-gray-600">{date}</span>
-        <button className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors">
-          <Eye size={16} className="text-gray-600" />
-        </button>
+        <Link href={`/requests/${requestId}`}>
+          <button className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors">
+            <Eye size={16} className="text-gray-600" />
+          </button>
+        </Link>
       </div>
     </div>
   );
