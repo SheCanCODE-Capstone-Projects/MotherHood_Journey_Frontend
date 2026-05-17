@@ -32,22 +32,25 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
 
   return (
     <header
-      className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b bg-white/95 px-4 py-4 backdrop-blur sm:px-6"
+      className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b bg-white/80 px-4 py-4 backdrop-blur-xl sm:px-6"
       style={{ borderColor: roleTheme.border }}
     >
       <div className="min-w-0 flex items-center gap-3">
         <div
-          className="grid size-11 shrink-0 place-items-center rounded-2xl font-semibold text-white"
+          className="grid size-11 shrink-0 place-items-center rounded-2xl font-semibold text-white shadow-sm"
           style={{ backgroundColor: roleTheme.accent }}
         >
           {displayName.slice(0, 1).toUpperCase()}
         </div>
 
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5B8784]">
+          <div
+            className="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em]"
+            style={{ backgroundColor: roleTheme.accentSoft, color: roleTheme.text }}
+          >
             {role.replaceAll("_", " ")}
-          </p>
-          <h1 className="truncate text-lg font-semibold text-[#1D5052]">
+          </div>
+          <h1 className="truncate text-lg font-semibold text-[#1D5052] sm:text-xl">
             {displayName}
           </h1>
           <p className="truncate text-sm text-[#54797C]">
@@ -59,7 +62,7 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
       <Button
         type="button"
         variant="outline"
-        className="h-10 rounded-xl bg-white px-4"
+        className="h-10 rounded-xl border bg-white px-4 shadow-sm"
         style={{ borderColor: roleTheme.border, color: roleTheme.text }}
         onClick={() => void handleLogout()}
       >

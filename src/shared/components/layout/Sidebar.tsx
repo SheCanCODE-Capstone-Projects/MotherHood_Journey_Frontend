@@ -48,17 +48,20 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
 
   return (
     <aside
-      className="hidden w-72 shrink-0 border-r bg-[#F5FBFA] lg:flex lg:flex-col"
+      className="hidden w-72 shrink-0 border-r bg-white/75 backdrop-blur-xl lg:flex lg:flex-col"
       style={{ borderColor: roleTheme.border }}
     >
       <div className="border-b px-6 py-6" style={{ borderColor: roleTheme.border }}>
-        <p className="text-xs font-semibold uppercase tracking-[0.24em]" style={{ color: roleTheme.text }}>
-          Motherhood Journey
-        </p>
-        <h2 className="mt-2 text-2xl font-semibold" style={{ color: roleTheme.text }}>
+        <div
+          className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em]"
+          style={{ backgroundColor: roleTheme.accentSoft, color: roleTheme.text }}
+        >
+          MotherHood
+        </div>
+        <h2 className="mt-4 text-2xl font-semibold" style={{ color: roleTheme.text }}>
           {roleLabel} Portal
         </h2>
-        <p className="mt-2 text-sm" style={{ color: roleTheme.text }}>
+        <p className="mt-2 text-sm leading-6" style={{ color: roleTheme.text }}>
           Role-aware navigation for {role.replaceAll("_", " ")} workflows.
         </p>
       </div>
@@ -75,7 +78,7 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
               asChild
               variant={isActive ? "default" : "ghost"}
               className={cn(
-                "h-11 w-full justify-start rounded-2xl px-4",
+                "h-11 w-full justify-start rounded-2xl px-4 transition-transform hover:-translate-y-0.5",
                 isActive
                   ? "text-white"
                   : "hover:text-[#1D5052]",
