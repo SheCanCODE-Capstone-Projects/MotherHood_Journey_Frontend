@@ -43,6 +43,14 @@ const iconByHref: Record<string, LucideIcon> = {
 
 const mainNavItems = ["/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/children", "/appointments", "/reports", "/analytics", "/staff", "/sync"];
 
+const allNavItems = Array.from(
+  new Map(
+    Object.values(ROLE_NAV_ITEMS)
+      .flat()
+      .map((item) => [item.href, item]),
+  ).values(),
+);
+
 export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
   const { role, roleLabel, organizationName, navItems, displayName, roleTheme } = useRole({
     fallbackRole,
@@ -75,7 +83,7 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
       >
         <Link href={item.href}>
           {isActive && (
-            <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r bg-[#5DCAA5]" />
+            <div className="absolute left-0 top-1/2 h-5 w-0.75 -translate-y-1/2 rounded-r bg-[#5DCAA5]" />
           )}
           <Icon className="size-5 shrink-0" />
           <span className="text-sm font-medium">{item.label}</span>
@@ -105,7 +113,7 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
       </div>
 
   <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-5">
-        {navItems
+        {(allNavItems.length ? allNavItems : navItems)
           .filter((item) => mainNavItems.includes(item.href))
           .map(renderNavItem)}
       </nav>
