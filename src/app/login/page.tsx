@@ -73,6 +73,10 @@ export default function LoginPage() {
     setStatus(null);
   };
 
+  const setRoleCookie = (role: string) => {
+    document.cookie = `mh_role=${encodeURIComponent(role)}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+  };
+
   const onChangeField = (field: keyof LoginForm, value: string) => {
     setFormData((previous) => ({ ...previous, [field]: value }));
 
@@ -131,6 +135,11 @@ export default function LoginPage() {
       return;
     }
 
+    const signedInRole = useAuth.getState().currentUser?.role;
+    if (signedInRole) {
+      setRoleCookie(signedInRole);
+    }
+
     setErrors({});
     setHasSubmitError(false);
     setFormData({
@@ -144,6 +153,7 @@ export default function LoginPage() {
 
   const onLogout = () => {
     const result = logout();
+    document.cookie = "mh_role=; Path=/; Max-Age=0; SameSite=Lax";
     if (result.ok) {
       setStatus({ tone: "success", key: result.messageKey });
     }

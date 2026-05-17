@@ -1,28 +1,42 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { Bell, LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 import { Button } from "@/shared/components/ui/button";
 import { useRole } from "@/shared/hooks/useRole";
 import type { UserRole } from "@/shared/types/auth";
+import { ROLE_NAV_ITEMS } from "@/shared/config/rbac";
 
 type TopBarProps = {
   fallbackRole: UserRole;
   previewRole?: UserRole;
 };
 
+function getBreadcrumb(pathname: string): string {
+  const segments = pathname.split("/").filter(Boolean);
+  const breadcrumbs: string[] = [];
+
+  for (const segment of segments) {
+    const matchedItem = Object.values(ROLE_NAV_ITEMS)
+      .flat()
+      .find((item) => item.href === `/${segment}` || item.href.includes(segment));
+
+    if (matchedItem) {
+      breadcrumbs.push(matchedItem.label);
+    } else if (segment.match(/^[a-zA-Z0-9-]+$/)) {
+      breadcrumbs.push(segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " "));
+    }
+  }
+
+  return breadcrumbs.join(" > ");
+}
+
 export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
   const router = useRouter();
-  const {
-    role,
-    roleTheme,
-    displayName,
-    organizationLabel,
-    organizationName,
-    logout,
-  } = useRole({ fallbackRole, previewRole });
+  const pathname = usePathname();
+  const { roleTheme, displayName, organizationName, organizationLabel, role, logout } = useRole({ fallbackRole, previewRole });
 
   const handleLogout = async () => {
     logout();
@@ -30,9 +44,11 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
     router.push("/login");
   };
 
+  const breadcrumb = getBreadcrumb(pathname);
+
   return (
     <header
-      className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b bg-white/80 px-4 py-4 backdrop-blur-xl sm:px-6"
+      className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b bg-white/95 px-4 py-4 backdrop-blur print:hidden sm:px-6"
       style={{ borderColor: roleTheme.border }}
     >
       <div className="min-w-0 flex items-center gap-3">
@@ -40,7 +56,7 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
           className="grid size-11 shrink-0 place-items-center rounded-2xl font-semibold text-white shadow-sm"
           style={{ backgroundColor: roleTheme.accent }}
         >
-          {displayName.slice(0, 1).toUpperCase()}
+          {displayName?.slice(0, 1).toUpperCase()}
         </div>
 
         <div className="min-w-0">
@@ -59,16 +75,24 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
         </div>
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        className="h-10 rounded-xl border bg-white px-4 shadow-sm"
-        style={{ borderColor: roleTheme.border, color: roleTheme.text }}
-        onClick={() => void handleLogout()}
-      >
-        <LogOut className="size-4" />
-        <span>Logout</span>
-      </Button>
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          className="size-8 rounded-lg border border-gray-200 p-0"
+          title="Notifications"
+        >
+          <Bell className="size-4 text-gray-600" />
+        </Button>
+
+        <Button
+          variant="outline"
+          className="size-8 rounded-lg border border-gray-200 p-0"
+          onClick={() => void handleLogout()}
+          title="Logout"
+        >
+          <LogOut className="size-4 text-gray-600" />
+        </Button>
+      </div>
     </header>
   );
 }

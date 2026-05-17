@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import { ServiceWorkerRegistration } from "@/shared/components/layout/ServiceWorkerRegistration";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "MotherHood Journey",
-  description:
-    "Maternal health portal for patients, health workers, facility admins, district officers, and government teams.",
+  title: "Motherhood Journey",
+  description: "Maternal and child health portal for mobile-first care workflows.",
 };
 
 export default function RootLayout({
@@ -17,7 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+        </Providers>
+        <ServiceWorkerRegistration />
       </body>
     </html>
   );
