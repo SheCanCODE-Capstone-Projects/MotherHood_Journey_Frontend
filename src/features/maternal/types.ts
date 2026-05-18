@@ -1,9 +1,12 @@
 /**
-<<<<<<< HEAD
- * Types for maternal features
+ * Maternal health feature types
+ * Based on backend Mother entity structure
  */
 
-export interface Mother {
+/**
+ * Request payload for mother registration
+ */
+export interface MotherRegistrationRequest {
   national_id: string;
   first_name: string;
   last_name: string;
@@ -11,10 +14,6 @@ export interface Mother {
   phone_number: string;
   home_location: string;
   education_level: string;
-}
-
-export interface MotherRegistrationRequest extends Mother {
-  // Request body for creating a new mother
 }
 
 export interface MotherRegistrationResponse {
@@ -30,38 +29,10 @@ export interface MotherRegistrationResponse {
   message: string;
 }
 
-export interface MotherFormStepOneData {
-  national_id: string;
-  first_name: string;
-  last_name: string;
-  date_of_birth: string;
-  phone_number: string;
-}
-
-export interface MotherFormStepTwoData {
-  home_location: string;
-  education_level: string;
-}
-
-export interface MotherFormData extends MotherFormStepOneData, MotherFormStepTwoData {}
-=======
- * Maternal health feature types
- * Based on backend Mother entity structure
- */
-
-/**
- * NIDA (National ID) verification status - matches backend NidaVerifiedStatus enum
- */
 export type NidaStatus = "PENDING" | "VERIFIED" | "FAILED" | "MANUAL";
 
-/**
- * Pregnancy status for a mother - matches backend PregnancyStatus enum
- */
 export type PregnancyStatus = "ACTIVE" | "DELIVERED" | "LOST" | "TRANSFERRED";
 
-/**
- * User info linked to Mother (OneToOne relationship in backend)
- */
 export interface MotherUser {
   id: string;
   name: string;
@@ -69,17 +40,11 @@ export interface MotherUser {
   email?: string;
 }
 
-/**
- * Facility info associated with Mother
- */
 export interface MotherFacility {
   id: string;
   name: string;
 }
 
-/**
- * Geo location info for Mother
- */
 export interface MotherGeoLocation {
   id: string;
   sector?: string;
@@ -87,35 +52,25 @@ export interface MotherGeoLocation {
   province?: string;
 }
 
-/**
- * Mother/Patient data model - matches backend Mother entity
- * Note: name comes from the linked User entity
- */
 export interface Mother {
-  id: string; // UUID
-  user?: MotherUser; // OneToOne relationship
-  facility?: MotherFacility; // ManyToOne relationship
-  geoLocation?: MotherGeoLocation; // ManyToOne relationship
-  healthId: string; // unique
+  id: string;
+  user?: MotherUser;
+  facility?: MotherFacility;
+  geoLocation?: MotherGeoLocation;
+  healthId: string;
   nidaVerifiedStatus: NidaStatus;
-  dateOfBirth: string; // ISO date string (LocalDate in backend)
+  dateOfBirth: string;
   educationLevel?: string;
-  registeredAt: string; // ISO datetime string (LocalDateTime in backend)
+  registeredAt: string;
   currentPregnancyStatus?: PregnancyStatus;
 }
 
-/**
- * Search request parameters for mothers
- */
 export interface MotherSearchRequest {
-  searchTerm?: string; // health_id, name, or NID
+  searchTerm?: string;
   page?: number;
   pageSize?: number;
 }
 
-/**
- * Paginated response from API
- */
 export interface MotherPageResponse {
   content: Mother[];
   pageNumber: number;
@@ -124,4 +79,3 @@ export interface MotherPageResponse {
   totalPages: number;
   last: boolean;
 }
->>>>>>> 70b53139d72327305443a69b70b7ff8739383fc2

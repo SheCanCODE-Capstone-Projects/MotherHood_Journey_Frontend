@@ -1,9 +1,12 @@
-<<<<<<< HEAD
-import { createApiClient } from "@/lib/api/client";
-import type {
-  MotherRegistrationRequest,
-  MotherRegistrationResponse,
-} from "../types";
+/**
+ * Mothers API endpoints
+ * Handles all mother/patient data operations
+ * Based on backend: com.motherhood.journey.maternal.controller.MotherController
+ */
+
+import { apiClient } from "@/lib/api/client";
+import type { PageResponse } from "@/shared/types/api";
+import type { Mother, MotherPageResponse, MotherRegistrationRequest, MotherRegistrationResponse } from "../types";
 
 /**
  * Create a new mother registration
@@ -13,9 +16,7 @@ import type {
 export async function registerMother(
   data: MotherRegistrationRequest
 ): Promise<MotherRegistrationResponse> {
-  const client = createApiClient();
-
-  const response = await client.post<MotherRegistrationResponse>(
+  const response = await apiClient.post<MotherRegistrationResponse>(
     "/api/v1/mothers",
     {
       national_id: data.national_id,
@@ -28,16 +29,8 @@ export async function registerMother(
     }
   );
 
-=======
-/**
- * Mothers API endpoints
- * Handles all mother/patient data operations
- * Based on backend: com.motherhood.journey.maternal.controller.MotherController
- */
-
-import { apiClient } from "@/lib/api/client";
-import type { PageResponse } from "@/shared/types/api";
-import type { Mother, MotherPageResponse } from "../types";
+  return response;
+}
 
 /**
  * Search mothers by health_id, name, or NID
@@ -60,26 +53,10 @@ export async function searchMothers(
   const response = await apiClient.get<MotherPageResponse>(
     `/api/v1/mothers/search?${params.toString()}`
   );
->>>>>>> 70b53139d72327305443a69b70b7ff8739383fc2
   return response;
 }
 
 /**
-<<<<<<< HEAD
- * Get mother details by health ID
- * Used for verification or display purposes
- */
-export async function getMotherByHealthId(
-  healthId: string
-): Promise<MotherRegistrationResponse> {
-  const client = createApiClient();
-
-  const response = await client.get<MotherRegistrationResponse>(
-    `/api/v1/mothers/${healthId}`
-  );
-
-  return response;
-=======
  * Get all mothers with pagination
  * Endpoint: GET /api/v1/mothers
  */
@@ -110,5 +87,4 @@ export async function getMotherById(id: string): Promise<Mother> {
  */
 export async function getMotherByHealthId(healthId: string): Promise<Mother> {
   return apiClient.get<Mother>(`/api/v1/mothers/health-id/${healthId}`);
->>>>>>> 70b53139d72327305443a69b70b7ff8739383fc2
 }

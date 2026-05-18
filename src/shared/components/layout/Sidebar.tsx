@@ -44,7 +44,7 @@ const iconByHref: Record<string, LucideIcon> = {
 const mainNavItems = ["/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/children", "/appointments", "/reports", "/analytics", "/staff", "/sync"];
 
 export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
-  const { role, roleLabel, organizationName, navItems, displayName } = useRole({
+  const { role, roleLabel, roleTheme, organizationName, navItems, displayName } = useRole({
     fallbackRole,
     previewRole,
   });

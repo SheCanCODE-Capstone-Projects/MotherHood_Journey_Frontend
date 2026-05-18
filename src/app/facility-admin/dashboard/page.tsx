@@ -116,10 +116,31 @@ const generateMockServiceRequests = (): ServiceRequest[] => {
   ];
 };
 
-// API functions (using mock data)
+// API functions (attempt real API, fall back to mock)
 const fetchFacilityStats = async (facilityId: string): Promise<FacilityStats> => {
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+  try {
+    const res = await fetch(`/api/v1/facilities/${facilityId}/stats`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const body = await res.json();
+    // Expecting { ancAttendanceRate, vaccinationCoverage, noShowRate, serviceRequestBacklog }
+    if (
+      typeof body.ancAttendanceRate === "number" &&
+      typeof body.vaccinationCoverage === "number" &&
+      typeof body.noShowRate === "number" &&
+      typeof body.serviceRequestBacklog === "number"
+    ) {
+      return body as FacilityStats;
+    }
+    // If shape is unexpected, fall through to mock
+  } catch (err) {
+    // network or parse error - fall back to mock
+    // console.warn should remain during development
+    // eslint-disable-next-line no-console
+    console.warn("fetchFacilityStats failed, using mock data:", err);
+  }
+
+  // fallback
+  await new Promise((resolve) => setTimeout(resolve, 200));
   return generateMockStats(facilityId);
 };
 
@@ -128,7 +149,20 @@ const fetchAncAttendanceData = async (
   startDate: Date,
   endDate: Date
 ): Promise<AncAttendanceData[]> => {
-  await new Promise(resolve => setTimeout(resolve, 300));
+  try {
+    const url = `/api/v1/facilities/${facilityId}/anc-attendance?start=${encodeURIComponent(
+      startDate.toISOString()
+    )}&end=${encodeURIComponent(endDate.toISOString())}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const body = await res.json();
+    if (Array.isArray(body)) return body as AncAttendanceData[];
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn("fetchAncAttendanceData failed, using mock:", err);
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 150));
   return generateMockAncData(12);
 };
 
@@ -137,12 +171,36 @@ const fetchVaccinationData = async (
   startDate: Date,
   endDate: Date
 ): Promise<VaccinationData[]> => {
-  await new Promise(resolve => setTimeout(resolve, 300));
+  try {
+    const url = `/api/v1/facilities/${facilityId}/vaccination-coverage?start=${encodeURIComponent(
+      startDate.toISOString()
+    )}&end=${encodeURIComponent(endDate.toISOString())}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const body = await res.json();
+    if (Array.isArray(body)) return body as VaccinationData[];
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn("fetchVaccinationData failed, using mock:", err);
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 150));
   return generateMockVaccinationData();
 };
 
 const fetchServiceRequests = async (facilityId: string): Promise<ServiceRequest[]> => {
-  await new Promise(resolve => setTimeout(resolve, 200));
+  try {
+    const url = `/api/v1/facilities/${facilityId}/service-requests?limit=5`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const body = await res.json();
+    if (Array.isArray(body)) return body as ServiceRequest[];
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn("fetchServiceRequests failed, using mock:", err);
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 100));
   return generateMockServiceRequests();
 };
 
