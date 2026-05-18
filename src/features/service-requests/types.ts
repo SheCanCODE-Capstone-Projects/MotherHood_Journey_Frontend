@@ -33,3 +33,27 @@ export interface SubmitPayload {
 export interface SubmitResponse {
   referenceNumber: string;
 }
+
+export type ServiceRequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "ESCALATED";
+
+export interface ServiceRequestDTO {
+  id: string;
+  referenceNo: string;
+  patientName: string;
+  serviceType: ServiceTypeId;
+  submittedDate: string;
+  status: ServiceRequestStatus;
+  documents: Array<{ key: DocKey; name: string; url: string }>;
+  rejectionReason?: string;
+}
+
+export interface ReviewActionPayload {
+  id: string;
+  action: "APPROVED" | "REJECTED" | "ESCALATED";
+  rejectionReason?: string;
+}
+
+export interface ListServiceRequestsParams {
+  status?: ServiceRequestStatus;
+  serviceType?: ServiceTypeId;
+}

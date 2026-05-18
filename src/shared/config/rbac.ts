@@ -3,7 +3,7 @@ import type { UserRole } from "@/shared/types/auth";
 export const ROLE_ROUTE_MAP: Record<UserRole, string[]> = {
   patient:          ["/dashboard", "/pregnancies", "/children", "/appointments"],
   health_worker:    ["/dashboard", "/mothers", "/visits", "/diagnoses"],
-  facility_admin:   ["/dashboard", "/staff", "/reports"],
+  facility_admin:   ["/dashboard", "/service-requests", "/staff", "/reports"],
   district_officer: ["/dashboard", "/analytics"],
   government:       ["/dashboard", "/sync", "/reports"],
 };
@@ -94,6 +94,7 @@ export const ROLE_NAV_ITEMS: Record<UserRole, RoleNavItem[]> = {
   ],
   facility_admin: [
     { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
+    { href: "/service-requests", label: "Service Requests", shortLabel: "Requests" },
     { href: "/staff", label: "Staff", shortLabel: "Staff" },
     { href: "/reports", label: "Reports", shortLabel: "Reports" },
   ],

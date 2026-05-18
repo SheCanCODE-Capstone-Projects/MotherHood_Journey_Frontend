@@ -87,7 +87,8 @@ export function searchMothers(query: string): Promise<MotherSearchResult[]> {
       resolve(mockMothers);
     }, 300);
   });
-import { apiClient } from "@/lib/api/client";
+}
+
 import type {
   AdministerVaccinationRequest,
   ChildVaccinationSessionResponse,
