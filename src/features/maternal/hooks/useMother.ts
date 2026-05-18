@@ -1,8 +1,8 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
-import { registerMother } from "../api/mothers.api";
-import type { MotherRegistrationRequest, MotherRegistrationResponse } from "../types";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { registerMother, searchMothers, getMothers } from "../api/mothers.api";
+import type { MotherRegistrationRequest, MotherRegistrationResponse, MotherPageResponse } from "../types";
 
 /**
  * Custom hook for mother registration
@@ -34,4 +34,31 @@ export function useMother() {
     // Check if request failed
     isError: mutation.isError,
   };
+}
+
+/**
+ * Custom hook for searching mothers
+ * Usage: const { data, isLoading, error } = useMotherSearch("searchTerm");
+ */
+export function useMotherSearch(
+  searchTerm?: string,
+  page: number = 1,
+  size: number = 10
+) {
+  return useQuery<MotherPageResponse, Error>({
+    queryKey: ["mothers", "search", searchTerm, page, size],
+    queryFn: () => searchMothers(searchTerm, page, size),
+    enabled: !!searchTerm,
+  });
+}
+
+/**
+ * Custom hook for listing all mothers
+ * Usage: const { data, isLoading, error } = useMothers();
+ */
+export function useMothers(page: number = 1, size: number = 10) {
+  return useQuery<MotherPageResponse, Error>({
+    queryKey: ["mothers", "list", page, size],
+    queryFn: () => getMothers(page, size),
+  });
 }
