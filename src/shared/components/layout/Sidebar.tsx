@@ -43,6 +43,7 @@ const iconByHref: Record<string, LucideIcon> = {
 
 const mainNavItems = ["/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/children", "/appointments", "/reports", "/analytics", "/staff", "/sync"];
 
+<<<<<<< HEAD
 const allNavItems = Array.from(
   new Map(
     Object.values(ROLE_NAV_ITEMS)
@@ -53,6 +54,12 @@ const allNavItems = Array.from(
 
 export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
   const { role, roleLabel, organizationName, navItems, displayName, roleTheme } = useRole({
+=======
+const roleTheme = { text: '#085041', border: '#5DCAA5', accent: '#085041' };
+
+export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
+  const { role, roleLabel, roleTheme, organizationName, navItems, displayName } = useRole({
+>>>>>>> main
     fallbackRole,
     previewRole,
   });
@@ -94,9 +101,10 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
 
   return (
     <aside
-      className="hidden w-72 shrink-0 border-r bg-[#F5FBFA] lg:flex lg:flex-col print:hidden"
-      style={{ borderColor: roleTheme.border }}
+      className="hidden w-72 shrink-0 border-r  lg:flex lg:flex-col print:hidden"
+      style={{ backgroundColor: roleTheme.accent, borderColor: roleTheme.border }}
     >
+<<<<<<< HEAD
       <div className="border-b px-6 py-6" style={{ borderColor: roleTheme.border }}>
         <div
           className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em]"
@@ -105,6 +113,13 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
           MotherHood
         </div>
         <h2 className="mt-4 text-2xl font-semibold" style={{ color: roleTheme.text }}>
+=======
+      <div className="border-b border-white/10 px-6 py-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
+          Motherhood Journey
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold" style={{ color: roleTheme.text }}>
+>>>>>>> main
           {roleLabel} Portal
         </h2>
         <p className="mt-2 text-sm leading-6" style={{ color: roleTheme.text }}>

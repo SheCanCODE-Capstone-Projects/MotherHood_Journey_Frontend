@@ -36,7 +36,16 @@ function getBreadcrumb(pathname: string): string {
 export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
   const router = useRouter();
   const pathname = usePathname();
+<<<<<<< HEAD
   const { roleTheme, displayName, organizationName, organizationLabel, role, logout } = useRole({ fallbackRole, previewRole });
+=======
+  const {
+    organizationName,
+    logout,
+    roleTheme,
+    displayName,
+  } = useRole({ fallbackRole, previewRole });
+>>>>>>> main
 
   const handleLogout = async () => {
     logout();
@@ -58,6 +67,7 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
         >
           {displayName?.slice(0, 1).toUpperCase()}
         </div>
+      </div>  
 
         <div className="min-w-0">
           <div

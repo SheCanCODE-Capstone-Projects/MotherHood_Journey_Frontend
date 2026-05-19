@@ -1,5 +1,5 @@
 const CACHE_NAME = "motherhood-vaccination-card-v1";
-const VACCINATION_ROUTE_PATTERN = /\/api\/children\/[^/]+\/vaccinations$/;
+const VACCINATION_ROUTE_PATTERN = /\/api\/patient\/children\/[^/]+\/vaccinations$/;
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 self.addEventListener("install", (event) => {
@@ -11,7 +11,7 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  const requestUrl = new URL(event.request.url);
+  const requestUrl = new URL(event.request.url, self.location.origin);
 
   if (event.request.method !== "GET" || !VACCINATION_ROUTE_PATTERN.test(requestUrl.pathname)) {
     return;
@@ -30,19 +30,23 @@ async function handleVaccinationFetch(request) {
     if (networkResponse && networkResponse.ok) {
       const cachedCopy = await buildCachedResponse(networkResponse);
       await cache.put(request, cachedCopy.clone());
-    }
-
-    return networkResponse;
-  } catch (error) {
-    if (cachedResponse && isFresh(cachedResponse)) {
-      return cachedResponse;
+      return networkResponse;
     }
 
     if (cachedResponse) {
       return cachedResponse;
     }
 
-    throw error;
+    return networkResponse;
+  } catch (error) {
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    return new Response(JSON.stringify({ error: "Offline and no cached vaccination data available." }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
 
@@ -57,14 +61,4 @@ async function buildCachedResponse(response) {
     statusText: response.statusText,
     headers,
   });
-}
-
-function isFresh(response) {
-  const cachedAt = response.headers.get("x-cached-at");
-
-  if (!cachedAt) {
-    return true;
-  }
-
-  return Date.now() - new Date(cachedAt).getTime() <= MAX_AGE_MS;
 }
