@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { PageHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui/button";
 import { useMotherSearch, useMothers } from "@/features/maternal/hooks/useMother";
-import type { Mother } from "@/features/maternal/types";
+import type { Mother, NidaStatus } from "@/features/maternal/types";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { NidaStatusBadge } from "@/shared/components/status";
 

@@ -187,59 +187,6 @@ function getSoonestPending(vaccines: VaccinationRecord[]) {
   return pending[0] ?? null;
 }
 
-function createDemoVaccinationCard(childId: string): VaccinationCardData {
-  const now = new Date();
-  const oneMonth = 30 * 24 * 60 * 60 * 1000;
-
-  return {
-    child: {
-      id: childId,
-      fullName: formatChildLabel(childId),
-      dateOfBirth: new Date(now.getTime() - 8 * oneMonth).toISOString(),
-      motherName: "Sample Mother",
-      facilityName: "Nyamata Health Center",
-      householdPhone: "0780000000",
-    },
-    lastUpdatedAt: now.toISOString(),
-    vaccines: [
-      {
-        id: "demo-bcg-1",
-        name: "BCG",
-        doseLabel: "Dose 1",
-        status: "completed",
-        dueDate: new Date(now.getTime() - 7 * oneMonth).toISOString(),
-        administeredDate: new Date(now.getTime() - 7 * oneMonth + 2 * 24 * 60 * 60 * 1000).toISOString(),
-        note: "Given at birth clinic.",
-      },
-      {
-        id: "demo-opv-2",
-        name: "OPV",
-        doseLabel: "Dose 2",
-        status: "due",
-        dueDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        administeredDate: null,
-        note: "Bring child card to next visit.",
-      },
-      {
-        id: "demo-penta-3",
-        name: "Pentavalent",
-        doseLabel: "Dose 3",
-        status: "overdue",
-        dueDate: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-        administeredDate: null,
-      },
-      {
-        id: "demo-measles-1",
-        name: "Measles-Rubella",
-        doseLabel: "Dose 1",
-        status: "upcoming",
-        dueDate: new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000).toISOString(),
-        administeredDate: null,
-      },
-    ],
-  };
-}
-
 export default function PatientVaccinationCardPage({ params }: PatientVaccinationPageProps) {
   const resolvedParams = use(params);
   const childId = normalizeChildId(resolvedParams.childId);
@@ -624,4 +571,56 @@ export default function PatientVaccinationCardPage({ params }: PatientVaccinatio
       </section>
     </div>
   );
+}
+
+// Demo data generator
+function createDemoVaccinationCard(childId: string): VaccinationCardData {
+  return {
+    child: {
+      id: childId,
+      fullName: "Amina Uwimana",
+      dateOfBirth: "2019-06-13",
+      motherName: "Marie Uwimana",
+      facilityName: "Nyagatare Health Centre",
+    },
+    lastUpdatedAt: new Date().toISOString(),
+    vaccines: [
+      {
+        id: `${childId}-bcg`,
+        name: "BCG",
+        doseLabel: "Dose 1",
+        status: "completed",
+        dueDate: "2019-06-14",
+        administeredDate: "2019-06-14",
+        note: "Recorded in the child health file",
+      },
+      {
+        id: `${childId}-polio1`,
+        name: "Polio",
+        doseLabel: "Dose 1",
+        status: "completed",
+        dueDate: "2019-06-28",
+        administeredDate: "2019-06-28",
+        note: "Recorded in the child health file",
+      },
+      {
+        id: `${childId}-penta1`,
+        name: "Penta",
+        doseLabel: "Dose 1",
+        status: "overdue",
+        dueDate: "2019-08-01",
+        administeredDate: null,
+        note: "Contact CHW for catch-up",
+      },
+      {
+        id: `${childId}-measles`,
+        name: "Measles",
+        doseLabel: "Dose 1",
+        status: "due",
+        dueDate: "2020-03-01",
+        administeredDate: null,
+        note: "Keep this card with the caregiver",
+      },
+    ],
+  };
 }

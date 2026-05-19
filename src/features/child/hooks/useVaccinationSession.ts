@@ -3,46 +3,36 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
-	administerVaccination,
-	searchChildVaccinationSession,
+  administerVaccination,
+  searchChildVaccinationSession,
 } from "@/lib/api/children";
-import { queryKeys } from "@/shared/config/query-keys";
-import type {
-	AdministerVaccinationRequest,
-	ChildVaccinationSessionResponse,
-} from "@/features/child/types";
+
+export const vaccinationSessionQueryKeys = {
+  all: ["vaccination-session"] as const,
+  search: (searchTerm: string) => [
+    "vaccination-session",
+    "search",
+    searchTerm,
+  ] as const,
+};
 
 export function useVaccinationSessionSearch(searchTerm: string) {
-	return useQuery<ChildVaccinationSessionResponse>({
-		queryKey: queryKeys.child.vaccinationSession(searchTerm),
-		queryFn: () => searchChildVaccinationSession(searchTerm),
-		enabled: searchTerm.trim().length > 0,
-		staleTime: 1000 * 60 * 5,
-		gcTime: 1000 * 60 * 10,
-		retry: 1,
-		refetchOnWindowFocus: false,
-	});
+  return useQuery({
+    queryKey: vaccinationSessionQueryKeys.search(searchTerm),
+    queryFn: () => searchChildVaccinationSession(searchTerm),
+    enabled: searchTerm.trim().length > 0,
+    retry: false,
+  });
 }
 
 export function useAdministerVaccination() {
-	const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationFn: ({
-			vaccinationId,
-			lotNumber,
-		}: {
-			vaccinationId: string;
-			lotNumber: string;
-		}) =>
-			administerVaccination(vaccinationId, {
-				lotNumber,
-			} satisfies AdministerVaccinationRequest),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({
-				queryKey: queryKeys.child.vaccinations,
-			});
-		},
-		retry: 1,
-	});
+  return useMutation({
+    mutationFn: ({ vaccinationId, lotNumber }: { vaccinationId: string; lotNumber: string }) =>
+      administerVaccination(vaccinationId, { lotNumber }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: vaccinationSessionQueryKeys.all });
+    },
+  });
 }

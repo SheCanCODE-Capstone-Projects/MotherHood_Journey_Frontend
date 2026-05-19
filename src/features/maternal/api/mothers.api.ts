@@ -5,7 +5,32 @@
  */
 
 import { apiClient } from "@/lib/api/client";
-import type { Mother, MotherPageResponse } from "../types";
+import type { PageResponse } from "@/shared/types/api";
+import type { Mother, MotherPageResponse, MotherRegistrationRequest, MotherRegistrationResponse } from "../types";
+
+/**
+ * Create a new mother registration
+ * Sends POST request to /api/v1/mothers with mother data
+ * Returns health_id and other registration details
+ */
+export async function registerMother(
+  data: MotherRegistrationRequest
+): Promise<MotherRegistrationResponse> {
+  const response = await apiClient.post<MotherRegistrationResponse>(
+    "/api/v1/mothers",
+    {
+      national_id: data.national_id,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      date_of_birth: data.date_of_birth,
+      phone_number: data.phone_number,
+      home_location: data.home_location,
+      education_level: data.education_level,
+    }
+  );
+
+  return response;
+}
 
 /**
  * Search mothers by health_id, name, or NID

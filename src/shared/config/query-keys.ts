@@ -9,11 +9,6 @@ export const queryKeys = {
   },
   child: {
     children: ["child", "children"] as const,
-    vaccinations: ["child", "vaccinations"] as const,
-    vaccinationSession: (searchTerm: string) =>
-      ["child", "vaccination-session", searchTerm] as const,
-    vaccinationCard: (childId: string) =>
-      ["child", "vaccination-card", childId] as const,
   },
   appointment: {
     appointments: ["appointment", "appointments"] as const,
@@ -21,6 +16,7 @@ export const queryKeys = {
   government: {
     reports: ["government", "reports"] as const,
     sync: ["government", "sync"] as const,
+    syncLogs: ["government", "sync-logs"] as const,
     analytics: ["government", "analytics"] as const,
   },
   geo: {

@@ -15,7 +15,6 @@ import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { useRole } from "@/shared/hooks/useRole";
 import type { UserRole } from "@/shared/types/auth";
-import { ROLE_NAV_ITEMS } from "@/shared/config/rbac";
 
 type MobileNavProps = {
   fallbackRole: UserRole;
@@ -26,32 +25,27 @@ const mobileIconByHref: Record<string, LucideIcon> = {
   "/dashboard": LayoutGrid,
   "/pregnancies": Baby,
   "/children": Baby,
-  "/health-worker/children": Baby,
   "/appointments": CalendarDays,
   "/mothers": Baby,
   "/visits": CalendarDays,
   "/diagnoses": Stethoscope,
 };
 
-const allMobileNavItems = Array.from(
-  new Map(
-    Object.values(ROLE_NAV_ITEMS)
-      .flat()
-      .map((item) => [item.href, item]),
-  ).values(),
-);
-
 export function MobileNav({ fallbackRole, previewRole }: MobileNavProps) {
-  const { roleTheme } = useRole({ fallbackRole, previewRole });
+  const { role, navItems, roleTheme } = useRole({ fallbackRole, previewRole });
   const pathname = usePathname();
+
+  if (role !== "patient" && role !== "health_worker") {
+    return null;
+  }
 
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-30 border-t bg-white/95 px-2 py-2 shadow-[0_-10px_30px_-20px_rgba(39,111,117,0.45)] backdrop-blur print:hidden lg:hidden"
       style={{ borderColor: roleTheme.border }}
     >
-      <div className="grid grid-cols-3 gap-1">
-        {allMobileNavItems.map((item) => {
+      <div className="grid grid-cols-4 gap-1">
+        {navItems.slice(0, 4).map((item) => {
           const Icon = mobileIconByHref[item.href] ?? LayoutGrid;
           const isActive =
             pathname === item.href || pathname.startsWith(`${item.href}/`);

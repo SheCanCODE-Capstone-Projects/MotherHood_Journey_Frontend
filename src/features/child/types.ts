@@ -29,11 +29,7 @@ export interface MotherSearchResult {
 }
 export type VaccinationStatus = "completed" | "due" | "overdue" | "upcoming";
 
-export type VaccinationSessionStatus =
-	| "PENDING"
-	| "ADMINISTERED"
-	| "MISSED"
-	| "OVERDUE";
+export type VaccinationSessionStatus = "PENDING" | "ADMINISTERED" | "MISSED" | "OVERDUE";
 
 export type VaccinationRecord = {
 	id: string;
@@ -97,6 +93,3 @@ export type ChildVaccinationSessionResponse = {
 export type AdministerVaccinationRequest = {
 	lotNumber: string;
 };
-
-export type VaccinationSessionChild = ChildVaccinationSessionChild;
-export type VaccinationSessionData = ChildVaccinationSessionResponse;

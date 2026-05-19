@@ -2,10 +2,10 @@ import type { UserRole } from "@/shared/types/auth";
 
 export const ROLE_ROUTE_MAP: Record<UserRole, string[]> = {
   patient:          ["/dashboard", "/pregnancies", "/children", "/appointments"],
-  health_worker:    ["/dashboard", "/mothers", "/visits", "/diagnoses", "/health-worker/children", "/children"],
+  health_worker:    ["/dashboard", "/mothers", "/visits", "/diagnoses"],
   facility_admin:   ["/dashboard", "/service-requests", "/staff", "/reports"],
   district_officer: ["/dashboard", "/analytics"],
-  government:       ["/dashboard", "/sync", "/reports"],
+  government:       ["/dashboard", "/sync", "/sync-log", "/reports"],
 };
 
 export type RoleNavItem = {
@@ -88,7 +88,7 @@ export const ROLE_NAV_ITEMS: Record<UserRole, RoleNavItem[]> = {
   health_worker: [
     { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
     { href: "/mothers", label: "Mothers", shortLabel: "Mothers" },
-    { href: "/health-worker/children", label: "Children", shortLabel: "Children" },
+    { href: "/children", label: "Children", shortLabel: "Children" },
     { href: "/visits", label: "Visits", shortLabel: "Visits" },
     { href: "/diagnoses", label: "Diagnoses", shortLabel: "Cases" },
   ],
@@ -105,6 +105,7 @@ export const ROLE_NAV_ITEMS: Record<UserRole, RoleNavItem[]> = {
   government: [
     { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
     { href: "/sync", label: "Sync", shortLabel: "Sync" },
+    { href: "/sync-log", label: "Sync Log", shortLabel: "Logs" },
     { href: "/reports", label: "Reports", shortLabel: "Reports" },
   ],
 };

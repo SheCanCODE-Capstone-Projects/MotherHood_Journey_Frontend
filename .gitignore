@@ -47,7 +47,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Generated files
-# Service worker is auto-generated from src/lib/sw-worker.ts
-public/sw.js
