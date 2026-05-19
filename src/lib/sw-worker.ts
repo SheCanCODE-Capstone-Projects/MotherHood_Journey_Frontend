@@ -14,13 +14,8 @@ self.addEventListener("activate", (event: ExtendableEvent) => {
   event.waitUntil(self.clients.claim());
 });
 
-<<<<<<< HEAD:src/lib/sw-worker.ts
 self.addEventListener("fetch", (event: FetchEvent) => {
   const requestUrl = new URL(event.request.url);
-=======
-self.addEventListener("fetch", (event) => {
-  const requestUrl = new URL(event.request.url, self.location.origin);
->>>>>>> main:public/sw.js
 
   if (event.request.method !== "GET" || !VACCINATION_ROUTE_PATTERN.test(requestUrl.pathname)) {
     return;
@@ -71,7 +66,6 @@ async function buildCachedResponse(response: Response): Promise<Response> {
     headers,
   });
 }
-<<<<<<< HEAD:src/lib/sw-worker.ts
 
 function isFresh(response: Response): boolean {
   const cachedAt = response.headers.get("x-cached-at");
@@ -82,5 +76,3 @@ function isFresh(response: Response): boolean {
 
   return Date.now() - new Date(cachedAt).getTime() <= MAX_AGE_MS;
 }
-=======
->>>>>>> main:public/sw.js

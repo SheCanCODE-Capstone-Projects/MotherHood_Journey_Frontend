@@ -1,13 +1,9 @@
 "use client";
 
-<<<<<<< HEAD
 import Link from "next/link";
 import { FileText, BarChart3 } from "lucide-react";
 import { PageHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui/button";
-=======
-import { PageHeader, WorkspacePanel } from "@/shared/components/layout";
->>>>>>> main
 import { useRole } from "@/shared/hooks/useRole";
 
 export default function ReportsPage() {
@@ -18,7 +14,6 @@ export default function ReportsPage() {
   const subtitle = isGovernment ? "National maternal health program analytics and performance." : "Facility performance metrics and operational reports.";
 
   return (
-<<<<<<< HEAD
     <div className="mx-auto w-full max-w-6xl space-y-6 pb-8">
       <PageHeader title={title} subtitle={subtitle} />
 
@@ -71,34 +66,6 @@ export default function ReportsPage() {
           </div>
         </div>
       </section>
-=======
-    <div className="space-y-6">
-      <PageHeader eyebrow={isGovernment ? "Government" : "Facility Admin"} title={title} subtitle={subtitle} />
-
-      <WorkspacePanel
-        eyebrow={isGovernment ? "National reporting" : "Facility reporting"}
-        title={isGovernment ? "Program reports and national summaries" : "Operational reports and facility summaries"}
-        subtitle={isGovernment ? "Keep national program data visible and ready for executive review." : "Open the reports that matter most to day-to-day facility operations."}
-        summary={isGovernment ? "The report area is designed for national indicators, program summaries, and ministry-level review." : "The report area is designed for facility summaries, operational metrics, and review actions."}
-        highlights={isGovernment ? ["Review national indicators", "Monitor reporting health", "Keep ministry summaries visible"] : ["Review facility performance", "Track operational metrics", "Keep summary views close at hand"]}
-        sidebarTitle={isGovernment ? "National view" : "Facility view"}
-        sidebarCopy={isGovernment ? "Reports can be expanded with national indicators and cross-region comparisons." : "Reports can be expanded with staffing, coverage, and service delivery views."}
-        sidebarStats={isGovernment ? [
-          { label: "Programs", value: "0" },
-          { label: "Regions", value: "0" },
-          { label: "Reports", value: "0" },
-        ] : [
-          { label: "Active reports", value: "0" },
-          { label: "Open issues", value: "0" },
-          { label: "Completed", value: "0" },
-        ]}
-        primaryAction={{ label: isGovernment ? "Open sync" : "Open staff", href: isGovernment ? "/sync" : "/staff" }}
-        secondaryAction={{ label: "Open dashboard", href: "/dashboard" }}
-        accent={roleTheme.accent}
-        border={roleTheme.border}
-        text={roleTheme.text}
-      />
->>>>>>> main
     </div>
   );
 }
