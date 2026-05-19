@@ -1,8 +1,9 @@
 "use client";
 
-import { Bell, LogOut } from "lucide-react";
+import { Bell, Building2, LogOut } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/shared/components/ui/button";
 import { useRole } from "@/shared/hooks/useRole";
@@ -36,7 +37,14 @@ function getBreadcrumb(pathname: string): string {
 export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { roleTheme, displayName, organizationName, organizationLabel, role, logout } = useRole({ fallbackRole, previewRole });
+  const {
+    organizationName,
+    organizationLabel,
+    logout,
+    roleTheme,
+    displayName,
+    role,
+  } = useRole({ fallbackRole, previewRole });
 
   const handleLogout = async () => {
     logout();
@@ -53,7 +61,7 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
     >
       <div className="min-w-0 flex items-center gap-3">
         <div
-          className="grid size-11 shrink-0 place-items-center rounded-2xl font-semibold text-white shadow-sm"
+          className="grid size-11 shrink-0 place-items-center rounded-2xl font-semibold text-white"
           style={{ backgroundColor: roleTheme.accent }}
         >
           {displayName?.slice(0, 1).toUpperCase()}
@@ -75,7 +83,12 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700">
+          <Building2 className="size-3.5 text-gray-500" />
+          <span>{organizationName}</span>
+        </div>
+
         <Button
           variant="outline"
           className="size-8 rounded-lg border border-gray-200 p-0"

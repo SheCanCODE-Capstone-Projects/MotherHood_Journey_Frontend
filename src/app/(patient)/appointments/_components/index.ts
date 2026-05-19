@@ -1,0 +1,1 @@
+export { AppointmentDetailModal } from "./AppointmentDetailModal";
