@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
@@ -43,7 +44,9 @@ const languageOptions: Array<{ code: LanguageCode; label: string }> = [
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
   const { currentUser, signIn, signUp, logout } = useAuth();
-  const [mode, setMode] = useState<AuthMode>("signin");
+  const searchParams = useSearchParams();
+  const initialMode = searchParams.get("mode") === "signup" ? "signup" : "signin";
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [formData, setFormData] = useState<LoginForm>({
     fullName: "",
     phone: "",
@@ -63,19 +66,15 @@ export default function LoginPage() {
     return code === "rw" || code === "fr" ? code : "en";
   }, [i18n.language]);
 
-  useEffect(() => {
-    const requestedMode = new URLSearchParams(window.location.search).get("mode");
-
-    if (requestedMode === "signup" || requestedMode === "signin") {
-      setMode(requestedMode);
-    }
-  }, []);
-
   const switchMode = (nextMode: AuthMode) => {
     setMode(nextMode);
     setErrors({});
     setHasSubmitError(false);
     setStatus(null);
+  };
+
+  const setRoleCookie = (role: string) => {
+    document.cookie = `mh_role=${encodeURIComponent(role)}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`;
   };
 
   const onChangeField = (field: keyof LoginForm, value: string) => {
@@ -136,6 +135,11 @@ export default function LoginPage() {
       return;
     }
 
+    const signedInRole = useAuth.getState().currentUser?.role;
+    if (signedInRole) {
+      setRoleCookie(signedInRole);
+    }
+
     setErrors({});
     setHasSubmitError(false);
     setFormData({
@@ -149,6 +153,7 @@ export default function LoginPage() {
 
   const onLogout = () => {
     const result = logout();
+    document.cookie = "mh_role=; Path=/; Max-Age=0; SameSite=Lax";
     if (result.ok) {
       setStatus({ tone: "success", key: result.messageKey });
     }

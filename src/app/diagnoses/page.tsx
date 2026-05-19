@@ -1,24 +1,42 @@
 "use client";
 
-import { PageHeader } from "@/shared/components/layout";
+import { PageHeader, WorkspacePanel } from "@/shared/components/layout";
+import { useRole } from "@/shared/hooks/useRole";
 
 export default function DiagnosesPage() {
+  const { roleTheme } = useRole({ fallbackRole: "health_worker" });
+
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Health Worker"
         title="Diagnoses"
         subtitle="Review and manage maternal health diagnoses and conditions."
       />
 
-      <section className="grid gap-4">
-        <article className="rounded-3xl border border-[#CCE6EB] bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">
-            Diagnosed Cases
-          </p>
-          <h2 className="mt-2 text-lg font-semibold text-[#1B5360]">Maternal Conditions</h2>
-          <p className="mt-1 text-sm text-[#54797C]">View all diagnosed health conditions for your patients.</p>
-        </article>
-      </section>
+      <WorkspacePanel
+        eyebrow="Case review"
+        title="Maternal conditions and diagnosis follow-up"
+        subtitle="Keep the clinical queue visible while you work through assessments and escalation steps."
+        summary="The panel is ready for diagnosis records, care plans, and status changes once clinical data is connected."
+        highlights={[
+          "Review cases waiting for assessment",
+          "Keep diagnosis notes in the same workflow",
+          "Surface urgent conditions clearly",
+        ]}
+        sidebarTitle="Clinical queue"
+        sidebarCopy="Diagnosed cases will appear here as the queue is connected to your data source."
+        sidebarStats={[
+          { label: "Open cases", value: "0" },
+          { label: "Urgent cases", value: "0" },
+          { label: "Resolved", value: "0" },
+        ]}
+        primaryAction={{ label: "Open visits", href: "/visits" }}
+        secondaryAction={{ label: "Open mothers", href: "/mothers" }}
+        accent={roleTheme.accent}
+        border={roleTheme.border}
+        text={roleTheme.text}
+      />
     </div>
   );
 }

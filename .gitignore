@@ -15,7 +15,15 @@
 
 # next.js
 /.next/
+**/.next/
 /out/
+
+# dependencies
+/node_modules
+**/node_modules/
+
+# nested project copy
+motherhood_journey/MotherHood_Journey_Frontend/
 
 # production
 /build

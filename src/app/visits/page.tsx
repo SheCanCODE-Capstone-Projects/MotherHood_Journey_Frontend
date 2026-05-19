@@ -1,24 +1,40 @@
-"use client";
-
-import { PageHeader } from "@/shared/components/layout";
+import { PageHeader, WorkspacePanel } from "@/shared/components/layout";
+import { ROLE_THEMES } from "@/shared/config/rbac";
 
 export default function VisitsPage() {
+  const roleTheme = ROLE_THEMES.health_worker;
+
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Health Worker"
         title="Visits"
         subtitle="Manage health facility visits and patient follow-ups."
       />
 
-      <section className="grid gap-4">
-        <article className="rounded-3xl border border-[#CCE6EB] bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">
-            Patient Visits
-          </p>
-          <h2 className="mt-2 text-lg font-semibold text-[#1B5360]">Visit Schedule</h2>
-          <p className="mt-1 text-sm text-[#54797C]">Track and record patient clinic visits and checkups.</p>
-        </article>
-      </section>
+      <WorkspacePanel
+        eyebrow="Visit schedule"
+        title="Clinic visits and home follow-ups"
+        subtitle="Keep today’s schedule visible while you move between community and facility checks."
+        summary="This view can host visit records, patient notes, and follow-up actions as the workflow grows."
+        highlights={[
+          "See scheduled visits first",
+          "Track follow-up notes in context",
+          "Keep clinic and community work aligned",
+        ]}
+        sidebarTitle="Workload snapshot"
+        sidebarCopy="No visits are loaded yet, but this layout is ready for the day’s schedule and follow-up list."
+        sidebarStats={[
+          { label: "Today’s visits", value: "0" },
+          { label: "Pending follow-ups", value: "0" },
+          { label: "Escalations", value: "0" },
+        ]}
+        primaryAction={{ label: "Open mothers", href: "/mothers" }}
+        secondaryAction={{ label: "Open diagnoses", href: "/diagnoses" }}
+        accent={roleTheme.accent}
+        border={roleTheme.border}
+        text={roleTheme.text}
+      />
     </div>
   );
 }
