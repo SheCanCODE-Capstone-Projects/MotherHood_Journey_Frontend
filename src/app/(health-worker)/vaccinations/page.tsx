@@ -22,6 +22,10 @@ type ToastState = {
 type AdminDialogState = {
   vaccination: ChildVaccinationSessionRecord;
   lotNumber: string;
+<<<<<<< HEAD
+=======
+  error?: string;
+>>>>>>> dcbbd5d (feat: Add field-level validation and error display to lot number input)
 } | null;
 
 function formatAge(years: number, months: number) {
@@ -108,10 +112,25 @@ export default function VaccinationSessionPage() {
       return;
     }
 
+<<<<<<< HEAD
     administerMutation.mutate(
       {
       vaccinationId: adminDialog.vaccination.id,
       lotNumber: adminDialog.lotNumber.trim(),
+=======
+    const trimmedLotNumber = adminDialog.lotNumber.trim();
+    if (!trimmedLotNumber) {
+      setAdminDialog((current) =>
+        current ? { ...current, error: "Lot number is required." } : current
+      );
+      return;
+    }
+
+    administerMutation.mutate(
+      {
+        vaccinationId: adminDialog.vaccination.id,
+        lotNumber: trimmedLotNumber,
+>>>>>>> dcbbd5d (feat: Add field-level validation and error display to lot number input)
       },
       {
         onSuccess: () => {
@@ -122,10 +141,20 @@ export default function VaccinationSessionPage() {
           });
         },
         onError: (error) => {
+<<<<<<< HEAD
           const message = error instanceof ApiError ? error.message : "Unable to administer vaccination.";
           setToast({ tone: "error", message });
         },
       },
+=======
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : "Unable to administer vaccination.";
+          setToast({ tone: "error", message });
+        },
+      }
+>>>>>>> dcbbd5d (feat: Add field-level validation and error display to lot number input)
     );
   }, [adminDialog, administerMutation]);
 
@@ -326,15 +355,39 @@ export default function VaccinationSessionPage() {
                 id="lot-number"
                 ref={lotNumberInputRef}
                 value={adminDialog.lotNumber}
+<<<<<<< HEAD
                 onChange={(event) => setAdminDialog((current) => (current ? { ...current, lotNumber: event.target.value } : current))}
+=======
+                onChange={(event) => {
+                  setAdminDialog((current) =>
+                    current
+                      ? { ...current, lotNumber: event.target.value, error: undefined }
+                      : current
+                  );
+                }}
+>>>>>>> dcbbd5d (feat: Add field-level validation and error display to lot number input)
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && canConfirmAdministration) {
                     handleConfirmAdministration();
                   }
                 }}
                 placeholder="Enter lot number"
+<<<<<<< HEAD
                 className="h-12 w-full rounded-2xl border border-[#D5E9E6] px-4 text-sm outline-none transition focus:border-[#1D5551] focus:ring-2 focus:ring-[#1D5551]/15"
               />
+=======
+                aria-invalid={!!adminDialog.error}
+                className={cn(
+                  "h-12 w-full rounded-2xl border px-4 text-sm outline-none transition focus:ring-2",
+                  adminDialog.error
+                    ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                    : "border-[#D5E9E6] focus:border-[#1D5551] focus:ring-[#1D5551]/15"
+                )}
+              />
+              {adminDialog.error ? (
+                <p className="text-sm font-medium text-red-600">{adminDialog.error}</p>
+              ) : null}
+>>>>>>> dcbbd5d (feat: Add field-level validation and error display to lot number input)
             </div>
 
             <div className="mt-6 flex flex-wrap justify-end gap-3">

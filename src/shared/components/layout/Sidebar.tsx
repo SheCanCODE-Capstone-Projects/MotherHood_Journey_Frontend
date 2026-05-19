@@ -34,6 +34,7 @@ const iconByHref: Record<string, LucideIcon> = {
   "/diagnoses": Stethoscope,
   "/pregnancies": Baby,
   "/children": Baby,
+  "/my-children": Baby,
   "/appointments": CalendarDays,
   "/staff": Users,
   "/reports": FileText,
@@ -41,7 +42,7 @@ const iconByHref: Record<string, LucideIcon> = {
   "/sync": LayoutDashboard,
 };
 
-const mainNavItems = ["/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/children", "/appointments", "/reports", "/analytics", "/staff", "/sync"];
+const mainNavItems = ["/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/children", "/my-children", "/appointments", "/reports", "/analytics", "/staff", "/sync"];
 
 const allNavItems = Array.from(
   new Map(
