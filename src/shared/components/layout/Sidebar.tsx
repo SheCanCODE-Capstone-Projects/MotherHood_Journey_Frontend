@@ -43,8 +43,16 @@ const iconByHref: Record<string, LucideIcon> = {
 
 const mainNavItems = ["/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/children", "/appointments", "/reports", "/analytics", "/staff", "/sync"];
 
+const allNavItems = Array.from(
+  new Map(
+    Object.values(ROLE_NAV_ITEMS)
+      .flat()
+      .map((item) => [item.href, item]),
+  ).values(),
+);
+
 export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
-  const { role, roleLabel, organizationName, navItems, displayName } = useRole({
+  const { role, roleLabel, organizationName, navItems, displayName, roleTheme } = useRole({
     fallbackRole,
     previewRole,
   });
@@ -75,7 +83,7 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
       >
         <Link href={item.href}>
           {isActive && (
-            <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r bg-[#5DCAA5]" />
+            <div className="absolute left-0 top-1/2 h-5 w-0.75 -translate-y-1/2 rounded-r bg-[#5DCAA5]" />
           )}
           <Icon className="size-5 shrink-0" />
           <span className="text-sm font-medium">{item.label}</span>
@@ -86,23 +94,26 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
 
   return (
     <aside
-      className="hidden w-72 shrink-0 border-r bg-[#F5FBFA] lg:flex lg:flex-col print:hidden"
-      style={{ borderColor: roleTheme.border }}
+      className="hidden w-72 shrink-0 border-r  lg:flex lg:flex-col print:hidden"
+      style={{ backgroundColor: roleTheme.accent, borderColor: roleTheme.border }}
     >
       <div className="border-b px-6 py-6" style={{ borderColor: roleTheme.border }}>
-        <p className="text-xs font-semibold uppercase tracking-[0.24em]" style={{ color: roleTheme.text }}>
-          Motherhood Journey
-        </p>
-        <h2 className="mt-2 text-2xl font-semibold" style={{ color: roleTheme.text }}>
+        <div
+          className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em]"
+          style={{ backgroundColor: roleTheme.accentSoft, color: roleTheme.text }}
+        >
+          MotherHood
+        </div>
+        <h2 className="mt-4 text-2xl font-semibold" style={{ color: roleTheme.text }}>
           {roleLabel} Portal
         </h2>
-        <p className="mt-2 text-sm" style={{ color: roleTheme.text }}>
+        <p className="mt-2 text-sm leading-6" style={{ color: roleTheme.text }}>
           Role-aware navigation for {role.replaceAll("_", " ")} workflows.
         </p>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-5">
-        {navItems
+  <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-5">
+        {(allNavItems.length ? allNavItems : navItems)
           .filter((item) => mainNavItems.includes(item.href))
           .map(renderNavItem)}
       </nav>
