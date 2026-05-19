@@ -64,7 +64,7 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
         >
           {displayName.slice(0, 1).toUpperCase()}
         </div>
-      </div>  
+      </div>
 
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700">
