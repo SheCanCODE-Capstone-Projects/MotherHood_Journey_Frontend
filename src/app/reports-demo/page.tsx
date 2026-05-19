@@ -129,7 +129,8 @@ const mockReports: Record<string, Report> = {
   },
 };
 
-// Status badge colors
+
+
 const statusConfig: Record<
   ReportStatus,
   { bg: string; text: string; icon: LucideIcon; border: string }
