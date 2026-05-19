@@ -5,7 +5,7 @@ export const ROLE_ROUTE_MAP: Record<UserRole, string[]> = {
   health_worker:    ["/dashboard", "/mothers", "/visits", "/diagnoses"],
   facility_admin:   ["/dashboard", "/staff", "/reports"],
   district_officer: ["/dashboard", "/analytics"],
-  government:       ["/dashboard", "/sync", "/reports"],
+  government:       ["/dashboard", "/sync", "/sync-log", "/reports"],
 };
 
 export type RoleNavItem = {
@@ -103,6 +103,7 @@ export const ROLE_NAV_ITEMS: Record<UserRole, RoleNavItem[]> = {
   government: [
     { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
     { href: "/sync", label: "Sync", shortLabel: "Sync" },
+    { href: "/sync-log", label: "Sync Log", shortLabel: "Logs" },
     { href: "/reports", label: "Reports", shortLabel: "Reports" },
   ],
 };
