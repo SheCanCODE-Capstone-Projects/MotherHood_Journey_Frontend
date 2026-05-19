@@ -188,6 +188,28 @@ export async function getGovSyncLogs(): Promise<GovSyncLog[]> {
   return readStoredDemoGovSyncLogs();
 }
 
+export async function triggerFullSync(): Promise<{ status: string }> {
+  try {
+    const response = await apiClient.post<unknown>("/api/v1/government/sync");
+    return { status: "started" };
+  } catch {
+    // In demo mode, simulate start
+    return { status: "started" };
+  }
+}
+
+export async function exportGovData(format = "csv"): Promise<{ filename: string; content: string } | null> {
+  try {
+    // Attempt to fetch export as text (backend should supply CSV/TXT)
+    const data = await apiClient.get<string>(`/api/v1/government/export?format=${encodeURIComponent(format)}`);
+    const filename = `gov-export.${format}`;
+    return { filename, content: String(data ?? "") };
+  } catch {
+    // No backend — return null to indicate demo/no-op
+    return null;
+  }
+}
+
 export async function retryGovSyncLog(id: string): Promise<GovSyncRetryResult> {
   try {
     await apiClient.post(`/api/v1/government/sync-logs/${id}/retry`);
