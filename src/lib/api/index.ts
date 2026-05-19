@@ -76,6 +76,12 @@ export type {
 } from "./geo";
 export type { ApiClient } from "./client";
 export { useApi } from "./useApi";
+export {
+  searchChildVaccinationSession,
+  getChildVaccinationCard,
+  administerVaccination,
+  getChildVaccinationRecords,
+} from "./children";
 
 export type {
   ApiResponse,

@@ -1,71 +1,32 @@
 # Health Worker Vaccination Session
 
-This feature enables health workers to manage vaccination records during in-person sessions.
+This feature supports in-person vaccination sessions for health workers. The page at `src/app/(health-worker)/vaccinations/page.tsx` lets staff search a child by health ID or birth certificate number, review today’s due vaccines, and mark doses as administered with a lot number.
 
-## Overview
+## Behavior
 
-The vaccination session page is located at `src/app/(health-worker)/vaccinations/page.tsx`.
+- Search is debounced on the client.
+- Matching child details and due vaccines are shown in place.
+- Administering a dose calls `PUT /api/v1/vaccinations/{id}/administer`.
+- After success, the vaccination query cache is invalidated and the page stays ready for the next child.
 
-### Core Functionality
+## Data Types
 
-- **Child Search**: Search for a child by health ID or birth certificate number
-- **Session Lookup**: Displays the child's vaccination schedule and status
-- **Record Administration**: Capture lot numbers and mark vaccines as administered
-- **Real-time Feedback**: Toast notifications confirm successful administration or report errors
+- `ChildVaccinationSessionRecord`: Due vaccine in the session flow.
+- `ChildVaccinationSessionChild`: Child details returned by the search endpoint.
+- `ChildVaccinationSessionResponse`: Child plus due vaccines and the matching field.
+- `AdministerVaccinationRequest`: Body sent when confirming administration.
 
-## Technical Architecture
+## API Endpoints
 
-### API Integration
+- `GET /api/v1/children/search?search_term=...`
+- `GET /api/v1/children/{childId}/vaccinations`
+- `PUT /api/v1/vaccinations/{id}/administer`
 
-All endpoints are backend-only (no frontend-local API routes):
+## Hooks
 
-- `GET /api/v1/children/search?search_term=...` — Search children by health ID or birth cert
-- `GET /api/v1/children/{childId}/vaccinations` — Retrieve the child's vaccination session
-- `PUT /api/v1/vaccinations/{id}/administer` — Mark a vaccine as administered with lot number
+- `useVaccinationSessionSearch(searchTerm)` loads the session record for a child.
+- `useAdministerVaccination()` confirms administration and invalidates vaccination queries.
 
-### Query Management
+## Notes
 
-The feature uses TanStack React Query for server state:
-
-- Query keys are centralized in `useVaccinationSession()` hook
-- Search results are cached and invalidated after administration
-- Mutations include error handling and user feedback
-
-### Component Structure
-
-```
-src/
-├── features/child/
-│   ├── types.ts                          # VaccinationSessionStatus, ChildVaccinationSession*
-│   ├── hooks/useVaccinationSession.ts    # useVaccinationSessionSearch, useAdministerVaccination
-│   └── index.ts                          # Feature exports
-├── lib/api/children.ts                   # Backend API helpers
-└── app/(health-worker)/vaccinations/
-    └── page.tsx                          # Session UI and flow
-```
-
-### Types
-
-**VaccinationSessionStatus**: `"PENDING" | "ADMINISTERED" | "MISSED" | "OVERDUE"`
-
-**ChildVaccinationSessionRecord**: Individual vaccine record with status, due date, dose label, and lot number.
-
-**ChildVaccinationSessionResponse**: Complete session containing child details and due vaccines array.
-
-## Usage
-
-1. Navigate to the vaccination session page as a health worker
-2. Enter a child's health ID or birth certificate number
-3. Wait for the backend to return the session
-4. For each due vaccine, click "Mark administered"
-5. Enter the lot number in the dialog
-6. Submit and confirm success
-
-The page remains open for the next child after administration.
-
-## Future Improvements
-
-- Add batch vaccine administration (mark multiple at once)
-- Export session data as PDF for records
-- Offline support with sync when reconnected
-- Mobile-optimized layout for tablets used in health facilities
+The implementation keeps the UI modern and resilient with React Query caching, toast feedback, and inline validation for the lot number dialog.
