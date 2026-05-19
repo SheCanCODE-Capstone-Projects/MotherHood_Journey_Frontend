@@ -32,9 +32,9 @@ export function NoShowRateBar({ data }: NoShowRateBarProps) {
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip formatter={(value: number) => `${Number(value).toFixed(1)}%`} />
+          <Tooltip formatter={(value) => `${Number(value ?? 0).toFixed(1)}%`} />
           <Bar dataKey="rate" fill="#25636C" radius={[8, 8, 0, 0]}>
-            <LabelList dataKey="rate" position="top" formatter={(value: number) => `${value.toFixed(0)}%`} style={{ fill: "#1D5052", fontSize: 12 }} />
+            <LabelList dataKey="rate" position="top" formatter={(value) => `${Number(value ?? 0).toFixed(0)}%`} style={{ fill: "#1D5052", fontSize: 12 }} />
           </Bar>
         </BarChart>
       </ResponsiveContainer>

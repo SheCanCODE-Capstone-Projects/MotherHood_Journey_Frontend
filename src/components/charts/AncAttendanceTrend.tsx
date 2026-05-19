@@ -31,7 +31,7 @@ export function AncAttendanceTrend({ data }: AncAttendanceTrendProps) {
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip formatter={(value: number) => `${Number(value).toFixed(1)}%`} />
+          <Tooltip formatter={(value) => `${Number(value ?? 0).toFixed(1)}%`} />
           <Line
             type="monotone"
             dataKey="attendance"
