@@ -1,80 +1,64 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { searchMothers, getMothers, getMotherById } from "../api/mothers.api";
-import type { Mother, MotherPageResponse } from "../types";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { registerMother, searchMothers, getMothers } from "../api/mothers.api";
+import type { MotherRegistrationRequest, MotherRegistrationResponse, MotherPageResponse } from "../types";
 
 /**
- * Query key factory for mother-related queries
+ * Custom hook for mother registration
+ * Handles loading, error, and success states
+ * Usage: const { mutate, isPending, data, error } = useMother();
  */
-export const motherQueryKeys = {
-  all: ["mothers"] as const,
-  search: (searchTerm: string | undefined, page: number, pageSize: number) => [
-    "mothers",
-    "search",
-    searchTerm,
-    page,
-    pageSize,
-  ] as const,
-  list: (page: number, pageSize: number) => [
-    "mothers",
-    "list",
-    page,
-    pageSize,
-  ] as const,
-  detail: (id: string) => ["mothers", "detail", id] as const,
-  byHealthId: (healthId: string) => ["mothers", "healthId", healthId] as const,
-};
+export function useMother() {
+  const mutation = useMutation<
+    MotherRegistrationResponse,
+    Error,
+    MotherRegistrationRequest
+  >({
+    mutationFn: registerMother,
+  });
+
+  return {
+    // Trigger the registration
+    mutate: mutation.mutate,
+    // Loading state while request is in progress
+    isPending: mutation.isPending,
+    // Successful response data with health_id
+    data: mutation.data,
+    // Error if registration fails
+    error: mutation.error,
+    // Reset state if needed
+    reset: mutation.reset,
+    // Check if request was successful
+    isSuccess: mutation.isSuccess,
+    // Check if request failed
+    isError: mutation.isError,
+  };
+}
 
 /**
- * Hook to search mothers by health_id, name, or NID
- * Debounced 300ms via the search input component
- * Returns paginated results with loading/error states
+ * Custom hook for searching mothers
+ * Usage: const { data, isLoading, error } = useMotherSearch("searchTerm");
  */
 export function useMotherSearch(
-  searchTerm: string | undefined,
+  searchTerm?: string,
   page: number = 1,
-  pageSize: number = 10
+  size: number = 10
 ) {
-  return useQuery({
-    queryKey: motherQueryKeys.search(searchTerm, page, pageSize),
-    queryFn: () => searchMothers(searchTerm, page, pageSize),
-    enabled: true, // Always enabled, but search input should debounce before calling
-    placeholderData: (previousData) => previousData,
+  return useQuery<MotherPageResponse, Error>({
+    queryKey: ["mothers", "search", searchTerm, page, size],
+    queryFn: () => searchMothers(searchTerm, page, size),
+    enabled: !!searchTerm,
   });
 }
 
 /**
- * Hook to fetch mothers list with pagination
+ * Custom hook for listing all mothers
+ * Usage: const { data, isLoading, error } = useMothers();
  */
-export function useMothers(page: number = 1, pageSize: number = 10) {
-  return useQuery({
-    queryKey: motherQueryKeys.list(page, pageSize),
-    queryFn: () => getMothers(page, pageSize),
-  });
-}
-
-/**
- * Hook to fetch a single mother by ID
- */
-export function useMotherById(id: string, enabled: boolean = true) {
-  return useQuery({
-    queryKey: motherQueryKeys.detail(id),
-    queryFn: () => getMotherById(id),
-    enabled,
-  });
-}
-
-/**
- * Hook to fetch a mother by health ID
- */
-export function useMotherByHealthId(
-  healthId: string,
-  enabled: boolean = true
-) {
-  return useQuery({
-    queryKey: motherQueryKeys.byHealthId(healthId),
-    queryFn: () => getMotherById(healthId),
-    enabled,
+export function useMothers(page: number = 1, size: number = 10) {
+  return useQuery<MotherPageResponse, Error>({
+    queryKey: ["mothers", "list", page, size],
+    queryFn: () => getMothers(page, size),
   });
 }

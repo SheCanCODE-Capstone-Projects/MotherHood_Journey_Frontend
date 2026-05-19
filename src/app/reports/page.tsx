@@ -1,10 +1,10 @@
 "use client";
 
-import { PageHeader } from "@/shared/components/layout";
+import { PageHeader, WorkspacePanel } from "@/shared/components/layout";
 import { useRole } from "@/shared/hooks/useRole";
 
 export default function ReportsPage() {
-  const { role } = useRole();
+  const { role, roleTheme } = useRole();
 
   const isGovernment = role === "government";
   const title = isGovernment ? "National Reports" : "Reports";
@@ -12,21 +12,31 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={title} subtitle={subtitle} />
+      <PageHeader eyebrow={isGovernment ? "Government" : "Facility Admin"} title={title} subtitle={subtitle} />
 
-      <section className="grid gap-4">
-        <article className={`rounded-3xl border bg-white p-5 shadow-sm`} style={{ borderColor: isGovernment ? "#CFE3E9" : "#CEE6E1" }}>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">
-            {isGovernment ? "National Reports" : "Performance"}
-          </p>
-          <h2 className="mt-2 text-lg font-semibold" style={{ color: isGovernment ? "#194D56" : "#1D5551" }}>
-            {isGovernment ? "Program Reports" : "Facility Reports"}
-          </h2>
-          <p className="mt-1 text-sm text-[#54797C]">
-            {isGovernment ? "Access comprehensive national maternal health program reports and statistics." : "Access detailed facility performance and activity reports."}
-          </p>
-        </article>
-      </section>
+      <WorkspacePanel
+        eyebrow={isGovernment ? "National reporting" : "Facility reporting"}
+        title={isGovernment ? "Program reports and national summaries" : "Operational reports and facility summaries"}
+        subtitle={isGovernment ? "Keep national program data visible and ready for executive review." : "Open the reports that matter most to day-to-day facility operations."}
+        summary={isGovernment ? "The report area is designed for national indicators, program summaries, and ministry-level review." : "The report area is designed for facility summaries, operational metrics, and review actions."}
+        highlights={isGovernment ? ["Review national indicators", "Monitor reporting health", "Keep ministry summaries visible"] : ["Review facility performance", "Track operational metrics", "Keep summary views close at hand"]}
+        sidebarTitle={isGovernment ? "National view" : "Facility view"}
+        sidebarCopy={isGovernment ? "Reports can be expanded with national indicators and cross-region comparisons." : "Reports can be expanded with staffing, coverage, and service delivery views."}
+        sidebarStats={isGovernment ? [
+          { label: "Programs", value: "0" },
+          { label: "Regions", value: "0" },
+          { label: "Reports", value: "0" },
+        ] : [
+          { label: "Active reports", value: "0" },
+          { label: "Open issues", value: "0" },
+          { label: "Completed", value: "0" },
+        ]}
+        primaryAction={{ label: isGovernment ? "Open sync" : "Open staff", href: isGovernment ? "/sync" : "/staff" }}
+        secondaryAction={{ label: "Open dashboard", href: "/dashboard" }}
+        accent={roleTheme.accent}
+        border={roleTheme.border}
+        text={roleTheme.text}
+      />
     </div>
   );
 }

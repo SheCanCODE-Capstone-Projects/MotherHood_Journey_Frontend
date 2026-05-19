@@ -61,6 +61,14 @@ export {
   getSectors,
   getVillages,
 } from "./geo";
+export {
+  activateStaffAccount,
+  createDemoFacilityStaffMembers,
+  deactivateStaffAccount,
+  getFacilityStaffMembers,
+  readStoredFacilityStaffMembers,
+  seedDemoFacilityStaffMembers,
+} from "./users";
 export type {
   CellQueryContext,
   SectorQueryContext,
