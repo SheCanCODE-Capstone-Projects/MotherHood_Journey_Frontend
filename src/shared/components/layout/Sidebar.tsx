@@ -46,7 +46,7 @@ const mainNavItems = ["/dashboard", "/mothers", "/visits", "/diagnoses", "/pregn
 const roleTheme = { text: '#085041', border: '#5DCAA5', accent: '#085041' };
 
 export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
-  const { role, roleLabel, organizationName, navItems, displayName } = useRole({
+  const { role, roleLabel, roleTheme, organizationName, navItems, displayName } = useRole({
     fallbackRole,
     previewRole,
   });
