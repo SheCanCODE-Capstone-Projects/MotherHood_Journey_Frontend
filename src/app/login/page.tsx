@@ -3,10 +3,12 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { Sparkles, ShieldCheck, ArrowRight } from "lucide-react";
 import { z } from "zod";
 
 import "@/lib/i18n";
 import { useAuth } from "@/shared/hooks/useAuth";
+import { Button } from "@/shared/components/ui/button";
 
 const signInSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters"),
@@ -164,8 +166,8 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(58,143,133,0.22),transparent_45%),radial-gradient(circle_at_85%_25%,rgba(42,127,138,0.24),transparent_45%),linear-gradient(140deg,#2F7F7A_0%,#2A7F8A_45%,#3A8F85_100%)] opacity-95" />
+    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_#effaf8_0%,_#ffffff_42%,_#f5fbfb_100%)]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(58,143,133,0.18),transparent_40%),radial-gradient(circle_at_85%_25%,rgba(42,127,138,0.2),transparent_42%)]" />
 
       <aside className="absolute right-4 top-4 z-20 w-[min(90vw,18rem)] sm:right-6 sm:top-6">
         <div className="rounded-2xl border border-[#A9D6D3] bg-[#E7F7F5] p-3 text-sm text-[#1D5052] shadow-lg">
@@ -215,195 +217,227 @@ export default function LoginPage() {
       </aside>
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-10 sm:px-6">
-        <section className="w-full max-w-md rounded-3xl border border-white/60 bg-white/92 p-7 shadow-[0_20px_55px_-25px_rgba(34,122,127,0.7)] backdrop-blur-sm sm:p-9">
-          <div className="mb-7">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#1D5052]">
-              {t("login.title")}
-            </h1>
+        <section className="grid w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/70 bg-white/85 shadow-[0_24px_70px_-30px_rgba(17,64,63,0.45)] backdrop-blur-sm lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="hidden flex-col justify-between bg-linear-to-br from-[#1D5551] via-[#2A7F8A] to-[#3A8F85] p-8 text-white lg:flex">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-white/90">
+                <Sparkles className="size-4" />
+                Motherhood platform
+              </div>
+              <h1 className="mt-6 max-w-md text-4xl font-semibold leading-tight tracking-tight">
+                A calmer entry point for care teams and families.
+              </h1>
+              <p className="mt-4 max-w-md text-sm leading-6 text-white/85">
+                Modern authentication built for maternal health workflows, with role-aware access and multilingual support.
+              </p>
+            </div>
+
+            <div className="space-y-3 text-sm text-white/85">
+              <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3">
+                <ShieldCheck className="size-5" />
+                Protected access for health workers, patients, and administrators.
+              </div>
+              <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3">
+                <ArrowRight className="size-5" />
+                Simple sign in and sign up flow with clear feedback.
+              </div>
+            </div>
           </div>
 
-          {status && (
-            <p
-              className={`mb-5 rounded-lg border px-3 py-2 text-sm ${
-                status.tone === "success"
-                  ? "border-[#B4DDD9] bg-[#E7F7F5] text-[#1F585B]"
-                  : "border-red-200 bg-red-50 text-red-700"
-              }`}
-            >
-              {t(status.key, { phone: currentUser?.phone ?? formData.phone })}
-            </p>
-          )}
-
-          {currentUser ? (
-            <div className="space-y-4 rounded-2xl border border-[#B4DDD9] bg-[#E7F7F5] p-5 text-[#1D5052]">
-              <p className="text-sm font-medium">
-                {t("login.loggedInAs", { phone: currentUser.phone })}
+          <div className="p-7 sm:p-9">
+            <div className="mb-7">
+              <h1 className="text-3xl font-semibold tracking-tight text-[#11403F]">
+                {t("login.title")}
+              </h1>
+              <p className="mt-2 text-sm leading-6 text-[#54797C]">
+                Sign in to continue or create a new account in a polished, role-aware workspace.
               </p>
-              <button
-                type="button"
-                onClick={onLogout}
-                className="w-full rounded-xl bg-linear-to-r from-[#2F7F7A] via-[#2C6F73] to-[#2A7F8A] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.95)] transition hover:brightness-105"
-              >
-                {t("login.logout")}
-              </button>
             </div>
-          ) : (
-            <>
-              <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl bg-[#E4F4F1] p-1">
-                <button
-                  type="button"
-                  onClick={() => switchMode("signin")}
-                  className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                    mode === "signin"
-                      ? "bg-[#2C6F73] text-white shadow"
-                      : "text-[#2C6F73] hover:bg-[#D1ECE8]"
-                  }`}
-                >
-                  {t("login.signInTab")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => switchMode("signup")}
-                  className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                    mode === "signup"
-                      ? "bg-[#2C6F73] text-white shadow"
-                      : "text-[#2C6F73] hover:bg-[#D1ECE8]"
-                  }`}
-                >
-                  {t("login.signUpTab")}
-                </button>
-              </div>
 
-              <form onSubmit={onSubmit} className="space-y-5" noValidate>
-              <div>
-                <label
-                  htmlFor="fullName"
-                  className="mb-2 block text-sm font-medium text-[#1D5052]"
-                >
-                  {t("login.fullName")}
-                </label>
-                <input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  value={formData.fullName}
-                  onChange={(event) => onChangeField("fullName", event.target.value)}
-                  placeholder="Jane Doe"
-                  className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
-                    errors.fullName
-                      ? "border-red-500 ring-2 ring-red-100"
-                      : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
-                  }`}
-                />
-                {errors.fullName && (
-                  <p className="mt-1.5 text-sm text-red-600">{errors.fullName}</p>
-                )}
-              </div>
+            {status ? (
+              <p
+                className={`mb-5 rounded-lg border px-3 py-2 text-sm ${
+                  status.tone === "success"
+                    ? "border-[#B4DDD9] bg-[#E7F7F5] text-[#1F585B]"
+                    : "border-red-200 bg-red-50 text-red-700"
+                }`}
+              >
+                {t(status.key, { phone: currentUser?.phone ?? formData.phone })}
+              </p>
+            ) : null}
 
-              <div>
-                <label
-                  htmlFor="phone"
-                  className="mb-2 block text-sm font-medium text-[#1D5052]"
-                >
-                  {t("login.phone")}
-                </label>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(event) => onChangeField("phone", event.target.value)}
-                  placeholder="+250700000000"
-                  className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
-                    errors.phone
-                      ? "border-red-500 ring-2 ring-red-100"
-                      : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
-                  }`}
-                />
-                {errors.phone && (
-                  <p className="mt-1.5 text-sm text-red-600">{errors.phone}</p>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="mb-2 block text-sm font-medium text-[#1D5052]"
-                >
-                  {t("login.password")}
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(event) => onChangeField("password", event.target.value)}
-                  className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
-                    errors.password
-                      ? "border-red-500 ring-2 ring-red-100"
-                      : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
-                  }`}
-                />
-                {errors.password && (
-                  <p className="mt-1.5 text-sm text-red-600">{errors.password}</p>
-                )}
-              </div>
-
-              {mode === "signup" && (
-                <div>
-                  <label
-                    htmlFor="confirmPassword"
-                    className="mb-2 block text-sm font-medium text-[#1D5052]"
-                  >
-                    {t("login.confirmPassword")}
-                  </label>
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    value={formData.confirmPassword}
-                    onChange={(event) =>
-                      onChangeField("confirmPassword", event.target.value)
-                    }
-                    className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
-                      errors.confirmPassword
-                        ? "border-red-500 ring-2 ring-red-100"
-                        : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
-                    }`}
-                  />
-                  {errors.confirmPassword && (
-                    <p className="mt-1.5 text-sm text-red-600">{errors.confirmPassword}</p>
-                  )}
-                </div>
-              )}
-
-              {hasSubmitError && (
-                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                  {t("login.error")}
+            {currentUser ? (
+              <div className="space-y-4 rounded-2xl border border-[#B4DDD9] bg-[#E7F7F5] p-5 text-[#1D5052]">
+                <p className="text-sm font-medium">
+                  {t("login.loggedInAs", { phone: currentUser.phone })}
                 </p>
-              )}
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="w-full rounded-xl bg-linear-to-r from-[#2F7F7A] via-[#2C6F73] to-[#2A7F8A] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.95)] transition hover:brightness-105"
+                >
+                  {t("login.logout")}
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl bg-[#EAF6F4] p-1">
+                  <Button
+                    type="button"
+                    onClick={() => switchMode("signin")}
+                    className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
+                      mode === "signin"
+                        ? "bg-[#1D5551] text-white shadow"
+                        : "text-[#1D5551] hover:bg-[#DDF2EF]"
+                    }`}
+                  >
+                    {t("login.signInTab")}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => switchMode("signup")}
+                    className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
+                      mode === "signup"
+                        ? "bg-[#1D5551] text-white shadow"
+                        : "text-[#1D5551] hover:bg-[#DDF2EF]"
+                    }`}
+                  >
+                    {t("login.signUpTab")}
+                  </Button>
+                </div>
 
-              <button
-                type="submit"
-                className="w-full rounded-xl bg-linear-to-r from-[#2F7F7A] via-[#2C6F73] to-[#2A7F8A] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.95)] transition hover:brightness-105"
-              >
-                {mode === "signup" ? t("login.submitSignUp") : t("login.submitSignIn")}
-              </button>
+                <form onSubmit={onSubmit} className="space-y-5" noValidate>
+                  <div>
+                    <label
+                      htmlFor="fullName"
+                      className="mb-2 block text-sm font-medium text-[#1D5052]"
+                    >
+                      {t("login.fullName")}
+                    </label>
+                    <input
+                      id="fullName"
+                      name="fullName"
+                      type="text"
+                      value={formData.fullName}
+                      onChange={(event) => onChangeField("fullName", event.target.value)}
+                      placeholder="Jane Doe"
+                      className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
+                        errors.fullName
+                          ? "border-red-500 ring-2 ring-red-100"
+                          : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
+                      }`}
+                    />
+                    {errors.fullName ? (
+                      <p className="mt-1.5 text-sm text-red-600">{errors.fullName}</p>
+                    ) : null}
+                  </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  switchMode(mode === "signin" ? "signup" : "signin")
-                }
-                className="w-full text-sm font-medium text-[#1D5052] underline underline-offset-2"
-              >
-                {mode === "signin"
-                  ? t("login.switchToSignUp")
-                  : t("login.switchToSignIn")}
-              </button>
-            </form>
-            </>
-          )}
+                  <div>
+                    <label
+                      htmlFor="phone"
+                      className="mb-2 block text-sm font-medium text-[#1D5052]"
+                    >
+                      {t("login.phone")}
+                    </label>
+                    <input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(event) => onChangeField("phone", event.target.value)}
+                      placeholder="+250700000000"
+                      className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
+                        errors.phone
+                          ? "border-red-500 ring-2 ring-red-100"
+                          : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
+                      }`}
+                    />
+                    {errors.phone ? (
+                      <p className="mt-1.5 text-sm text-red-600">{errors.phone}</p>
+                    ) : null}
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="password"
+                      className="mb-2 block text-sm font-medium text-[#1D5052]"
+                    >
+                      {t("login.password")}
+                    </label>
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(event) => onChangeField("password", event.target.value)}
+                      className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
+                        errors.password
+                          ? "border-red-500 ring-2 ring-red-100"
+                          : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
+                      }`}
+                    />
+                    {errors.password ? (
+                      <p className="mt-1.5 text-sm text-red-600">{errors.password}</p>
+                    ) : null}
+                  </div>
+
+                  {mode === "signup" ? (
+                    <div>
+                      <label
+                        htmlFor="confirmPassword"
+                        className="mb-2 block text-sm font-medium text-[#1D5052]"
+                      >
+                        {t("login.confirmPassword")}
+                      </label>
+                      <input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={(event) =>
+                          onChangeField("confirmPassword", event.target.value)
+                        }
+                        className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
+                          errors.confirmPassword
+                            ? "border-red-500 ring-2 ring-red-100"
+                            : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
+                        }`}
+                      />
+                      {errors.confirmPassword ? (
+                        <p className="mt-1.5 text-sm text-red-600">{errors.confirmPassword}</p>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  {hasSubmitError ? (
+                    <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                      {t("login.error")}
+                    </p>
+                  ) : null}
+
+                  <Button
+                    type="submit"
+                    className="w-full rounded-xl bg-linear-to-r from-[#1D5551] via-[#2A7F8A] to-[#3A8F85] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.95)] transition hover:brightness-105"
+                  >
+                    {mode === "signup" ? t("login.submitSignUp") : t("login.submitSignIn")}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      switchMode(mode === "signin" ? "signup" : "signin")
+                    }
+                    variant="ghost"
+                    className="w-full text-sm font-medium text-[#1D5052] underline underline-offset-2"
+                  >
+                    {mode === "signin"
+                      ? t("login.switchToSignUp")
+                      : t("login.switchToSignIn")}
+                  </Button>
+                </form>
+              </>
+            )}
+          </div>
         </section>
       </div>
     </main>

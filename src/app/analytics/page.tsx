@@ -7,7 +7,7 @@ export default function AnalyticsPage() {
   const { roleTheme } = useRole({ fallbackRole: "district_officer" });
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-6 pb-8">
       <PageHeader
         eyebrow="District Officer"
         title="Analytics"

@@ -4,15 +4,6 @@ import { ApiError as ApiErrorClass } from "@/shared/types/api";
 import type { ErrorResponseDTO } from "@/shared/types/api";
 import { useAuth } from "@/shared/hooks/useAuth";
 
-type SessionTokenCarrier = {
-  accessToken?: string;
-  token?: string;
-  user?: {
-    accessToken?: string;
-    token?: string;
-  };
-};
-
 /**
  * Typed fetch client with automatic bearer token attachment
  * Throws ApiError on non-2xx responses with detailed error information

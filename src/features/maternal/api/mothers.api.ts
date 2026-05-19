@@ -5,6 +5,9 @@
  */
 
 import { apiClient } from "@/lib/api/client";
+<<<<<<< HEAD
+import type { Mother, MotherPageResponse } from "../types";
+=======
 import type { PageResponse } from "@/shared/types/api";
 import type { Mother, MotherPageResponse, MotherRegistrationRequest, MotherRegistrationResponse } from "../types";
 
@@ -31,6 +34,7 @@ export async function registerMother(
 
   return response;
 }
+>>>>>>> main
 
 /**
  * Search mothers by health_id, name, or NID
