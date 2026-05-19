@@ -19,6 +19,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { useRole } from "@/shared/hooks/useRole";
+import { SkipLink } from "@/shared/components/layout/SkipLink";
 import type { UserRole } from "@/shared/types/auth";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -141,6 +142,7 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
       className="hidden w-72 shrink-0 border-r border-[#163E43] lg:flex lg:flex-col print:hidden"
       style={{ backgroundColor: "#1D5052" }}
     >
+      <SkipLink />
       <div className="border-b border-white/10 px-6 py-6">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
           Motherhood Journey
