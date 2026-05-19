@@ -58,7 +58,6 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
         >
           {displayName?.slice(0, 1).toUpperCase()}
         </div>
-      </div>  
 
         <div className="min-w-0">
           <div
