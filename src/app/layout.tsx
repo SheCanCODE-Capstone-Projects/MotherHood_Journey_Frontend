@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-
 import { ServiceWorkerRegistration } from "@/shared/components/layout/ServiceWorkerRegistration";
-import { Providers } from "./providers";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "Motherhood Journey",

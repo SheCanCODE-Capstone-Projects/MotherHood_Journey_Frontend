@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Sparkles, ShieldCheck, ArrowRight } from "lucide-react";
 import { z } from "zod";
@@ -45,7 +46,9 @@ const languageOptions: Array<{ code: LanguageCode; label: string }> = [
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
   const { currentUser, signIn, signUp, logout } = useAuth();
-  const [mode, setMode] = useState<AuthMode>("signin");
+  const searchParams = useSearchParams();
+  const initialMode = searchParams.get("mode") === "signup" ? "signup" : "signin";
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [formData, setFormData] = useState<LoginForm>({
     fullName: "",
     phone: "",
