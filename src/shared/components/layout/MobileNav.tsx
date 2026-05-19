@@ -26,6 +26,7 @@ const mobileIconByHref: Record<string, LucideIcon> = {
   "/dashboard": LayoutGrid,
   "/pregnancies": Baby,
   "/children": Baby,
+  "/health-worker/children": Baby,
   "/appointments": CalendarDays,
   "/mothers": Baby,
   "/visits": CalendarDays,

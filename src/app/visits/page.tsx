@@ -6,8 +6,6 @@ import { PageHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui/button";
 
 export default function VisitsPage() {
-  const roleTheme = ROLE_THEMES.health_worker;
-
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 pb-8">
       <PageHeader

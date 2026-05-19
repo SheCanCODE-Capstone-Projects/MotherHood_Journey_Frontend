@@ -30,7 +30,7 @@ export default function ChildrenPage() {
           <p className="mt-1 text-[#5B8784]">View and manage registered children</p>
         </div>
         <Link
-          href="/children/register"
+          href="/health-worker/children/register"
           className="flex items-center gap-2 rounded-full bg-[#2C6F73] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#1D5052]"
         >
           <UserPlus className="h-4 w-4" />
@@ -78,7 +78,7 @@ export default function ChildrenPage() {
                   <td className="py-4 text-sm text-[#1D5052]">{child.mother_name}</td>
                   <td className="py-4 text-right">
                     <Link
-                      href={`/children/${child.id}`}
+                      href={`/children/${child.id}/vaccinations`}
                       className="inline-flex items-center gap-1 text-sm font-semibold text-[#2C6F73] hover:underline"
                     >
                       View

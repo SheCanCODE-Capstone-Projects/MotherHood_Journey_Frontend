@@ -12,6 +12,12 @@ import type {
   CancelAppointmentResponse,
 } from "@/features/appointment/types";
 import { APPOINTMENT_ENDPOINTS } from "@/features/appointment/constants";
+import type {
+  AppointmentResponse,
+  AvailableSlotsResponse,
+  CreateAppointmentRequest,
+  PatientInfo,
+} from "@/lib/schemas/appointmentSchema";
 
 /**
  * Get all appointments for the current patient
@@ -94,4 +100,36 @@ export async function getPastAppointments(
     );
     return appointmentDateTime <= now || appointment.status !== "SCHEDULED";
   });
+}
+
+/**
+ * Health worker: resolve a patient by national health ID before booking.
+ * Endpoint aligns with backend patient lookup (adjust path if controller differs).
+ */
+export async function searchPatient(healthId: string): Promise<PatientInfo> {
+  return apiClient.get<PatientInfo>(
+    `/api/v1/patients/by-health-id/${encodeURIComponent(healthId)}`,
+  );
+}
+
+/**
+ * Health worker: list bookable time slots for a facility on a given calendar day.
+ */
+export async function getAvailableSlots(
+  date: string,
+  facilityId: string,
+): Promise<AvailableSlotsResponse> {
+  const params = new URLSearchParams({ date, facilityId });
+  return apiClient.get<AvailableSlotsResponse>(
+    `/api/v1/appointments/available-slots?${params.toString()}`,
+  );
+}
+
+/**
+ * Health worker: create a scheduled appointment from the booking form.
+ */
+export async function createAppointment(
+  body: CreateAppointmentRequest,
+): Promise<AppointmentResponse> {
+  return apiClient.post<AppointmentResponse>(`${APPOINTMENT_ENDPOINTS.BASE}/book`, body);
 }

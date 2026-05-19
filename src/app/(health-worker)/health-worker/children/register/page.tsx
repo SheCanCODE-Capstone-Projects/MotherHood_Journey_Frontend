@@ -248,7 +248,7 @@ export default function RegisterChildPage() {
           </button>
           <button
             onClick={() =>
-              router.push(`/children/${registrationResult.child.id}`)
+              router.push(`/children/${registrationResult.child.id}/vaccinations`)
             }
             className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#2C6F73] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#1D5052]"
           >

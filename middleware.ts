@@ -81,6 +81,7 @@ export const config = {
     "/dashboard/:path*",
     "/pregnancies/:path*",
     "/children/:path*",
+    "/health-worker/:path*",
     "/appointments/:path*",
     "/mothers/:path*",
     "/visits/:path*",
