@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
@@ -62,6 +62,14 @@ export default function LoginPage() {
     const code = i18n.language?.slice(0, 2) as LanguageCode | undefined;
     return code === "rw" || code === "fr" ? code : "en";
   }, [i18n.language]);
+
+  useEffect(() => {
+    const requestedMode = new URLSearchParams(window.location.search).get("mode");
+
+    if (requestedMode === "signup" || requestedMode === "signin") {
+      setMode(requestedMode);
+    }
+  }, []);
 
   const switchMode = (nextMode: AuthMode) => {
     setMode(nextMode);

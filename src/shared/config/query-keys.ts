@@ -16,6 +16,7 @@ export const queryKeys = {
   government: {
     reports: ["government", "reports"] as const,
     sync: ["government", "sync"] as const,
+    syncLogs: ["government", "sync-logs"] as const,
     analytics: ["government", "analytics"] as const,
   },
   geo: {
