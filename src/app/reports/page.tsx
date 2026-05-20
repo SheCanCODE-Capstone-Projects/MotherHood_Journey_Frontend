@@ -1,21 +1,24 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { PageHeader } from "@/shared/components/layout";
 import { ROLE_THEMES } from "@/shared/config/rbac";
 import { useRole } from "@/shared/hooks/useRole";
 import { BarChart3, TrendingUp, Users, Heart, Download, Calendar } from "lucide-react";
 
 export default function ReportsPage() {
+  const router = useRouter();
   const { role } = useRole();
   const roleTheme = role === "government" ? ROLE_THEMES.government : ROLE_THEMES.facility_admin;
   const isGovernment = role === "government";
 
   const handleCreateReport = () => {
-    window.location.assign("/reports/rpt-vaccination-001");
+    router.push("/reports/new");
   };
 
   const handleScheduleReport = () => {
-    window.location.assign("/reports/rpt-anc-002");
+    router.push("/reports/schedule");
   };
 
   const reportCategories = [

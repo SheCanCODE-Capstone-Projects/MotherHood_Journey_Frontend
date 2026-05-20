@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { PageHeader } from "@/shared/components/layout";
 import { ROLE_THEMES } from "@/shared/config/rbac";
 import { CheckCircle, Clock, AlertCircle, Zap, Download, Upload } from "lucide-react";
@@ -8,6 +10,7 @@ import { triggerFullSync, exportGovData } from "@/lib/api/government";
 
 export default function SyncPage() {
   const roleTheme = ROLE_THEMES.government;
+  const [syncNotice, setSyncNotice] = useState<string | null>(null);
 
   const syncStatus = [
     { label: "Synced Districts", value: "30", icon: CheckCircle, color: "#10B981" },
@@ -33,6 +36,19 @@ export default function SyncPage() {
 
   const triggerMutation = useMutation({
     mutationFn: triggerFullSync,
+    onMutate: () => {
+      setSyncNotice(null);
+    },
+    onSuccess: (result) => {
+      setSyncNotice(
+        result.source === "demo"
+          ? `Full sync queued in demo mode at ${new Date(result.startedAt).toLocaleTimeString()}.`
+          : `Full sync started at ${new Date(result.startedAt).toLocaleTimeString()}.`,
+      );
+    },
+    onError: () => {
+      setSyncNotice("Unable to start full sync.");
+    },
   });
 
   const exportMutation = useMutation({
@@ -172,6 +188,11 @@ export default function SyncPage() {
             View Logs
           </button>
         </div>
+        {syncNotice ? (
+          <p className="mt-3 text-sm font-medium" style={{ color: roleTheme.text }}>
+            {syncNotice}
+          </p>
+        ) : null}
       </section>
     </div>
   );
