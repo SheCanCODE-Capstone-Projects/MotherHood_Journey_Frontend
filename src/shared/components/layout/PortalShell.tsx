@@ -20,29 +20,18 @@ export function PortalShell({
   fallbackRole,
   previewRole,
 }: PortalShellProps) {
-  // Use a module-scoped flag so nested PortalShells rendered in the same
-  // render pass do not duplicate the UI. This avoids the race where two
-  // shells both render because an effect hasn't set a window marker yet.
-  // The root PortalShell will listen for `portal:preview-role` events and
-  // pass the active preview role down to Sidebar/TopBar/MobileNav.
-  // Subsequent nested PortalShell instances will render children only.
-  // Note: this is a client-only module flag (this file is a client component).
-  // eslint-disable-next-line no-var
-  if (typeof (globalThis as any).__portalShellMounted === "undefined") {
-    (globalThis as any).__portalShellMounted = false;
-  }
+  // Always render the shell at the root layout. The previous module-scoped
+  // global guard caused the shell to be skipped in some dev hot-reload
+  // scenarios (leaving only children rendered). Removing the guard keeps the
+  // UI consistent; nested role layouts were already reverted to render
+  // children-only so duplicate shells should not occur.
 
-  const alreadyMounted = (globalThis as any).__portalShellMounted === true;
-
-  if (!alreadyMounted) {
-    (globalThis as any).__portalShellMounted = true;
-  }
-
-  if (alreadyMounted) {
-    return <>{children}</>;
-  }
-
-  const [runtimePreviewRole, setRuntimePreviewRole] = useState<UserRole | undefined>(previewRole);
+  const [runtimePreviewRole, setRuntimePreviewRole] = useState<UserRole | undefined>(() => {
+    if (typeof window !== "undefined") {
+      return (window as any).__portalPreviewRole ?? previewRole;
+    }
+    return previewRole;
+  });
 
   useEffect(() => {
     const handler = (e: Event) => {
