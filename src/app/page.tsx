@@ -56,7 +56,7 @@ export default function HomePage() {
             <Button
               type="button"
               variant="outline"
-              className="border-[#B9D8D5] bg-white text-[#24585B]"
+              className="h-10 rounded-[8px] border-[#B9D8D5] bg-white px-4 text-[#24585B]"
               onClick={() => window.location.assign("/login")}
             >
               Open Login
@@ -64,8 +64,8 @@ export default function HomePage() {
           }
         />
 
-        <section className="rounded-3xl border border-[#D5E9E6] bg-white p-5 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#5B8784]">
+        <section className="rounded-[8px] border border-[#D5E7E4] bg-white/[0.94] p-5 shadow-sm">
+          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#5B8784]">
             Preview Role
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
@@ -79,8 +79,8 @@ export default function HomePage() {
                   variant={isActive ? "default" : "outline"}
                   className={
                     isActive
-                      ? "bg-[#2C6F73] text-white hover:bg-[#245C60]"
-                      : "border-[#B9D8D5] bg-white text-[#24585B]"
+                      ? "h-10 rounded-[8px] bg-[#2C6F73] px-4 text-white hover:bg-[#245C60]"
+                      : "h-10 rounded-[8px] border-[#B9D8D5] bg-white px-4 text-[#24585B]"
                   }
                   onClick={() => setPreviewRole(role)}
                 >
@@ -95,12 +95,12 @@ export default function HomePage() {
           {previewHighlights[previewRole].map((item) => (
             <article
               key={item}
-              className="rounded-3xl border border-[#D5E9E6] bg-white p-5 shadow-sm"
+              className="rounded-[8px] border border-[#D5E7E4] bg-white/[0.94] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_20px_38px_-30px_rgba(22,63,66,0.75)]"
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#5B8784]">
                 {ROLE_LABELS[previewRole]}
               </p>
-              <h2 className="mt-3 text-lg font-semibold text-[#1D5052]">
+              <h2 className="mt-3 text-lg font-semibold text-[#163F42]">
                 {item}
               </h2>
               <p className="mt-2 text-sm leading-6 text-[#54797C]">

@@ -1,78 +1,368 @@
 "use client";
 
+import Link from "next/link";
+import {
+  Activity,
+  ArrowUpRight,
+  Baby,
+  BarChart3,
+  CalendarDays,
+  CheckCircle2,
+  ClipboardList,
+  FileText,
+  HeartPulse,
+  RefreshCcw,
+  ShieldPlus,
+  Stethoscope,
+  TrendingUp,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+
 import { PageHeader } from "@/shared/components/layout";
+import { Button } from "@/shared/components/ui/button";
+import { ROLE_THEMES } from "@/shared/config/rbac";
 import { useRole } from "@/shared/hooks/useRole";
+import type { UserRole } from "@/shared/types/auth";
+
+type DashboardCard = {
+  label: string;
+  title: string;
+  description: string;
+  href: string;
+  icon: LucideIcon;
+};
+
+type MetricCard = {
+  label: string;
+  value: string;
+  trend: string;
+  icon: LucideIcon;
+  tone?: "success" | "warning";
+};
+
+type DashboardContent = {
+  title: string;
+  subtitle: string;
+  eyebrow: string;
+  spotlight: {
+    label: string;
+    value: string;
+    description: string;
+  };
+  cards: DashboardCard[];
+  metrics: MetricCard[];
+  priorities: string[];
+  activity: string[];
+};
+
+const dashboardContent: Record<UserRole, DashboardContent> = {
+  patient: {
+    title: "Dashboard",
+    subtitle: "A calm overview of your pregnancy, visits, and child health follow-ups.",
+    eyebrow: "Care journey",
+    spotlight: {
+      label: "Next appointment",
+      value: "Thursday, 09:30",
+      description: "Nyamata Health Center antenatal check-in.",
+    },
+    metrics: [
+      { label: "Pregnancy week", value: "28", trend: "Healthy progress", icon: Baby, tone: "success" },
+      { label: "Upcoming visits", value: "2", trend: "Next 30 days", icon: CalendarDays },
+      { label: "Completed tasks", value: "84%", trend: "+6% this month", icon: CheckCircle2, tone: "success" },
+    ],
+    cards: [
+      { label: "Pregnancy", title: "Current Week", description: "Track your latest stage, milestones, and care guidance.", href: "/pregnancies", icon: Baby },
+      { label: "Appointments", title: "Upcoming Visit", description: "Review your scheduled facility appointments.", href: "/appointments", icon: CalendarDays },
+      { label: "Children", title: "Follow-up Status", description: "Check immunization and child health reminders.", href: "/children", icon: HeartPulse },
+    ],
+    priorities: ["Confirm transport for your next visit", "Review iron supplement reminder", "Update emergency contact details"],
+    activity: ["Antenatal visit marked complete", "Child follow-up reminder added", "Pregnancy milestone updated"],
+  },
+  health_worker: {
+    title: "Dashboard",
+    subtitle: "Monitor patient workload, high-risk follow-ups, and today's maternal care activity.",
+    eyebrow: "Clinical overview",
+    spotlight: {
+      label: "Scheduled today",
+      value: "12 visits",
+      description: "3 require priority review before noon.",
+    },
+    metrics: [
+      { label: "Active mothers", value: "24", trend: "+4 this week", icon: Users },
+      { label: "High risk cases", value: "3", trend: "Needs follow-up", icon: ShieldPlus, tone: "warning" },
+      { label: "Completed visits", value: "18", trend: "Today", icon: Stethoscope, tone: "success" },
+    ],
+    cards: [
+      { label: "Active Cases", title: "Patients Under Care", description: "Monitor ongoing maternal care cases.", href: "/mothers", icon: Users },
+      { label: "Visits", title: "Scheduled Today", description: "View your patient visit schedule.", href: "/visits", icon: CalendarDays },
+      { label: "Diagnoses", title: "Recent Cases", description: "Review diagnosed maternal health conditions.", href: "/diagnoses", icon: ClipboardList },
+    ],
+    priorities: ["Review 3 high-risk mother records", "Prepare morning visit notes", "Close pending diagnosis summaries"],
+    activity: ["Grace Mukamana flagged for review", "6 visit records synced", "New diagnosis draft created"],
+  },
+  facility_admin: {
+    title: "Dashboard",
+    subtitle: "Keep facility staffing, reports, and service readiness visible at a glance.",
+    eyebrow: "Facility operations",
+    spotlight: {
+      label: "Facility status",
+      value: "92% ready",
+      description: "Staffing and reporting indicators are stable.",
+    },
+    metrics: [
+      { label: "Staff on duty", value: "18", trend: "4 departments", icon: Users, tone: "success" },
+      { label: "Open reports", value: "5", trend: "2 due soon", icon: FileText },
+      { label: "Service coverage", value: "91%", trend: "+3% month over month", icon: TrendingUp, tone: "success" },
+    ],
+    cards: [
+      { label: "Staff", title: "Team Members", description: "Manage facility staff and assignments.", href: "/staff", icon: Users },
+      { label: "Operations", title: "Facility Status", description: "Monitor facility operational metrics.", href: "/reports", icon: Activity },
+      { label: "Reports", title: "Performance", description: "View facility performance reports.", href: "/reports", icon: FileText },
+    ],
+    priorities: ["Approve weekly staffing roster", "Review pending facility report", "Check maternal care stock readiness"],
+    activity: ["Staff roster updated", "Monthly report draft saved", "Coverage metric improved"],
+  },
+  district_officer: {
+    title: "Dashboard",
+    subtitle: "Track district maternal health performance and facility coverage.",
+    eyebrow: "District command",
+    spotlight: {
+      label: "Coverage rate",
+      value: "89%",
+      description: "Across 24 active facilities in the district.",
+    },
+    metrics: [
+      { label: "Facilities", value: "24", trend: "All reporting", icon: Activity, tone: "success" },
+      { label: "Active mothers", value: "2,456", trend: "+128 this month", icon: Users },
+      { label: "At risk cases", value: "34", trend: "7 newly flagged", icon: ShieldPlus, tone: "warning" },
+    ],
+    cards: [
+      { label: "District Overview", title: "Facilities Status", description: "Monitor all facilities in the district.", href: "/analytics", icon: Activity },
+      { label: "Analytics", title: "Key Metrics", description: "View district-level health metrics and statistics.", href: "/analytics", icon: BarChart3 },
+    ],
+    priorities: ["Follow up with 2 delayed-reporting facilities", "Review at-risk case distribution", "Prepare district coverage notes"],
+    activity: ["Kicukiro Health Center submitted report", "Coverage rate increased by 5%", "At-risk case list refreshed"],
+  },
+  government: {
+    title: "Dashboard",
+    subtitle: "National maternal health program oversight with sync, reports, and performance signals.",
+    eyebrow: "National oversight",
+    spotlight: {
+      label: "National sync",
+      value: "98%",
+      description: "District data is current across the program.",
+    },
+    metrics: [
+      { label: "Districts synced", value: "28/30", trend: "2 pending", icon: RefreshCcw },
+      { label: "Reports ready", value: "14", trend: "This quarter", icon: FileText, tone: "success" },
+      { label: "Program coverage", value: "93%", trend: "+2% this month", icon: TrendingUp, tone: "success" },
+    ],
+    cards: [
+      { label: "National", title: "Program Overview", description: "Monitor national maternal health program performance.", href: "/reports", icon: BarChart3 },
+      { label: "Sync", title: "Data Synchronization", description: "Manage data synchronization across districts.", href: "/sync", icon: RefreshCcw },
+      { label: "Reports", title: "National Reports", description: "View comprehensive national health reports.", href: "/reports", icon: FileText },
+    ],
+    priorities: ["Resolve 2 delayed district syncs", "Review national quarterly report", "Check coverage changes by province"],
+    activity: ["National report generated", "28 districts synchronized", "Coverage dashboard refreshed"],
+  },
+};
+
+const metricToneStyles = {
+  success: "bg-emerald-50 text-emerald-700",
+  warning: "bg-amber-50 text-amber-700",
+  default: "bg-slate-50 text-slate-600",
+};
 
 export default function DashboardPage() {
-  const { role } = useRole();
-
-  const dashboardContent: Record<string, { title: string; subtitle: string; cards: Array<{ label: string; title: string; description: string }> }> = {
-    patient: {
-      title: "Dashboard",
-      subtitle: "Overview of your motherhood journey and recent updates.",
-      cards: [
-        { label: "Pregnancy", title: "Current Week", description: "Track your latest stage and milestones." },
-        { label: "Appointments", title: "Upcoming Visit", description: "See your next scheduled facility appointment." },
-        { label: "Children", title: "Follow-up Status", description: "Review immunization and checkup reminders." },
-      ],
-    },
-    health_worker: {
-      title: "Dashboard",
-      subtitle: "Overview of maternal health activities and patient updates.",
-      cards: [
-        { label: "Active Cases", title: "Patients Under Care", description: "Monitor ongoing maternal care cases." },
-        { label: "Visits", title: "Scheduled Today", description: "View your patient visit schedule." },
-        { label: "Diagnoses", title: "Recent Cases", description: "Review diagnosed maternal health conditions." },
-      ],
-    },
-    facility_admin: {
-      title: "Dashboard",
-      subtitle: "Facility management and operational overview.",
-      cards: [
-        { label: "Staff", title: "Team Members", description: "Manage facility staff and assignments." },
-        { label: "Operations", title: "Facility Status", description: "Monitor facility operational metrics." },
-        { label: "Reports", title: "Performance", description: "View facility performance reports." },
-      ],
-    },
-    district_officer: {
-      title: "Dashboard",
-      subtitle: "District-level maternal health monitoring and oversight.",
-      cards: [
-        { label: "District Overview", title: "Facilities Status", description: "Monitor all facilities in the district." },
-        { label: "Analytics", title: "Key Metrics", description: "View district-level health metrics and statistics." },
-      ],
-    },
-    government: {
-      title: "Dashboard",
-      subtitle: "National maternal health program oversight and monitoring.",
-      cards: [
-        { label: "National", title: "Program Overview", description: "Monitor national maternal health program performance." },
-        { label: "Sync", title: "Data Synchronization", description: "Manage data synchronization across districts." },
-        { label: "Reports", title: "National Reports", description: "View comprehensive national health reports." },
-      ],
-    },
-  };
-
+  const { role, roleTheme } = useRole();
   const content = dashboardContent[role] || dashboardContent.patient;
-  const borderColor = role === "patient" ? "#D5E9E6" : role === "health_worker" ? "#CCE6EB" : role === "facility_admin" ? "#CEE6E1" : role === "district_officer" ? "#CFE8E3" : "#CFE3E9";
-  const textColor = role === "patient" ? "#1D5052" : role === "health_worker" ? "#1B5360" : role === "facility_admin" ? "#1D5551" : role === "district_officer" ? "#215C57" : "#194D56";
+  const theme = ROLE_THEMES[role] || ROLE_THEMES.patient;
+  const primaryAction = content.cards[0];
 
   return (
     <div className="space-y-6">
-      <PageHeader title={content.title} subtitle={content.subtitle} />
+      <PageHeader
+        eyebrow={content.eyebrow}
+        title={content.title}
+        subtitle={content.subtitle}
+        action={
+          <Button
+            asChild
+            className="h-10 rounded-[8px] px-4 text-white shadow-[0_14px_28px_-18px_rgba(22,63,66,0.75)]"
+            style={{ backgroundColor: roleTheme.accent }}
+          >
+            <Link href={primaryAction.href}>
+              <span>{primaryAction.title}</span>
+              <ArrowUpRight className="size-4" />
+            </Link>
+          </Button>
+        }
+      />
 
-      <section className={`grid gap-4 ${content.cards.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
-        {content.cards.map((card) => (
-          <article key={card.title} className="rounded-3xl border bg-white p-5 shadow-sm" style={{ borderColor }}>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">
-              {card.label}
-            </p>
-            <h2 className="mt-2 text-lg font-semibold" style={{ color: textColor }}>
-              {card.title}
+      <section
+        className="overflow-hidden rounded-[8px] border bg-white/[0.94] shadow-[0_20px_45px_-34px_rgba(22,63,66,0.65)] backdrop-blur"
+        style={{ borderColor: theme.border }}
+      >
+        <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="p-5 sm:p-6">
+            <div
+              className="inline-flex items-center gap-2 rounded-[8px] px-3 py-1.5 text-xs font-semibold"
+              style={{ backgroundColor: theme.accentSoft, color: theme.text }}
+            >
+              <Activity className="size-3.5" />
+              <span>{content.spotlight.label}</span>
+            </div>
+
+            <div className="mt-5 max-w-2xl">
+              <p className="text-4xl font-semibold tracking-tight sm:text-5xl" style={{ color: theme.text }}>
+                {content.spotlight.value}
+              </p>
+              <p className="mt-3 text-sm leading-6 text-[#54797C] sm:text-base">
+                {content.spotlight.description}
+              </p>
+            </div>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              {content.metrics.map((metric) => {
+                const Icon = metric.icon;
+                const tone = metric.tone ?? "default";
+
+                return (
+                  <article key={metric.label} className="rounded-[8px] border bg-[#FBFDFD] p-4" style={{ borderColor: theme.border }}>
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5B8784]">
+                        {metric.label}
+                      </p>
+                      <Icon className="size-5 shrink-0" style={{ color: theme.accent }} />
+                    </div>
+                    <p className="mt-3 text-2xl font-semibold" style={{ color: theme.text }}>
+                      {metric.value}
+                    </p>
+                    <span className={`mt-3 inline-flex rounded-[8px] px-2.5 py-1 text-xs font-semibold ${metricToneStyles[tone]}`}>
+                      {metric.trend}
+                    </span>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="border-t bg-[#F7FBFA] p-5 sm:p-6 lg:border-l lg:border-t-0" style={{ borderColor: theme.border }}>
+            <div className="rounded-[8px] bg-[#064F56] p-4 text-white shadow-[0_18px_38px_-28px_rgba(6,79,86,0.85)]">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/70">
+                  Next visit
+                </p>
+                <CalendarDays className="size-4 text-[#B7E9DD]" />
+              </div>
+              <h2 className="mt-4 text-xl font-semibold">{content.spotlight.value}</h2>
+              <p className="mt-2 text-sm leading-6 text-white/75">{content.spotlight.description}</p>
+            </div>
+
+            <h2 className="mt-5 text-sm font-semibold uppercase tracking-[0.18em]" style={{ color: theme.text }}>
+              Quick actions
             </h2>
-            <p className="mt-1 text-sm text-[#54797C]">{card.description}</p>
-          </article>
-        ))}
+            <div className="mt-4 space-y-3">
+              {content.priorities.map((priority, index) => (
+                <div key={priority} className="flex gap-3 rounded-[8px] border border-white bg-white p-3 shadow-xs">
+                  <div
+                    className="grid size-8 shrink-0 place-items-center rounded-[8px] text-sm font-semibold text-white"
+                    style={{ backgroundColor: theme.accent }}
+                  >
+                    {index + 1}
+                  </div>
+                  <p className="text-sm leading-6 text-[#315F62]">{priority}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={`grid gap-4 ${content.cards.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-2"}`}>
+        {content.cards.map((card) => {
+          const Icon = card.icon;
+
+          return (
+            <Link
+              key={card.title}
+              href={card.href}
+              className="group rounded-[8px] border bg-white/[0.94] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_20px_38px_-30px_rgba(22,63,66,0.75)]"
+              style={{ borderColor: theme.border }}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div
+                  className="grid size-11 shrink-0 place-items-center rounded-[8px]"
+                  style={{ backgroundColor: theme.accentSoft, color: theme.accent }}
+                >
+                  <Icon className="size-5" />
+                </div>
+                <ArrowUpRight className="size-5 text-[#7BA09D] transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </div>
+              <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">
+                {card.label}
+              </p>
+              <h2 className="mt-2 text-lg font-semibold" style={{ color: theme.text }}>
+                {card.title}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-[#54797C]">{card.description}</p>
+            </Link>
+          );
+        })}
+      </section>
+
+      {role === "patient" ? (
+        <section>
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">
+                Health tips
+              </p>
+              <h2 className="mt-1 text-lg font-semibold text-[#153F42]">For you this week</h2>
+            </div>
+            <HeartPulse className="size-5 text-[#0B5554]" />
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <article className="overflow-hidden rounded-[8px] border border-[#D5E7E4] bg-white shadow-sm">
+              <div className="h-28 bg-[linear-gradient(135deg,rgba(11,85,84,0.15),rgba(93,202,165,0.35)),radial-gradient(circle_at_20%_30%,#F59E0B_0_12%,transparent_13%),radial-gradient(circle_at_68%_45%,#2F855A_0_18%,transparent_19%),radial-gradient(circle_at_44%_68%,#EAB308_0_10%,transparent_11%)]" />
+              <div className="p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#5B8784]">Nutrition</p>
+                <h3 className="mt-2 text-base font-semibold text-[#153F42]">Balanced meals support steady energy.</h3>
+              </div>
+            </article>
+            <article className="overflow-hidden rounded-[8px] border border-[#D5E7E4] bg-white shadow-sm">
+              <div className="h-28 bg-[linear-gradient(135deg,rgba(6,79,86,0.82),rgba(93,202,165,0.38)),radial-gradient(circle_at_72%_42%,rgba(255,255,255,0.45)_0_16%,transparent_17%)]" />
+              <div className="p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#5B8784]">Movement</p>
+                <h3 className="mt-2 text-base font-semibold text-[#153F42]">Gentle walking can help circulation.</h3>
+              </div>
+            </article>
+          </div>
+        </section>
+      ) : null}
+
+      <section className="rounded-[8px] border bg-white/[0.94] p-5 shadow-sm" style={{ borderColor: theme.border }}>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">
+              Recent activity
+            </p>
+            <h2 className="mt-1 text-lg font-semibold" style={{ color: theme.text }}>
+              Latest updates
+            </h2>
+          </div>
+          <Activity className="size-5" style={{ color: theme.accent }} />
+        </div>
+
+        <div className="mt-4 divide-y" style={{ borderColor: theme.border }}>
+          {content.activity.map((item) => (
+            <div key={item} className="flex items-center gap-3 py-3">
+              <span className="size-2 rounded-full" style={{ backgroundColor: theme.accent }} />
+              <p className="text-sm text-[#315F62]">{item}</p>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );

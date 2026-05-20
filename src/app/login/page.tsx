@@ -43,7 +43,14 @@ const languageOptions: Array<{ code: LanguageCode; label: string }> = [
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
   const { currentUser, signIn, signUp, logout } = useAuth();
-  const [mode, setMode] = useState<AuthMode>("signin");
+  const [mode, setMode] = useState<AuthMode>(() => {
+    if (typeof window === "undefined") {
+      return "signin";
+    }
+
+    const requestedMode = new URLSearchParams(window.location.search).get("mode");
+    return requestedMode === "signup" || requestedMode === "signin" ? requestedMode : "signin";
+  });
   const [formData, setFormData] = useState<LoginForm>({
     fullName: "",
     phone: "",
@@ -161,11 +168,11 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(58,143,133,0.22),transparent_45%),radial-gradient(circle_at_85%_25%,rgba(42,127,138,0.24),transparent_45%),linear-gradient(140deg,#2F7F7A_0%,#2A7F8A_45%,#3A8F85_100%)] opacity-95" />
+    <main className="relative min-h-screen overflow-hidden bg-[#F4F8F7]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_12%,rgba(93,202,165,0.18),transparent_36%),linear-gradient(180deg,#F9FCFB_0%,#EEF6F4_100%)]" />
 
       <aside className="absolute right-4 top-4 z-20 w-[min(90vw,18rem)] sm:right-6 sm:top-6">
-        <div className="rounded-2xl border border-[#A9D6D3] bg-[#E7F7F5] p-3 text-sm text-[#1D5052] shadow-lg">
+        <div className="rounded-[8px] border border-[#D5E7E4] bg-white p-3 text-sm text-[#1D5052] shadow-lg">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="font-semibold">{t("login.languageNotice")}</p>
@@ -174,7 +181,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowLanguageMenu((previous) => !previous)}
-              className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#2C6F73]"
+              className="rounded-[8px] bg-[#EAF4F2] px-3 py-1 text-xs font-semibold text-[#2C6F73]"
             >
               {activeLanguage.toUpperCase()}
             </button>
@@ -199,7 +206,7 @@ export default function LoginPage() {
                     className={`rounded-xl px-3 py-2 text-left text-xs font-semibold transition sm:text-sm ${
                       isActive
                         ? "bg-[#2C6F73] text-white shadow"
-                        : "bg-white text-[#2C6F73] hover:bg-[#D1ECE8]"
+                        : "bg-[#F7FBFA] text-[#2C6F73] hover:bg-[#D1ECE8]"
                     }`}
                   >
                     {option.label}
@@ -211,10 +218,39 @@ export default function LoginPage() {
         </div>
       </aside>
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-10 sm:px-6">
-        <section className="w-full max-w-md rounded-3xl border border-white/60 bg-white/92 p-7 shadow-[0_20px_55px_-25px_rgba(34,122,127,0.7)] backdrop-blur-sm sm:p-9">
+      <div className="relative mx-auto grid min-h-screen w-full max-w-6xl items-center gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_0.9fr]">
+        <section className="hidden rounded-[8px] border border-[#D5E7E4] bg-white p-7 shadow-sm lg:block">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5B8784]">
+            Government gateway
+          </p>
+          <h1 className="mt-4 max-w-sm text-4xl font-semibold tracking-tight text-[#153F42]">
+            National Infrastructure Overview
+          </h1>
+          <p className="mt-4 max-w-md text-sm leading-6 text-[#54797C]">
+            Secure maternal health access for government teams, facilities, health workers, and patient care journeys.
+          </p>
+          <div className="mt-8 grid grid-cols-3 gap-3">
+            {["30", "98%", "Tier 1"].map((value, index) => (
+              <div key={value} className="rounded-[8px] border border-[#E4EFED] bg-[#F7FBFA] p-4">
+                <p className="text-2xl font-semibold text-[#153F42]">{value}</p>
+                <p className="mt-1 text-xs text-[#6D8587]">{["Districts", "Sync", "Security"][index]}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 rounded-[8px] bg-[#064F56] p-5 text-white">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/65">Command center</p>
+            <p className="mt-3 text-sm leading-6 text-white/75">
+              Review national reports, sync health records, and audit consent activity from one controlled access point.
+            </p>
+          </div>
+        </section>
+
+        <section className="w-full max-w-md justify-self-center rounded-[8px] border border-[#D5E7E4] bg-white p-7 shadow-[0_20px_55px_-35px_rgba(34,122,127,0.45)] sm:p-9">
           <div className="mb-7">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#1D5052]">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5B8784]">
+              Secure Access
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#1D5052]">
               {t("login.title")}
             </h1>
           </div>
@@ -232,21 +268,21 @@ export default function LoginPage() {
           )}
 
           {currentUser ? (
-            <div className="space-y-4 rounded-2xl border border-[#B4DDD9] bg-[#E7F7F5] p-5 text-[#1D5052]">
+            <div className="space-y-4 rounded-[8px] border border-[#B4DDD9] bg-[#E7F7F5] p-5 text-[#1D5052]">
               <p className="text-sm font-medium">
                 {t("login.loggedInAs", { phone: currentUser.phone })}
               </p>
               <button
                 type="button"
                 onClick={onLogout}
-                className="w-full rounded-xl bg-linear-to-r from-[#2F7F7A] via-[#2C6F73] to-[#2A7F8A] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.95)] transition hover:brightness-105"
+                className="w-full rounded-[8px] bg-[#064F56] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.75)] transition hover:brightness-105"
               >
                 {t("login.logout")}
               </button>
             </div>
           ) : (
             <>
-              <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl bg-[#E4F4F1] p-1">
+              <div className="mb-5 grid grid-cols-2 gap-2 rounded-[8px] bg-[#E4F4F1] p-1">
                 <button
                   type="button"
                   onClick={() => switchMode("signin")}
@@ -382,7 +418,7 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                className="w-full rounded-xl bg-linear-to-r from-[#2F7F7A] via-[#2C6F73] to-[#2A7F8A] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.95)] transition hover:brightness-105"
+                className="w-full rounded-[8px] bg-[#064F56] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.75)] transition hover:brightness-105"
               >
                 {mode === "signup" ? t("login.submitSignUp") : t("login.submitSignIn")}
               </button>
