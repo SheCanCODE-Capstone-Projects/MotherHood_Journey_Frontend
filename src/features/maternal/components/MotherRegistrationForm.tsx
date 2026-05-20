@@ -123,7 +123,7 @@ export function MotherRegistrationForm() {
           education_level: data.education_level,
         },
         {
-          onSuccess: (response) => {
+          onSuccess: (response: any) => {
             // Store health ID and name for success screen
             setSubmittedHealthId(response.data.health_id);
             setSubmittedName({
