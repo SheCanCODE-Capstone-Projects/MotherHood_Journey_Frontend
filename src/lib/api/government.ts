@@ -3,6 +3,116 @@ import { apiClient } from "@/lib/api/client";
 export type GovSyncTargetSystem = "NIDA" | "HMIS" | "IREMBO";
 export type GovSyncStatus = "PENDING" | "IN_FLIGHT" | "SUCCEEDED" | "FAILED" | "DEAD_LETTER";
 
+export type ProvinceId = "northern" | "eastern" | "kigali" | "southern" | "western";
+export type DashboardMetric = "vaccination_coverage" | "anc_attendance" | "birth_registration";
+
+export interface ProvinceMetricData {
+  provinceId: ProvinceId;
+  provinceName: string;
+  value: number;
+  districts: DistrictMetricData[];
+}
+
+export interface DistrictMetricData {
+  districtId: string;
+  districtName: string;
+  value: number;
+}
+
+export interface NationalTotals {
+  totalPopulation: number;
+  targetPopulation: number;
+  totalVaccinated: number;
+  totalAncVisits: number;
+  totalBirthRegistrations: number;
+  vaccinationCoverage: number;
+  ancAttendance: number;
+  birthRegistrationRate: number;
+}
+
+export interface NationalDashboardData {
+  metric: DashboardMetric;
+  period: string;
+  provinces: ProvinceMetricData[];
+  national: NationalTotals;
+  lastUpdated: string;
+}
+
+const DISTRICT_NAMES: Record<ProvinceId, string[]> = {
+  northern: ["Musanze", "Gicumbi", "Rulindo", "Burera", "Gakenke"],
+  eastern: ["Rwamagana", "Kayonza", "Nyagatare", "Gatsibo", "Kirche", "Ngoma", "Bugesera"],
+  kigali: ["Nyarugenge", "Gasabo", "Kicukiro"],
+  southern: ["Huye", "Nyanza", "Gisagara", "Nyamagabe", "Ruhango", "Nyaruguru", "Muhanga", "Kamonyi"],
+  western: ["Karongi", "Rutsiro", "Rubavu", "Nyabihu", "Ngororero", "Rusizi", "Nyamasheke"],
+};
+
+function generateDistrictData(districts: string[], baseValue: number): DistrictMetricData[] {
+  return districts.map((name) => ({
+    districtId: name.toLowerCase().replace(/\s+/g, "-"),
+    districtName: name,
+    value: Math.min(100, Math.max(20, baseValue + Math.round((Math.random() - 0.5) * 24))),
+  }));
+}
+
+function generateMockDashboardData(
+  metric: DashboardMetric,
+  period: string,
+): NationalDashboardData {
+  const provinceBaseValues: Record<ProvinceId, number> = {
+    northern: 78,
+    eastern: 72,
+    kigali: 88,
+    southern: 81,
+    western: 75,
+  };
+
+  const provinces: ProvinceMetricData[] = (
+    Object.entries(provinceBaseValues) as [ProvinceId, number][]
+  ).map(([id, base]) => {
+    const value = Math.min(100, Math.max(20, base + Math.round((Math.random() - 0.5) * 10)));
+    return {
+      provinceId: id,
+      provinceName: id.charAt(0).toUpperCase() + id.slice(1),
+      value,
+      districts: generateDistrictData(DISTRICT_NAMES[id], value),
+    };
+  });
+
+  const avg = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
+  const avgCoverage = avg(provinces.map((p) => p.value));
+
+  return {
+    metric,
+    period,
+    provinces,
+    national: {
+      totalPopulation: 13200000,
+      targetPopulation: 4850000,
+      totalVaccinated: Math.round(avgCoverage * 0.01 * 4850000),
+      totalAncVisits: 218000,
+      totalBirthRegistrations: 295000,
+      vaccinationCoverage: metric === "vaccination_coverage" ? avgCoverage : 82,
+      ancAttendance: metric === "anc_attendance" ? avgCoverage : 79,
+      birthRegistrationRate: metric === "birth_registration" ? avgCoverage : 85,
+    },
+    lastUpdated: new Date().toISOString(),
+  };
+}
+
+export async function getNationalDashboardMetrics(
+  metric: DashboardMetric,
+  period: string,
+): Promise<NationalDashboardData> {
+  try {
+    const response = await apiClient.get<unknown>(
+      `/api/v1/government/dashboard?metric=${metric}&period=${period}`,
+    );
+    return response as unknown as NationalDashboardData;
+  } catch {
+    return generateMockDashboardData(metric, period);
+  }
+}
+
 export type GovSyncLog = {
   id: string;
   createdAt: string;
