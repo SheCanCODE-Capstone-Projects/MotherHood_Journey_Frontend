@@ -195,6 +195,8 @@ function Header() {
 function NewRequestForm() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedService, setSelectedService] = useState("");
+  const [requests, setRequests] = useState<Array<{service: string; requestId: string; date: string; status: string; statusColor: string}>>([]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -221,6 +223,35 @@ function NewRequestForm() {
     if (input) input.value = '';
   };
 
+  const handleSubmit = () => {
+    if (!selectedService || !selectedFile) {
+      alert("Please select a service and upload a file");
+      return;
+    }
+
+    const newRequest = {
+      service: selectedService,
+      requestId: `REQ-2023-${String(Date.now()).slice(-3)}`,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      status: "Pending",
+      statusColor: "blue"
+    };
+
+    console.log("Submitting request:", newRequest);
+    console.log("File:", selectedFile.name);
+    
+    // Reset form
+    setSelectedService("");
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    const input = document.getElementById('file-upload') as HTMLInputElement;
+    if (input) input.value = '';
+    const select = document.getElementById('service-select') as HTMLSelectElement;
+    if (select) select.value = '';
+
+    alert("Request submitted successfully!");
+  };
+
   return (
     <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
       <div className="mb-6">
@@ -232,11 +263,16 @@ function NewRequestForm() {
         <div>
           <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Service</label>
           <div className="relative">
-            <select className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-500">
-              <option>Select a service...</option>
-              <option>Birth Certificate</option>
-              <option>Health Summary</option>
-              <option>Immunization Record</option>
+            <select 
+              id="service-select"
+              value={selectedService}
+              onChange={(e) => setSelectedService(e.target.value)}
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-500"
+            >
+              <option value="">Select a service...</option>
+              <option value="Birth Certificate">Birth Certificate</option>
+              <option value="Health Summary">Health Summary</option>
+              <option value="Immunization Record">Immunization Record</option>
             </select>
             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
               <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -334,7 +370,10 @@ function NewRequestForm() {
           )}
         </div>
 
-        <button className="w-full bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3.5 rounded-xl transition-colors">
+        <button 
+          onClick={handleSubmit}
+          className="w-full bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3.5 rounded-xl transition-colors"
+        >
           Submit Request
         </button>
       </div>

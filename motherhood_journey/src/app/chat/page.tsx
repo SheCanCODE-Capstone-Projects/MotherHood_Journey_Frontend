@@ -2,10 +2,16 @@
 
 import { Home, FileText, ClipboardList, MessageSquare, Lightbulb, Send, Paperclip, Smile, Phone, Video, MoreVertical, AlertCircle, FileIcon, MapPin, Menu, X } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function ChatPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeChat, setActiveChat] = useState({
+    name: "Dr. Sarah Chen",
+    role: "Obstetrician",
+    avatar: "SC",
+    online: true
+  });
   
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -13,8 +19,8 @@ export default function ChatPage() {
       <main className="flex-1 flex flex-col">
         <MobileHeader onMenuClick={() => setIsMobileMenuOpen(true)} />
         <div className="flex flex-1 overflow-hidden">
-          <ChatList />
-          <ChatWindow />
+          <ChatList activeChat={activeChat} onSelectChat={setActiveChat} />
+          <ChatWindow activeChat={activeChat} />
           <QuickHelp />
         </div>
       </main>
@@ -139,7 +145,34 @@ function SidebarItem({ icon, label, href, active = false }: { icon: React.ReactN
   );
 }
 
-function ChatList() {
+function ChatList({ activeChat, onSelectChat }: { activeChat: {name: string; role: string; avatar: string; online: boolean}; onSelectChat: (chat: {name: string; role: string; avatar: string; online: boolean}) => void }) {
+  const careTeam = [
+    {
+      name: "Dr. Sarah Chen",
+      role: "Obstetrician",
+      message: "Your test results look great! Let's schedule...",
+      time: "2m",
+      avatar: "SC",
+      online: true
+    },
+    {
+      name: "Nurse Patricia",
+      role: "Community Health Worker",
+      message: "Good morning! How are you feeling today?",
+      time: "1h",
+      avatar: "NP",
+      online: false
+    },
+    {
+      name: "Elena Martinez",
+      role: "Nutritionist",
+      message: "Here's the meal plan we discussed...",
+      time: "3h",
+      avatar: "EM",
+      online: false
+    }
+  ];
+
   return (
     <div className="hidden md:flex w-[280px] bg-white border-r border-gray-100 flex-col">
       <div className="p-4 border-b border-gray-100">
@@ -148,29 +181,19 @@ function ChatList() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <ChatListItem 
-          name="Dr. Sarah Chen"
-          role="Obstetrician"
-          message="Your test results look great! Let's schedule..."
-          time="2m"
-          active
-          avatar="SC"
-          online
-        />
-        <ChatListItem 
-          name="Nurse Patricia"
-          role="Community Health Worker"
-          message="Good morning! How are you feeling today?"
-          time="1h"
-          avatar="NP"
-        />
-        <ChatListItem 
-          name="Elena Martinez"
-          role="Nutritionist"
-          message="Here's the meal plan we discussed..."
-          time="3h"
-          avatar="EM"
-        />
+        {careTeam.map((member) => (
+          <ChatListItem
+            key={member.avatar}
+            name={member.name}
+            role={member.role}
+            message={member.message}
+            time={member.time}
+            active={activeChat.name === member.name}
+            avatar={member.avatar}
+            online={member.online}
+            onClick={() => onSelectChat(member)}
+          />
+        ))}
       </div>
 
       <div className="p-4 border-t border-gray-100">
@@ -183,9 +206,9 @@ function ChatList() {
   );
 }
 
-function ChatListItem({ name, role, message, time, active = false, avatar, online = false }: { name: string; role: string; message: string; time: string; active?: boolean; avatar: string; online?: boolean }) {
+function ChatListItem({ name, role, message, time, active = false, avatar, online = false, onClick }: { name: string; role: string; message: string; time: string; active?: boolean; avatar: string; online?: boolean; onClick: () => void }) {
   return (
-    <div className={`p-4 border-b border-gray-50 cursor-pointer transition-colors ${active ? 'bg-teal-50' : 'hover:bg-gray-50'}`}>
+    <div onClick={onClick} className={`p-4 border-b border-gray-50 cursor-pointer transition-colors ${active ? 'bg-teal-50' : 'hover:bg-gray-50'}`}>
       <div className="flex items-start gap-3">
         <div className="relative">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold ${active ? 'bg-teal-600' : 'bg-gray-400'}`}>
@@ -208,29 +231,49 @@ function ChatListItem({ name, role, message, time, active = false, avatar, onlin
   );
 }
 
-function ChatWindow() {
+function ChatWindow({ activeChat }: { activeChat: {name: string; role: string; avatar: string; online: boolean} }) {
+  const [messages, setMessages] = useState<Array<{id: number; text: string; image?: File; isOwn: boolean; time: string}>>([]);
+
+  const handleSendMessage = (text: string, image: File | null) => {
+    if (!text.trim() && !image) return;
+    
+    const newMessage = {
+      id: Date.now(),
+      text,
+      image: image || undefined,
+      isOwn: true,
+      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    };
+    
+    setMessages(prev => [...prev, newMessage]);
+  };
+
   return (
     <div className="flex-1 flex flex-col bg-white">
-      <ChatHeader />
-      <ChatMessages />
-      <ChatInput />
+      <ChatHeader activeChat={activeChat} />
+      <ChatMessages messages={messages} activeChatName={activeChat.name} />
+      <ChatInput onSend={handleSendMessage} />
     </div>
   );
 }
 
-function ChatHeader() {
+function ChatHeader({ activeChat }: { activeChat: {name: string; role: string; avatar: string; online: boolean} }) {
   return (
     <div className="px-4 md:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="relative">
           <div className="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-            SC
+            {activeChat.avatar}
           </div>
-          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+          {activeChat.online && (
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+          )}
         </div>
         <div>
-          <h3 className="text-sm font-bold text-gray-900">Dr. Sarah Chen</h3>
-          <p className="text-[10px] text-green-600 font-medium">● Online</p>
+          <h3 className="text-sm font-bold text-gray-900">{activeChat.name}</h3>
+          <p className={`text-[10px] font-medium ${activeChat.online ? 'text-green-600' : 'text-gray-400'}`}>
+            {activeChat.online ? '● Online' : '● Offline'}
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -248,7 +291,7 @@ function ChatHeader() {
   );
 }
 
-function ChatMessages() {
+function ChatMessages({ messages, activeChatName }: { messages: Array<{id: number; text: string; image?: File; isOwn: boolean; time: string}>; activeChatName: string }) {
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
       <div className="text-center">
@@ -256,7 +299,7 @@ function ChatMessages() {
       </div>
 
       <MessageBubble 
-        sender="Dr. Sarah Chen"
+        sender={activeChatName}
         message="Good morning, Elena. I've reviewed your latest blood pressure readings and they look stable. How have you been feeling this week?"
         time="10:32 AM"
         isOwn={false}
@@ -270,7 +313,7 @@ function ChatMessages() {
       />
 
       <MessageBubble 
-        sender="Dr. Sarah Chen"
+        sender={activeChatName}
         message="That's wonderful to hear! The new diet plan seems to be working well. Let's continue with it and I'd like to see you next week for a routine checkup. Does Wednesday at 2pm work for you?"
         time="10:36 AM"
         isOwn={false}
@@ -284,14 +327,36 @@ function ChatMessages() {
       />
 
       <MessageBubble 
-        sender="Dr. Sarah Chen"
+        sender={activeChatName}
         message="Perfect! The baby looks healthy and is developing beautifully. Everything is progressing as expected. Keep up the good work with your prenatal vitamins and rest."
         time="10:40 AM"
         isOwn={false}
       />
 
+      {messages.map(msg => (
+        msg.image ? (
+          <div key={msg.id} className="flex justify-end">
+            <div className="max-w-[70%]">
+              <div className="bg-gray-100 rounded-2xl overflow-hidden">
+                <div className="w-full h-48 bg-gradient-to-br from-blue-200 to-cyan-200 flex items-center justify-center">
+                  <p className="text-xs text-gray-600">{msg.image.name}</p>
+                </div>
+                {msg.text && (
+                  <div className="px-4 py-3">
+                    <p className="text-xs text-gray-900">{msg.text}</p>
+                  </div>
+                )}
+              </div>
+              <p className="text-[9px] text-gray-400 mt-1 text-right mr-1">{msg.time}</p>
+            </div>
+          </div>
+        ) : (
+          <MessageBubble key={msg.id} sender="You" message={msg.text} time={msg.time} isOwn={msg.isOwn} />
+        )
+      ))}
+
       <div className="text-center">
-        <p className="text-[9px] text-gray-400">Dr. Sarah Chen is typing...</p>
+        <p className="text-[9px] text-gray-400">{activeChatName} is typing...</p>
       </div>
     </div>
   );
@@ -329,16 +394,45 @@ function ImageMessage({ sender, imageUrl, caption, time }: { sender: string; ima
   );
 }
 
-function ChatInput() {
+function ChatInput({ onSend }: { onSend: (text: string, image: File | null) => void }) {
+  const [message, setMessage] = useState("");
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSend = () => {
+    if (!message.trim() && !selectedImage) return;
+    onSend(message, selectedImage);
+    setMessage("");
+    setSelectedImage(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setSelectedImage(file);
+    }
+  };
+
   return (
     <div className="px-4 md:px-6 py-4 border-t border-gray-100">
+      {selectedImage && (
+        <div className="mb-2 flex items-center gap-2 text-xs text-gray-600 bg-gray-50 p-2 rounded-lg">
+          <span>📎 {selectedImage.name}</span>
+          <button onClick={() => setSelectedImage(null)} className="ml-auto text-red-500 hover:text-red-700">✕</button>
+        </div>
+      )}
       <div className="flex items-center gap-2 md:gap-3">
-        <button className="w-8 h-8 md:w-9 md:h-9 rounded-lg hover:bg-gray-50 flex items-center justify-center transition-colors">
+        <input type="file" accept="image/*" onChange={handleImageSelect} ref={fileInputRef} className="hidden" />
+        <button onClick={() => fileInputRef.current?.click()} className="w-8 h-8 md:w-9 md:h-9 rounded-lg hover:bg-gray-50 flex items-center justify-center transition-colors">
           <Paperclip size={18} className="text-gray-400" />
         </button>
         <div className="flex-1 relative">
           <input 
             type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleSend()}
             placeholder="Type your message here..."
             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
           />
@@ -346,7 +440,7 @@ function ChatInput() {
         <button className="hidden md:flex w-9 h-9 rounded-lg hover:bg-gray-50 items-center justify-center transition-colors">
           <Smile size={18} className="text-gray-400" />
         </button>
-        <button className="px-4 md:px-5 py-3 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-semibold text-xs transition-colors flex items-center gap-2">
+        <button onClick={handleSend} className="px-4 md:px-5 py-3 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-semibold text-xs transition-colors flex items-center gap-2">
           <Send size={16} />
           <span className="hidden md:inline">Send</span>
         </button>

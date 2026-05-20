@@ -2,6 +2,7 @@
 
 import { Home, FileText, ClipboardList, MessageSquare, Lightbulb, Download, Calendar, User as UserIcon, Activity, ChevronRight, CheckCircle, MapPin } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function RecordsPage() {
   return (
@@ -228,6 +229,42 @@ function PastVisits() {
 }
 
 function VisitCard({ title, type, description, date, doctor, location }: { title: string; type: string; description: string; date: string; doctor: string; location: string }) {
+  const handleDownloadVisit = () => {
+    const content = `
+MATERNAL SANCTUARY HEALTH SYSTEM
+CLINICAL VISIT RECORD
+
+========================================
+VISIT DETAILS
+========================================
+Title: ${title}
+Type: ${type}
+Date: ${date}
+Doctor: ${doctor}
+Location: ${location}
+
+========================================
+CLINICAL SUMMARY
+========================================
+${description}
+
+========================================
+Generated: ${new Date().toLocaleString()}
+© 2024 Maternal Sanctuary Health System
+========================================
+    `;
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${title.replace(/\s+/g, '_')}_${date.replace(/,\s*/g, '_')}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="bg-white rounded-xl p-4 border border-gray-100 hover:shadow-sm transition-shadow">
       <div className="flex items-start justify-between mb-2">
@@ -251,9 +288,18 @@ function VisitCard({ title, type, description, date, doctor, location }: { title
           </div>
           <span className="text-[9px] text-gray-600 font-medium">{doctor}</span>
         </div>
-        <button className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 text-[9px] font-bold text-gray-700 rounded-md transition-colors">
-          ACCESS
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={handleDownloadVisit}
+            className="px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-[9px] font-bold text-teal-700 rounded-md transition-colors flex items-center gap-1"
+          >
+            <Download size={10} />
+            DOWNLOAD
+          </button>
+          <button className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 text-[9px] font-bold text-gray-700 rounded-md transition-colors">
+            ACCESS
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -298,10 +344,79 @@ function ConsolidatedInsights() {
 }
 
 function DownloadButton() {
+  const handleDownload = () => {
+    const content = `
+MATERNAL SANCTUARY HEALTH SYSTEM
+CLINICAL HISTORY SUMMARY
+
+========================================
+PATIENT INFORMATION
+========================================
+Name: Elena Rodriguez-Chan
+Patient ID: 925-882-9418
+Position: 01
+
+========================================
+HEALTH METRICS
+========================================
+Health Score: 98%
+Visits This Year: 04
+Completion Rate: 85%
+
+========================================
+VACCINATION RECORDS
+========================================
+✓ Hepatitis B (HepB) - Completed
+✓ Rotavirus (RV) - Completed
+○ Diphtheria, Tetanus (DTaP) - Scheduled: Mar 18
+
+========================================
+PAST VISITS
+========================================
+
+1. Postnatal Check - Oct 10, 2023
+   Doctor: Dr. Sarah Chen
+   Location: On-Site Exam
+   Summary: Routine postnatal checkup confirmed. Vitals are stable.
+   Discussed nutrition as outlined for postpartum recovery.
+
+2. Newborn Well-Visit - Sep 28, 2023
+   Doctor: Dr. Michael Torres
+   Location: On-Site Exam
+   Summary: Newborn assessment for 2-week old. Baby vitals and
+   feeding status are strong and consistent.
+
+3. Final Prenatal - Sep 15, 2023
+   Doctor: Dr. Helena Smith
+   Location: On-Site Exam
+   Summary: Final prenatal checkup before delivery is scheduled.
+   All test results indicate healthy delivery.
+
+========================================
+Generated: ${new Date().toLocaleString()}
+© 2024 Maternal Sanctuary Health System
+========================================
+    `;
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Clinical_Summary_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="lg:sticky lg:top-6 h-fit">
-      <button className="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-3.5 px-5 rounded-2xl transition-colors shadow-md text-xs leading-tight">
-        Download Full<br />Summary
+      <button 
+        onClick={handleDownload}
+        className="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-3.5 px-5 rounded-2xl transition-colors shadow-md text-xs leading-tight flex items-center justify-center gap-2"
+      >
+        <Download size={16} />
+        <span>Download Full<br />Summary</span>
       </button>
     </div>
   );
