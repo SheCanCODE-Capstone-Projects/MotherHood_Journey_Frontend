@@ -10,6 +10,14 @@ export default function ReportsPage() {
   const roleTheme = role === "government" ? ROLE_THEMES.government : ROLE_THEMES.facility_admin;
   const isGovernment = role === "government";
 
+  const handleCreateReport = () => {
+    window.location.assign("/reports/rpt-vaccination-001");
+  };
+
+  const handleScheduleReport = () => {
+    window.location.assign("/reports/rpt-anc-002");
+  };
+
   const reportCategories = [
     {
       id: 1,
@@ -123,10 +131,20 @@ export default function ReportsPage() {
         <h3 className="text-lg font-semibold" style={{ color: roleTheme.text }}>Generate Custom Report</h3>
         <p className="mt-2 text-sm" style={{ color: roleTheme.text }}>Create a customized report with specific metrics and date ranges for your needs.</p>
         <div className="mt-4 flex flex-wrap gap-3">
-          <button className="rounded-lg px-4 py-2 text-sm font-semibold" style={{ backgroundColor: roleTheme.accent, color: "white" }}>
+          <button
+            type="button"
+            onClick={handleCreateReport}
+            className="rounded-lg px-4 py-2 text-sm font-semibold"
+            style={{ backgroundColor: roleTheme.accent, color: "white" }}
+          >
             Create Report
           </button>
-          <button className="rounded-lg px-4 py-2 text-sm font-semibold" style={{ borderColor: roleTheme.border, border: "2px solid", color: roleTheme.text }}>
+          <button
+            type="button"
+            onClick={handleScheduleReport}
+            className="rounded-lg px-4 py-2 text-sm font-semibold"
+            style={{ borderColor: roleTheme.border, border: "2px solid", color: roleTheme.text }}
+          >
             Schedule Report
           </button>
         </div>
