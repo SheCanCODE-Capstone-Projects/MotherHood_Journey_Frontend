@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 import { MobileNav } from "@/shared/components/layout/MobileNav";
@@ -20,36 +20,54 @@ export function PortalShell({
   fallbackRole,
   previewRole,
 }: PortalShellProps) {
-  // Prevent rendering multiple shells when nested PortalShells exist.
-  // A top-level PortalShell sets a marker on `window` so subsequent
-  // PortalShell instances render only their children (avoiding duplicate
-  // sidebars/topbars). This keeps the Sidebar persistent across route
-  // navigation while allowing nested uses in previews or role layouts.
-  const alreadyMounted = typeof window !== "undefined" && (window as any).__portalShellMounted;
+  // Use a module-scoped flag so nested PortalShells rendered in the same
+  // render pass do not duplicate the UI. This avoids the race where two
+  // shells both render because an effect hasn't set a window marker yet.
+  // The root PortalShell will listen for `portal:preview-role` events and
+  // pass the active preview role down to Sidebar/TopBar/MobileNav.
+  // Subsequent nested PortalShell instances will render children only.
+  // Note: this is a client-only module flag (this file is a client component).
+  // eslint-disable-next-line no-var
+  if (typeof (globalThis as any).__portalShellMounted === "undefined") {
+    (globalThis as any).__portalShellMounted = false;
+  }
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && !((window as any).__portalShellMounted)) {
-      (window as any).__portalShellMounted = true;
-    }
-  }, []);
+  const alreadyMounted = (globalThis as any).__portalShellMounted === true;
+
+  if (!alreadyMounted) {
+    (globalThis as any).__portalShellMounted = true;
+  }
 
   if (alreadyMounted) {
     return <>{children}</>;
   }
 
+  const [runtimePreviewRole, setRuntimePreviewRole] = useState<UserRole | undefined>(previewRole);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      // Expect a CustomEvent with detail set to the UserRole string
+      const role = (e as CustomEvent).detail as UserRole | undefined;
+      setRuntimePreviewRole(role);
+    };
+
+    window.addEventListener("portal:preview-role", handler as EventListener);
+    return () => window.removeEventListener("portal:preview-role", handler as EventListener);
+  }, []);
+
   return (
     <div className="flex min-h-screen bg-[#F8FBFB] print:bg-white">
       <SkipLink />
-      <Sidebar fallbackRole={fallbackRole} previewRole={previewRole} />
+      <Sidebar fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
 
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <TopBar fallbackRole={fallbackRole} previewRole={previewRole} />
+        <TopBar fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
 
         <main id="main-content" className="flex-1 px-4 py-6 pb-24 print:px-0 print:py-0 print:pb-0 sm:px-6 lg:px-8 lg:pb-8">
           {children}
         </main>
 
-        <MobileNav fallbackRole={fallbackRole} previewRole={previewRole} />
+        <MobileNav fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
       </div>
     </div>
   );
