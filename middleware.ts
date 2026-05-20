@@ -27,6 +27,8 @@ const PROTECTED_ROUTE_MATCHES: ProtectedRouteMatch[] = Object.entries(PROTECTED_
   .sort((left, right) => right.path.length - left.path.length);
 
 export async function middleware(req: NextRequest) {
+  if (process.env.NODE_ENV === "development") return NextResponse.next();
+
   const { pathname, search } = req.nextUrl;
   const match = getProtectedRoute(pathname);
 
@@ -89,5 +91,6 @@ export const config = {
     "/reports/:path*",
     "/analytics/:path*",
     "/sync/:path*",
+    "/patient/:path*",
   ],
 };
