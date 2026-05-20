@@ -1,7 +1,7 @@
 import type { UserRole } from "@/shared/types/auth";
 
 export const ROLE_ROUTE_MAP: Record<UserRole, string[]> = {
-  patient:          ["/dashboard", "/pregnancies", "/my-children", "/appointments"],
+  patient:          ["/dashboard", "/pregnancies", "/children", "/appointments", "/patient"],
   health_worker:    ["/dashboard", "/mothers", "/visits", "/diagnoses"],
   facility_admin:   ["/dashboard", "/service-requests", "/staff", "/reports"],
   district_officer: ["/dashboard", "/analytics"],
@@ -80,10 +80,11 @@ export const ROLE_THEMES: Record<UserRole, RoleTheme> = {
 
 export const ROLE_NAV_ITEMS: Record<UserRole, RoleNavItem[]> = {
   patient: [
-    { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
-    { href: "/pregnancies", label: "Pregnancies", shortLabel: "Pregnancy" },
-    { href: "/my-children", label: "Children", shortLabel: "Children" },
-    { href: "/appointments", label: "Appointments", shortLabel: "Visits" },
+    { href: "/patient/dashboard", label: "Dashboard", shortLabel: "Home" },
+    { href: "/patient/pregnancies", label: "Pregnancies", shortLabel: "Pregnancy" },
+    { href: "/patient/children", label: "Children", shortLabel: "Children" },
+    { href: "/patient/appointments", label: "Appointments", shortLabel: "Visits" },
+    { href: "/patient/chat", label: "Chat", shortLabel: "Chat" },
   ],
   health_worker: [
     { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
