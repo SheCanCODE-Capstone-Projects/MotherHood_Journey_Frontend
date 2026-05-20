@@ -48,15 +48,10 @@
 }
 
 :root {
-<<<<<<< HEAD:motherhood_journey/src/app/globals.css
-  --background: oklch(0.99 0.005 180);
-  --foreground: oklch(0.25 0.05 200);
-=======
   --font-sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-geist-mono: "Consolas", "SFMono-Regular", "Liberation Mono", monospace;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
->>>>>>> 4b6fa88936ca66280b994491656bd48b4e627a90:src/app/globals.css
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.25 0.05 200);
   --popover: oklch(1 0 0);
