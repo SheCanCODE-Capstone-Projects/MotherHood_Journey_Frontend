@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-import { PageHeader, PortalShell } from "@/shared/components/layout";
+import { PageHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui/button";
 import { ROLE_LABELS } from "@/shared/config/rbac";
 import type { UserRole } from "@/shared/types/auth";
@@ -46,9 +46,15 @@ const previewHighlights: Record<UserRole, string[]> = {
 export default function HomePage() {
   const [previewRole, setPreviewRole] = useState<UserRole>("patient");
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      (window as any).__portalPreviewRole = previewRole;
+      window.dispatchEvent(new CustomEvent("portal:preview-role", { detail: previewRole }));
+    }
+  }, [previewRole]);
+
   return (
-    <PortalShell fallbackRole="patient" previewRole={previewRole}>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <PageHeader
           title="Shared Layout Preview"
           subtitle="This screen previews the Sidebar, TopBar, MobileNav, and PageHeader with role-aware navigation."
@@ -111,6 +117,5 @@ export default function HomePage() {
           ))}
         </section>
       </div>
-    </PortalShell>
   );
 }

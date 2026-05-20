@@ -79,7 +79,7 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
       >
         <Link href={item.href}>
           {isActive && (
-            <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r bg-[#5DCAA5]" />
+            <div className="absolute left-0 top-1/2 h-5 w-0.75 -translate-y-1/2 rounded-r bg-[#5DCAA5]" />
           )}
           <Icon className="size-5 shrink-0" />
           <span className="text-sm font-medium">{item.label}</span>

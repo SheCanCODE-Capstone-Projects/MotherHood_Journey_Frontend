@@ -2,6 +2,8 @@ import type { NextAuthConfig} from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: NextAuthConfig = {
+  secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET ?? "motherhood-development-secret",
+  trustHost: true,
   providers: [
     CredentialsProvider({
       name: "Credentials",
