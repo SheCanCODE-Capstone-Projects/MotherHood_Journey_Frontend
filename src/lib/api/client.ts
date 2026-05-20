@@ -122,7 +122,13 @@ Response body:\n${rawText}`, normalizedError);
     endpoint: string,
     options: FetchOptions = {},
   ): Promise<T> {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+    // Resolve API base URL. Prefer explicit env var, but fall back to
+    // the current page origin when running in the browser so the client
+    // targets the same dev server (handles port changes like 3001).
+    let apiBaseUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+    if (!apiBaseUrl && typeof window !== "undefined") {
+      apiBaseUrl = window.location.origin;
+    }
 
     if (!endpoint.startsWith("http") && !apiBaseUrl) {
       throw new ApiErrorClass(
