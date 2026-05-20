@@ -72,11 +72,21 @@ export function createApiClient(): ApiClient {
    * Parse response and handle errors
    */
   async function parseResponse<T>(response: Response): Promise<T> {
-    const contentType = response.headers.get("content-type");
+    const contentType = response.headers.get("content-type") ?? "";
     let data: unknown;
 
-    if (contentType?.includes("application/json")) {
-      data = await response.json();
+    if (contentType.includes("application/json")) {
+      try {
+        // Attempt to parse JSON but fall back to text if server returned non-JSON body
+        data = await response.json();
+      } catch (err) {
+        // Preserve raw text for better diagnostics when JSON parsing fails
+        try {
+          data = await response.text();
+        } catch {
+          data = String(err ?? "Invalid JSON response");
+        }
+      }
     } else {
       data = await response.text();
     }
@@ -85,9 +95,10 @@ export function createApiClient(): ApiClient {
     if (!response.ok) {
       const errorData = isErrorResponseDTO(data) ? data : null;
       const statusCode = errorData?.statusCode ?? errorData?.status ?? response.status;
+      const rawText = typeof data === "string" ? data : JSON.stringify(data ?? {});
       const errorMessage =
         errorData?.message ||
-        (typeof data === "string" ? data : `HTTP ${response.status}`);
+        (typeof data === "string" && data.length > 0 ? data : `HTTP ${response.status}`);
 
       const normalizedError = errorData
         ? {
@@ -96,7 +107,9 @@ export function createApiClient(): ApiClient {
           }
         : undefined;
 
-      throw new ApiErrorClass(statusCode, errorMessage, normalizedError);
+      // Throw ApiError with raw response included for diagnostics
+      throw new ApiErrorClass(statusCode, `${errorMessage}\n
+Response body:\n${rawText}`, normalizedError);
     }
 
     return data as T;
