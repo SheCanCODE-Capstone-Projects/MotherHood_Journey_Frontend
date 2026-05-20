@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ServiceWorkerRegistration } from "@/shared/components/layout/ServiceWorkerRegistration";
 import { Providers } from "./providers";
+import { PortalShell } from "@/shared/components/layout";
 
 export const metadata: Metadata = {
   title: "Motherhood Journey",
@@ -16,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <PortalShell fallbackRole="patient">
+          <Providers>{children}</Providers>
+        </PortalShell>
         <ServiceWorkerRegistration />
       </body>
     </html>

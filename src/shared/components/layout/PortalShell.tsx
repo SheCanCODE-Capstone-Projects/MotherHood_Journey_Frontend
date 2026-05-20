@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect } from "react";
 import type { ReactNode } from "react";
 
 import { MobileNav } from "@/shared/components/layout/MobileNav";
@@ -19,6 +20,23 @@ export function PortalShell({
   fallbackRole,
   previewRole,
 }: PortalShellProps) {
+  // Prevent rendering multiple shells when nested PortalShells exist.
+  // A top-level PortalShell sets a marker on `window` so subsequent
+  // PortalShell instances render only their children (avoiding duplicate
+  // sidebars/topbars). This keeps the Sidebar persistent across route
+  // navigation while allowing nested uses in previews or role layouts.
+  const alreadyMounted = typeof window !== "undefined" && (window as any).__portalShellMounted;
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && !((window as any).__portalShellMounted)) {
+      (window as any).__portalShellMounted = true;
+    }
+  }, []);
+
+  if (alreadyMounted) {
+    return <>{children}</>;
+  }
+
   return (
     <div className="flex min-h-screen bg-[#F8FBFB] print:bg-white">
       <SkipLink />
