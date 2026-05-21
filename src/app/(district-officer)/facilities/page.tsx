@@ -4,7 +4,15 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, TrendingUp, TrendingDown, RefreshCcw } from "lucide-react";
+import {
+  ArrowLeft,
+  HeartPulse,
+  Syringe,
+  CalendarX,
+  TrendingUp,
+  TrendingDown,
+  RefreshCcw,
+} from "lucide-react";
 
 import { PageHeader } from "@/shared/components/layout";
 import { queryKeys } from "@/shared/config/query-keys";
@@ -23,31 +31,91 @@ function getMetricColor(value: number, reversed = false) {
   return "bg-red-50/80 text-red-700";
 }
 
+function getMetricStatus(value: number, reversed = false) {
+  const good = reversed ? value < 10 : value >= 80;
+  const mid = reversed ? value < 20 : value >= 60;
+  if (good) return "good";
+  if (mid) return "mid";
+  return "bad";
+}
+
+function Sparkline({
+  data,
+  color,
+  height = 32,
+}: {
+  data: number[];
+  color: string;
+  height?: number;
+}) {
+  const width = 80;
+  const min = Math.min(...data) - 5;
+  const max = Math.max(...data) + 5;
+  const points = data
+    .map((v, i) => {
+      const x = (i / (data.length - 1)) * width;
+      const y = height - ((v - min) / (max - min)) * height;
+      return `${x},${y}`;
+    })
+    .join(" ");
+  return (
+    <svg width={width} height={height} className="shrink-0">
+      <polyline
+        points={points}
+        fill="none"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function StatCard({
   label,
   value,
   trend,
   reversed = false,
+  icon: Icon,
+  data,
 }: {
   label: string;
   value: number;
   trend: number;
   reversed?: boolean;
+  icon: typeof HeartPulse;
+  data: number[];
 }) {
   const isGood = reversed ? trend < 0 : trend > 0;
   const TrendIcon = isGood ? TrendingUp : TrendingDown;
+  const status = getMetricStatus(value, reversed);
+  const borderColor =
+    status === "good"
+      ? "border-emerald-500"
+      : status === "mid"
+        ? "border-amber-500"
+        : "border-red-500";
   return (
-    <div className="rounded-xl border border-[#E5F3F2] bg-white p-6">
-      <p className="text-xs font-medium uppercase tracking-wider text-[#5B8784]">{label}</p>
-      <p className="mt-3 text-2xl font-bold text-[#1D5052]">{value}%</p>
-      <div
-        className={cn(
-          "mt-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-          isGood ? "bg-emerald-50/80 text-emerald-700" : "bg-red-50/80 text-red-700",
-        )}
-      >
-        <TrendIcon className="size-3" />
-        {Math.abs(trend)}% vs last period
+    <div className={cn("rounded-xl border-l-4 bg-white p-6 shadow-sm border-l-[3px] border-b border-b-[#E5F3F2] border-r border-r-[#E5F3F2] border-t border-t-[#E5F3F2]", borderColor)}>
+      <div className="flex items-start justify-between">
+        <p className="text-xs font-medium uppercase tracking-wider text-[#5B8784]">{label}</p>
+        <Icon className="size-4 text-[#5B8784]" />
+      </div>
+      <div className="mt-3 flex items-end justify-between">
+        <div>
+          <p className="text-2xl font-bold text-[#1D5052]">{value}%</p>
+          <div
+            className={cn(
+              "mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+              isGood ? "bg-emerald-50/80 text-emerald-700" : "bg-red-50/80 text-red-700",
+            )}
+          >
+            <TrendIcon className="size-3" />
+            {Math.abs(trend)}% vs last period
+          </div>
+        </div>
+        <Sparkline data={data} color={status === "good" ? "#10B981" : status === "mid" ? "#F59E0B" : "#EF4444"} />
       </div>
     </div>
   );
@@ -63,33 +131,50 @@ function TrendChart({
   color: string;
 }) {
   const values = data.map((d) => d[metric]);
-  const min = Math.min(...values) - 5;
-  const max = Math.max(...values) + 5;
+  const min = Math.floor(Math.min(...values) / 10) * 10;
+  const max = Math.ceil(Math.max(...values) / 10) * 10;
+  const padding = Math.max(5, (max - min) * 0.1);
+  const chartMin = min - padding;
+  const chartMax = max + padding;
   const width = 300;
-  const height = 80;
-  const points = values
+  const height = 100;
+  const toY = (v: number) => height - ((v - chartMin) / (chartMax - chartMin)) * height;
+  const linePoints = values
     .map((v, i) => {
       const x = (i / (values.length - 1)) * width;
-      const y = height - ((v - min) / (max - min)) * height;
-      return `${x},${y}`;
+      return `${x},${toY(v)}`;
     })
     .join(" ");
+  const areaPoints = `${0},${height} ${linePoints} ${width},${height}`;
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-20">
-      <polyline
-        points={points}
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {values.map((v, i) => {
-        const x = (i / (values.length - 1)) * width;
-        const y = height - ((v - min) / (max - min)) * height;
-        return <circle key={i} cx={x} cy={y} r="3" fill={color} />;
-      })}
-    </svg>
+    <div className="relative">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-24">
+        <defs>
+          <linearGradient id={`grad-${metric}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <polygon points={areaPoints} fill={`url(#grad-${metric})`} />
+        <polyline
+          points={linePoints}
+          fill="none"
+          stroke={color}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        {values.map((v, i) => {
+          const x = (i / (values.length - 1)) * width;
+          return <circle key={i} cx={x} cy={toY(v)} r="3" fill={color} stroke="white" strokeWidth="1.5" />;
+        })}
+      </svg>
+      <div className="flex justify-between mt-1">
+        {data.map((d) => (
+          <span key={d.week} className="text-[10px] text-[#5B8784]">{d.week}</span>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -103,6 +188,8 @@ function FacilityDetailView({
   const last = facility.trend[facility.trend.length - 1];
   const prev = facility.trend[facility.trend.length - 2];
 
+  const type = facility.name.includes("HP") ? "HP" : facility.name.includes("HC") ? "HC" : "Facility";
+
   return (
     <div className="space-y-6">
       <button
@@ -113,11 +200,26 @@ function FacilityDetailView({
         Back to Facilities
       </button>
 
-      <div className="rounded-xl border border-[#E5F3F2] bg-white p-6">
-        <p className="text-xs font-medium uppercase tracking-wider text-[#5B8784]">
-          {facility.sector} Sector
-        </p>
-        <h1 className="mt-1.5 text-xl font-bold text-[#1D5052]">{facility.name}</h1>
+      <div className="rounded-xl border border-[#E5F3F2] bg-white overflow-hidden">
+        <div className="flex items-start gap-5 p-6">
+          <div className="grid size-14 shrink-0 place-items-center rounded-xl bg-[#E8F6F3]">
+            <span className="text-xs font-bold text-[#1D5052] tracking-tight leading-tight text-center">
+              {type === "HC" ? "HC" : "HP"}
+            </span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium uppercase tracking-wider text-[#5B8784]">
+              {facility.sector} Sector
+            </p>
+            <h1 className="mt-1 text-xl font-bold text-[#1D5052]">{facility.name}</h1>
+          </div>
+          <div className="text-right shrink-0">
+            <p className="text-[10px] text-[#5B8784]">Last 6 weeks</p>
+            <p className="text-[10px] text-[#7BA09D]">
+              Wk {facility.trend[0].week.split(" ")[1]} – {facility.trend[facility.trend.length - 1].week.split(" ")[1]}
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -125,25 +227,31 @@ function FacilityDetailView({
           label="ANC Attendance"
           value={facility.ancAttendance}
           trend={last.anc - prev.anc}
+          icon={HeartPulse}
+          data={facility.trend.map((d) => d.anc)}
         />
         <StatCard
           label="Vaccination Coverage"
           value={facility.vaccinationCoverage}
           trend={last.vax - prev.vax}
+          icon={Syringe}
+          data={facility.trend.map((d) => d.vax)}
         />
         <StatCard
           label="No-Show Rate"
           value={facility.noShowRate}
           trend={last.noShow - prev.noShow}
           reversed
+          icon={CalendarX}
+          data={facility.trend.map((d) => d.noShow)}
         />
       </div>
 
       <div className="rounded-xl border border-[#E5F3F2] bg-white p-6">
-        <h2 className="text-sm font-semibold text-[#1D5052] mb-5">
+        <h2 className="text-sm font-semibold text-[#1D5052] mb-6">
           Weekly Performance Trend — Last 6 Weeks
         </h2>
-        <div className="grid gap-6 sm:grid-cols-3">
+        <div className="grid gap-8 sm:grid-cols-3">
           {(
             [
               { key: "anc" as const, label: "ANC Attendance", color: "#1D5052" },
@@ -152,15 +260,8 @@ function FacilityDetailView({
             ]
           ).map((item) => (
             <div key={item.key}>
-              <p className="text-xs font-medium text-[#5B8784] mb-3">{item.label}</p>
+              <p className="text-xs font-medium text-[#5B8784] mb-1">{item.label}</p>
               <TrendChart data={facility.trend} metric={item.key} color={item.color} />
-              <div className="flex justify-between mt-2">
-                {facility.trend.map((d) => (
-                  <span key={d.week} className="text-[10px] text-[#5B8784]">
-                    {d.week}
-                  </span>
-                ))}
-              </div>
             </div>
           ))}
         </div>
@@ -210,7 +311,7 @@ function FacilitiesContent() {
       return (
         <div className="space-y-6 animate-pulse">
           <div className="h-5 w-32 bg-[#E5F3F2] rounded" />
-          <div className="h-20 bg-[#E5F3F2] rounded-xl" />
+          <div className="h-24 bg-[#E5F3F2] rounded-xl" />
           <div className="grid gap-4 sm:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="h-32 bg-[#E5F3F2] rounded-xl" />
