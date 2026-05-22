@@ -13,10 +13,6 @@ import {
   MapPin,
 } from "lucide-react";
 
-// ---------------------------------------------------------------------------
-// Navbar
-// ---------------------------------------------------------------------------
-
 function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-[#D5E9E6]">
@@ -43,10 +39,6 @@ function Navbar() {
     </nav>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Hero
-// ---------------------------------------------------------------------------
 
 function Hero() {
   return (
@@ -91,10 +83,6 @@ function Hero() {
     </section>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Portals Section
-// ---------------------------------------------------------------------------
 
 const PORTALS = [
   {
@@ -151,10 +139,6 @@ function PortalsSection() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Feature Section
-// ---------------------------------------------------------------------------
-
 const FEATURES = [
   {
     icon: CheckCircle2,
@@ -172,7 +156,6 @@ function FeatureSection() {
   return (
     <section className="py-10 bg-[#F2F8F7]">
       <div className="max-w-6xl mx-auto px-6 grid gap-4 lg:grid-cols-2 items-center">
-        {/* Doctor Image — full half width */}
         <div className="relative w-full h-[420px] rounded-3xl overflow-hidden shadow-xl">
           <Image
             src="/images/doctors.jpg"
@@ -221,10 +204,6 @@ function FeatureSection() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Impact Section
-// ---------------------------------------------------------------------------
-
 const STATS = [
   {
     value: "10,000+",
@@ -262,10 +241,8 @@ function ImpactSection() {
           </p>
         </div>
 
-        {/* Single row — 4 equal cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
-          {/* Card 1 — Mothers Supported */}
           <div className="rounded-2xl bg-[#1D5052] p-5 flex flex-col justify-between">
             <div className="flex items-start justify-between mb-3">
               <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
@@ -284,7 +261,6 @@ function ImpactSection() {
             </div>
           </div>
 
-          {/* Card 2 — Active Health Centers */}
           <div className="rounded-2xl bg-[#E2F2F5] p-5 flex flex-col justify-between">
             <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center mb-3">
               <Activity className="size-4 text-[#1D5052]" />
@@ -298,7 +274,6 @@ function ImpactSection() {
             </div>
           </div>
 
-          {/* Card 3 — Vaccination Coverage */}
           <div className="rounded-2xl border border-[#D5E9E6] bg-[#F8FCFB] p-5 flex flex-col justify-between">
             <div className="w-8 h-8 rounded-lg bg-[#E2F2F5] flex items-center justify-center mb-3">
               <CheckCircle2 className="size-4 text-[#1D5052]" />
@@ -315,7 +290,6 @@ function ImpactSection() {
             </div>
           </div>
 
-          {/* Card 4 — Community-Led Growth */}
           <div className="rounded-2xl bg-[#E2F2F5] p-5 flex flex-col justify-between">
             <div>
               <p className="text-xs font-bold text-[#1D5052]">Community-Led Growth</p>
@@ -345,10 +319,6 @@ function ImpactSection() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// CTA Section
-// ---------------------------------------------------------------------------
-
 function CTASection() {
   return (
     <section id="contact" className="py-10 bg-[#1D5052]">
@@ -373,10 +343,6 @@ function CTASection() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Footer
-// ---------------------------------------------------------------------------
-
 function Footer() {
   return (
     <footer className="bg-[#1D5052] border-t border-white/10 py-8">
@@ -396,10 +362,6 @@ function Footer() {
     </footer>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Main Page
-// ---------------------------------------------------------------------------
 
 export default function LandingPage() {
   return (
