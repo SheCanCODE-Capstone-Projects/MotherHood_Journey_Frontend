@@ -260,7 +260,7 @@ export default function PatientVaccinationCardPage({ params }: PatientVaccinatio
     };
   }, [childId, refreshToken]);
 
-  const summary = useMemo(() => (loadState.data ? getCompletionSummary(loadState.data.vaccinationSchedule) : null), [loadState.data]);
+  const summary = useMemo(() => (loadState.data ? getCompletionSummary(loadState.data.vaccines) : null), [loadState.data]);
 
   return (
     <div className="space-y-6">

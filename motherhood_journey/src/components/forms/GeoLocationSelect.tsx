@@ -1,8 +1,21 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { GeoLocationSummaryDTO } from '@/features/geo/types';
-import { useProvinces, useDistricts, useSectors, useCells, useVillages } from '@/hooks/useGeoLocation';
+import { useProvinces, useDistricts, useSectors, useCells, useVillages } from '../../hooks/useGeoLocation';
+
+// Minimal local DTO used by this component (keeps nested app independent)
+export interface GeoLocationSummaryDTO {
+  provinceId?: string;
+  provinceName?: string;
+  districtId?: string;
+  districtName?: string;
+  sectorId?: string;
+  sectorName?: string;
+  cellId?: string;
+  cellName?: string;
+  villageId?: string;
+  villageName?: string;
+}
 
 interface GeoLocationSelectProps {
   value?: GeoLocationSummaryDTO;

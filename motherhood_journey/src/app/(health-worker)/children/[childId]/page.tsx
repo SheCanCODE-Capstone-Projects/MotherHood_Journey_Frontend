@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Baby, Calendar, Weight, User, X, CheckCircle } from 'lucide-react';
-import { useChildVaccinations, useMarkAdministered, VaccinationRecord } from '@/hooks/useVaccinations';
+import { useChildVaccinations, useMarkAdministered, VaccinationRecord } from '../../../../hooks/useVaccinations';
 
 type HealthStatus = 'HEALTHY' | 'AT_RISK' | 'CRITICAL';
 
@@ -178,7 +178,7 @@ export default function ChildProfilePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {vaccinations?.map((vaccination) => (
+                  {vaccinations?.map((vaccination: VaccinationRecord) => (
                     <VaccinationRow
                       key={vaccination.id}
                       vaccination={vaccination}
