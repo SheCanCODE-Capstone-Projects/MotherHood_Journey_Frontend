@@ -1,13 +1,28 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { PageHeader } from "@/shared/components/layout";
 import { ROLE_THEMES } from "@/shared/config/rbac";
 import { Clock, User, CheckCircle, AlertCircle, MapPin } from "lucide-react";
 
+type VisitItem = {
+  id: number;
+  time: string;
+  motherName: string;
+  type: string;
+  status: "Completed" | "In Progress" | "Scheduled";
+  bp: string;
+  weight: string;
+  notes: string;
+};
+
 export default function VisitsPage() {
+  const router = useRouter();
   const roleTheme = ROLE_THEMES.health_worker;
 
-  const todaysVisits = [
+  const [todaysVisits, setTodaysVisits] = useState<VisitItem[]>([
     {
       id: 1,
       time: "9:00 AM",
@@ -38,7 +53,9 @@ export default function VisitsPage() {
       weight: "--",
       notes: "BCG and OPV 1",
     },
-  ];
+  ]);
+  const [notesDraft, setNotesDraft] = useState("");
+  const [notesTargetId, setNotesTargetId] = useState<number | null>(null);
 
   const stats = [
     { label: "Today's Visits", value: "3", highlight: true },
@@ -46,6 +63,36 @@ export default function VisitsPage() {
     { label: "In Progress", value: "1", color: "#F59E0B" },
     { label: "Pending", value: "1", color: "#6B7280" },
   ];
+
+  const openNotesEditor = () => {
+    const targetVisit = todaysVisits.find((visit) => visit.status !== "Completed") ?? todaysVisits[0];
+
+    if (!targetVisit) {
+      return;
+    }
+
+    setNotesTargetId(targetVisit.id);
+    setNotesDraft(targetVisit.notes);
+  };
+
+  const saveNotes = () => {
+    if (notesTargetId == null) {
+      return;
+    }
+
+    setTodaysVisits((currentVisits) =>
+      currentVisits.map((visit) =>
+        visit.id === notesTargetId
+          ? {
+              ...visit,
+              notes: notesDraft.trim() || visit.notes,
+            }
+          : visit,
+      ),
+    );
+    setNotesTargetId(null);
+    setNotesDraft("");
+  };
 
   return (
     <div className="space-y-6">
@@ -113,16 +160,68 @@ export default function VisitsPage() {
       <section className="rounded-2xl border-2 p-5" style={{ borderColor: roleTheme.border, backgroundColor: roleTheme.accentSoft }}>
         <h3 className="font-semibold" style={{ color: roleTheme.text }}>Quick Actions</h3>
         <div className="mt-4 flex flex-wrap gap-3">
-          <button className="rounded-lg px-4 py-2 text-sm font-semibold" style={{ backgroundColor: roleTheme.accent, color: "white" }}>
+          <button
+            type="button"
+            onClick={() => window.location.assign("/visits/new")}
+            className="rounded-lg px-4 py-2 text-sm font-semibold"
+            style={{ backgroundColor: roleTheme.accent, color: "white" }}
+          >
             Record Visit
           </button>
-          <button className="rounded-lg px-4 py-2 text-sm font-semibold" style={{ borderColor: roleTheme.border, border: "2px solid", color: roleTheme.text }}>
+          <button
+            type="button"
+            onClick={() => window.location.assign("/visits/new")}
+            className="rounded-lg px-4 py-2 text-sm font-semibold"
+            style={{ borderColor: roleTheme.border, border: "2px solid", color: roleTheme.text }}
+          >
             Schedule Next
           </button>
-          <button className="rounded-lg px-4 py-2 text-sm font-semibold" style={{ borderColor: roleTheme.border, border: "2px solid", color: roleTheme.text }}>
+          <button
+            type="button"
+            onClick={openNotesEditor}
+            className="rounded-lg px-4 py-2 text-sm font-semibold"
+            style={{ borderColor: roleTheme.border, border: "2px solid", color: roleTheme.text }}
+          >
             Add Notes
           </button>
         </div>
+
+        {notesTargetId != null ? (
+          <div className="mt-4 rounded-xl border bg-white p-4" style={{ borderColor: roleTheme.border }}>
+            <p className="text-sm font-semibold" style={{ color: roleTheme.text }}>
+              Add note for {todaysVisits.find((visit) => visit.id === notesTargetId)?.motherName}
+            </p>
+            <textarea
+              value={notesDraft}
+              onChange={(event) => setNotesDraft(event.target.value)}
+              rows={3}
+              className="mt-3 w-full rounded-lg border px-3 py-2 text-sm outline-none"
+              style={{ borderColor: roleTheme.border }}
+              placeholder="Write a follow-up note..."
+            />
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={saveNotes}
+                className="rounded-lg px-4 py-2 text-sm font-semibold text-white"
+                style={{ backgroundColor: roleTheme.accent }}
+              >
+                Save Note
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setNotesTargetId(null);
+                  setNotesDraft("");
+                }}
+                className="rounded-lg border px-4 py-2 text-sm font-semibold"
+                style={{ borderColor: roleTheme.border, color: roleTheme.text }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : null}
       </section>
     </div>
   );

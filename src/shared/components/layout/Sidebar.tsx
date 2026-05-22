@@ -17,6 +17,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { useRole } from "@/shared/hooks/useRole";
+import { SkipLink } from "@/shared/components/layout/SkipLink";
 import type { UserRole } from "@/shared/types/auth";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -34,6 +35,7 @@ const iconByHref: Record<string, LucideIcon> = {
   "/diagnoses": Stethoscope,
   "/pregnancies": Baby,
   "/children": Baby,
+  "/my-children": Baby,
   "/appointments": CalendarDays,
   "/staff": Users,
   "/reports": FileText,
@@ -41,7 +43,7 @@ const iconByHref: Record<string, LucideIcon> = {
   "/sync": LayoutDashboard,
 };
 
-const mainNavItems = ["/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/children", "/appointments", "/reports", "/analytics", "/staff", "/sync"];
+const mainNavItems = ["/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/children", "/my-children", "/appointments", "/reports", "/analytics", "/staff", "/sync"];
 
 const roleTheme = { text: '#085041', border: '#5DCAA5', accent: '#085041' };
 
@@ -77,7 +79,7 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
       >
         <Link href={item.href}>
           {isActive && (
-            <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r bg-[#5DCAA5]" />
+            <div className="absolute left-0 top-1/2 h-5 w-0.75 -translate-y-1/2 rounded-r bg-[#5DCAA5]" />
           )}
           <Icon className="size-5 shrink-0" />
           <span className="text-sm font-medium">{item.label}</span>
@@ -91,6 +93,7 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
       className="hidden w-72 shrink-0 border-r  lg:flex lg:flex-col print:hidden"
       style={{ backgroundColor: roleTheme.accent, borderColor: roleTheme.border }}
     >
+      <SkipLink />
       <div className="border-b border-white/10 px-6 py-6">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
           Motherhood Journey

@@ -1,13 +1,35 @@
 "use client";
 
+import { useState } from "react";
+
 import { PageHeader } from "@/shared/components/layout";
 import { ROLE_THEMES } from "@/shared/config/rbac";
 import { AlertCircle, CheckCircle, TrendingUp, User } from "lucide-react";
 
+type DiagnosisStatus = "Active" | "Monitoring" | "Resolved";
+
+type Diagnosis = {
+  id: number;
+  motherName: string;
+  condition: string;
+  severity: "High" | "Medium" | "Low";
+  dateConfirmed: string;
+  status: DiagnosisStatus;
+  nextReview: string;
+  notes: string;
+};
+
+const STATUS_ROTATION: DiagnosisStatus[] = ["Active", "Monitoring", "Resolved"];
+
+function getNextStatus(currentStatus: DiagnosisStatus): DiagnosisStatus {
+  const currentIndex = STATUS_ROTATION.indexOf(currentStatus);
+  return STATUS_ROTATION[(currentIndex + 1) % STATUS_ROTATION.length];
+}
+
 export default function DiagnosesPage() {
   const roleTheme = ROLE_THEMES.health_worker;
 
-  const diagnoses = [
+  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([
     {
       id: 1,
       motherName: "Grace Mukamana",
@@ -38,7 +60,20 @@ export default function DiagnosesPage() {
       nextReview: "May 10, 2024",
       notes: "Iron supplementation prescribed",
     },
-  ];
+  ]);
+
+  const updateDiagnosisStatus = (id: number) => {
+    setDiagnoses((currentDiagnoses) =>
+      currentDiagnoses.map((diagnosis) =>
+        diagnosis.id === id
+          ? {
+              ...diagnosis,
+              status: getNextStatus(diagnosis.status),
+            }
+          : diagnosis,
+      ),
+    );
+  };
 
   const stats = [
     { label: "Total Cases", value: "3", icon: User },
@@ -99,7 +134,12 @@ export default function DiagnosesPage() {
                       <p style={{ color: roleTheme.text }}>{diagnosis.nextReview}</p>
                     </div>
                     <div>
-                      <button className="rounded-lg px-3 py-2 text-sm font-semibold" style={{ backgroundColor: roleTheme.accent, color: "white" }}>
+                      <button
+                        type="button"
+                        onClick={() => updateDiagnosisStatus(diagnosis.id)}
+                        className="rounded-lg px-3 py-2 text-sm font-semibold"
+                        style={{ backgroundColor: roleTheme.accent, color: "white" }}
+                      >
                         Update Status
                       </button>
                     </div>

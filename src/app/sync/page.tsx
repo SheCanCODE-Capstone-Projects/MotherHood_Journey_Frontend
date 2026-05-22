@@ -1,11 +1,16 @@
 "use client";
 
+import { useState } from "react";
+
 import { PageHeader } from "@/shared/components/layout";
 import { ROLE_THEMES } from "@/shared/config/rbac";
 import { CheckCircle, Clock, AlertCircle, Zap, Download, Upload } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { triggerFullSync, exportGovData } from "@/lib/api/government";
 
 export default function SyncPage() {
   const roleTheme = ROLE_THEMES.government;
+  const [syncNotice, setSyncNotice] = useState<string | null>(null);
 
   const syncStatus = [
     { label: "Synced Districts", value: "30", icon: CheckCircle, color: "#10B981" },
@@ -28,6 +33,27 @@ export default function SyncPage() {
     { district: "Nyarugenge", timestamp: "Apr 12, 2024 - 2:24 PM", records: 134, status: "Success", duration: "3.8s" },
     { district: "Gasabo", timestamp: "Apr 12, 2024 - 2:18 PM", records: 98, status: "Success", duration: "2.9s" },
   ];
+
+  const triggerMutation = useMutation({
+    mutationFn: triggerFullSync,
+    onMutate: () => {
+      setSyncNotice(null);
+    },
+    onSuccess: (result) => {
+      setSyncNotice(
+        result.source === "demo"
+          ? `Full sync queued in demo mode at ${new Date(result.startedAt).toLocaleTimeString()}.`
+          : `Full sync started at ${new Date(result.startedAt).toLocaleTimeString()}.`,
+      );
+    },
+    onError: () => {
+      setSyncNotice("Unable to start full sync.");
+    },
+  });
+
+  const exportMutation = useMutation({
+    mutationFn: exportGovData,
+  });
 
   return (
     <div className="space-y-6">
@@ -62,8 +88,13 @@ export default function SyncPage() {
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold" style={{ color: roleTheme.text }}>District Synchronization Status</h2>
-          <button className="rounded-lg px-4 py-2 text-sm font-semibold" style={{ backgroundColor: roleTheme.accent, color: "white" }}>
-            Sync All
+          <button
+            className="rounded-lg px-4 py-2 text-sm font-semibold"
+            style={{ backgroundColor: roleTheme.accent, color: "white" }}
+            onClick={() => void triggerMutation.mutate()}
+            disabled={(triggerMutation as any).isLoading}
+          >
+            {(triggerMutation as any).isLoading ? "Syncing..." : "Sync All"}
           </button>
         </div>
         <div className="space-y-2">
@@ -117,18 +148,67 @@ export default function SyncPage() {
       <section className="rounded-2xl border-2 p-6" style={{ borderColor: roleTheme.border, backgroundColor: roleTheme.accentSoft }}>
         <h3 className="text-lg font-semibold" style={{ color: roleTheme.text }}>Sync Controls</h3>
         <p className="mt-2 text-sm" style={{ color: roleTheme.text }}>Manage system-wide synchronization settings and manual sync operations.</p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <button className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold" style={{ backgroundColor: roleTheme.accent, color: "white" }}>
-            <Upload className="size-4" /> Full Sync
+          <div className="mt-4 flex flex-wrap gap-3">
+          <button
+            className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold"
+            style={{ backgroundColor: roleTheme.accent, color: "white" }}
+            onClick={() => void triggerMutation.mutate()}
+            disabled={(triggerMutation as any).isLoading}
+          >
+            <Upload className="size-4" /> {(triggerMutation as any).isLoading ? "Running..." : "Full Sync"}
           </button>
-          <button className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold" style={{ borderColor: roleTheme.border, border: "2px solid", color: roleTheme.text }}>
+          <button
+            className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold"
+            style={{ borderColor: roleTheme.border, border: "2px solid", color: roleTheme.text }}
+            onClick={async () => {
+              const res = await (exportMutation as any).mutateAsync();
+              if (res && res.content) {
+                const blob = new Blob([res.content], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = res.filename ?? "export.csv";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+              } else {
+                alert("Export not available in demo mode.");
+              }
+            }}
+            disabled={(exportMutation as any).isLoading}
+          >
             <Download className="size-4" /> Export Data
           </button>
-          <button className="rounded-lg px-4 py-2 text-sm font-semibold" style={{ borderColor: roleTheme.border, border: "2px solid", color: roleTheme.text }}>
+          <button
+            className="rounded-lg px-4 py-2 text-sm font-semibold"
+            style={{ borderColor: roleTheme.border, border: "2px solid", color: roleTheme.text }}
+            onClick={() => window.location.assign('/sync-log')}
+          >
             View Logs
           </button>
         </div>
+        {syncNotice ? (
+          <p className="mt-3 text-sm font-medium" style={{ color: roleTheme.text }}>
+            {syncNotice}
+          </p>
+        ) : null}
       </section>
     </div>
   );
 }
+
+// Hook up mutations after component to avoid hoisting errors
+const triggerMutation = {
+  isLoading: false,
+  mutateAsync: async () => {
+    return await triggerFullSync();
+  },
+};
+
+const exportMutation = {
+  isLoading: false,
+  mutateAsync: async () => {
+    return await exportGovData();
+  },
+};

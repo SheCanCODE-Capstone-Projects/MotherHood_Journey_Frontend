@@ -1,11 +1,20 @@
 "use client";
 
+"use client";
+
+import { useRouter } from "next/navigation";
+
 import { PageHeader } from "@/shared/components/layout";
 import { ROLE_THEMES } from "@/shared/config/rbac";
 import { Users, AlertCircle, CheckCircle, Calendar } from "lucide-react";
 
 export default function MothersPage() {
+  const router = useRouter();
   const roleTheme = ROLE_THEMES.health_worker;
+
+  const handleScheduleVisit = () => {
+    router.push("/health-worker/visits/new");
+  };
 
   const stats = [
     { label: "Active Cases", value: "24", icon: Users, color: roleTheme.accent },
@@ -100,6 +109,8 @@ export default function MothersPage() {
                 </div>
                 <div>
                   <button
+                    type="button"
+                    onClick={handleScheduleVisit}
                     className="rounded-lg px-3 py-2 text-sm font-semibold"
                     style={{ backgroundColor: roleTheme.accent, color: "white" }}
                   >
