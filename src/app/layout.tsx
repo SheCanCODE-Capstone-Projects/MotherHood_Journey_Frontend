@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased text-[15px]">
+    <html lang="en" className="h-full antialiased text-[13px]">
       <body className="min-h-full flex flex-col">
         <PortalShell fallbackRole="patient">
           <Providers>{children}</Providers>

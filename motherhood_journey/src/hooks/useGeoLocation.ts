@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { geoApi } from '@/lib/api/geo';
+import { geoApi } from '../lib/api/geo';
 
 export const useProvinces = () => {
   return useQuery({

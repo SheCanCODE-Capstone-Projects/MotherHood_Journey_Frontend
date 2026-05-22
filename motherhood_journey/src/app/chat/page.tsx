@@ -147,7 +147,7 @@ function SidebarItem({ icon, label, href, active = false }: { icon: React.ReactN
   );
 }
 
-type ChatMember = { name: string; role: string; avatar: string; online: boolean; motherId: string };
+type ChatMember = { name: string; role: string; avatar: string; online: boolean; motherId: string; message?: string; time?: string };
 
 function ChatList({ activeChat, onSelectChat }: { activeChat: ChatMember; onSelectChat: (chat: ChatMember) => void }) {
   const careTeam: ChatMember[] = [
@@ -213,7 +213,7 @@ function ChatList({ activeChat, onSelectChat }: { activeChat: ChatMember; onSele
   );
 }
 
-function ChatListItem({ name, role, message, time, active = false, avatar, online = false, onClick }: { name: string; role: string; message: string; time: string; active?: boolean; avatar: string; online?: boolean; onClick: () => void }) {
+function ChatListItem({ name, role, message = '', time = '', active = false, avatar, online = false, onClick }: { name: string; role: string; message?: string; time?: string; active?: boolean; avatar: string; online?: boolean; onClick: () => void }) {
   return (
     <div onClick={onClick} className={`p-4 border-b border-gray-50 cursor-pointer transition-colors ${active ? 'bg-teal-50' : 'hover:bg-gray-50'}`}>
       <div className="flex items-start gap-3">

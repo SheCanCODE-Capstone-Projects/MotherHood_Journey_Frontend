@@ -6,6 +6,7 @@
  */
 
 import "next-auth";
+import { DefaultSession } from "next-auth";
 import "next-auth/jwt";
 
 export const ROLES = {
@@ -32,20 +33,7 @@ export interface AppUser {
   facilityId?: string | null;
 }
 
-declare module "next-auth" {
-  interface Session {
-    user: AppUser;
-  }
-
-  interface User {
-    role: Role;
-    facilityId?: string | null;
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    role: Role;
-    facilityId?: string | null;
-  }
-}
+// Avoid module augmentation here to keep types consistent with the root
+// workspace-level NextAuth declarations. Use the exported `Role` and
+// `AppUser` types from this file where needed instead of re-augmenting
+// the `next-auth` module in this nested package.

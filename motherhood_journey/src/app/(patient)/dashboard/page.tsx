@@ -2,7 +2,7 @@
 
 import { Plus, MessageCircle, Calendar, User, Phone, Mail, Baby, MapPin, Clock } from "lucide-react";
 import Link from "next/link";
-import { useActivePregnancy, useMotherChildren, useNextAppointment } from "@/hooks/useDashboard";
+import { useActivePregnancy, useMotherChildren, useNextAppointment } from "../../../hooks/useDashboard";
 import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {

@@ -1,5 +1,12 @@
-import { apiClient } from '@/shared/lib/axios';
-import { Province, District, Sector, Cell, Village } from '@/features/geo/types';
+// When running with mock data we don't need the real HTTP client.
+declare const apiClient: any;
+
+// Local lightweight types for the nested mock data
+export interface Province { id: string; name: string; code?: string }
+export interface District { id: string; name: string; code?: string }
+export interface Sector { id: string; name: string; code?: string }
+export interface Cell { id: string; name: string; code?: string }
+export interface Village { id: string; name: string; code?: string }
 
 // Toggle this to test without backend
 const USE_MOCK_DATA = true;

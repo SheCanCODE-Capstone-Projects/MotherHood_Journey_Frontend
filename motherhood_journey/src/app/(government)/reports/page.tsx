@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { FileText, Download, Loader2 } from 'lucide-react';
-import { useGenerateReport } from '@/hooks/useReports';
-import { GeoLocationSelect } from '@/components/forms/GeoLocationSelect';
-import type { ReportType, PeriodType, ScopeLevel } from '@/lib/api/government';
+import { useGenerateReport } from '../../../hooks/useReports';
+import { GeoLocationSelect } from '../../../components/forms/GeoLocationSelect';
+import type { ReportType, PeriodType, ScopeLevel } from '../../../lib/api/government';
 
 export default function ReportsPage() {
   const [reportType, setReportType] = useState<ReportType>('VACCINATION_COVERAGE');
@@ -43,23 +43,25 @@ export default function ReportsPage() {
     });
   };
 
-  const handleGeoChange = (level: string, value: string) => {
+  const handleGeoChange = (location: { provinceId?: string; districtId?: string; sectorId?: string; sectorName?: string; } ) => {
     setGeoLocation(prev => ({
       ...prev,
-      [`${level}Id`]: value,
+      provinceId: location.provinceId || prev.provinceId,
+      districtId: location.districtId || prev.districtId,
+      sectorId: location.sectorId || prev.sectorId,
     }));
   };
 
-  const getMaxGeoLevel = (): number => {
+  const getMaxGeoLevel = (): 'province' | 'district' | 'sector' | 'cell' | 'village' => {
     switch (scopeLevel) {
       case 'PROVINCE':
-        return 1;
+        return 'province';
       case 'DISTRICT':
-        return 2;
+        return 'district';
       case 'SECTOR':
-        return 3;
+        return 'sector';
       default:
-        return 0;
+        return 'village';
     }
   };
 

@@ -11,7 +11,7 @@
  *   - Never scatter permission checks across components — always import from here.
  */
 
-import { type Role } from "@/shared/types/auth";
+import { type Role } from "../types/auth";
 
 // ---------------------------------------------------------------------------
 // 1. Resource identifiers — every gateable action in the system.

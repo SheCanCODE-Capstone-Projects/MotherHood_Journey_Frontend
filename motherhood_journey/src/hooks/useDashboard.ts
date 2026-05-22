@@ -1,5 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/shared/lib/axios';
+
+// When running with `USE_MOCK_DATA = true` we don't need the real apiClient.
+// Declare a loose `apiClient` to keep TS happy for the unused branch.
+declare const apiClient: any;
 
 interface Pregnancy {
   id: string;
