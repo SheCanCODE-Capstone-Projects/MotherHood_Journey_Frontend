@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { generateReport, GenerateReportRequest, GenerateReportResponse } from '@/lib/api/government';
+import { generateReport, GenerateReportRequest, GenerateReportResponse } from '../lib/api/government';
 
 // Toggle this to test without backend
 const USE_MOCK_DATA = true;

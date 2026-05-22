@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { WeekCalendarGrid, CalendarAppointment } from '@/shared/components/charts/WeekCalendarGrid';
-import { CapacityBar } from '@/shared/components/charts/CapacityBar';
+import { WeekCalendarGrid, CalendarAppointment } from '../../../shared/components/charts/WeekCalendarGrid';
+import { CapacityBar } from '../../../shared/components/charts/CapacityBar';
 
 // Mock data
 const MOCK_APPOINTMENTS: CalendarAppointment[] = [

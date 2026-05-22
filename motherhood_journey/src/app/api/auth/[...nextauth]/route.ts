@@ -6,6 +6,6 @@
  * /api/auth/callback/*, /api/auth/csrf) are handled automatically.
  */
 
-import { handlers } from "@/auth";
+import { handlers } from "../../../../auth";
 
 export const { GET, POST } = handlers;

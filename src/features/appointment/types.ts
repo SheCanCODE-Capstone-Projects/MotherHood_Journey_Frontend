@@ -1,15 +1,11 @@
-export type AppointmentStatus =
-  | "SCHEDULED"
-  | "COMPLETED"
-  | "NO_SHOW"
-  | "CANCELLED";
+export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "NO_SHOW" | "CANCELLED";
 
 export type AppointmentType =
   | "PRENATAL_CHECKUP"
   | "POSTNATAL_CHECKUP"
   | "IMMUNIZATION"
   | "NUTRITIONAL_COUNSELING"
-  | "DELIVERY_PREPARATION"
+  | "MENTAL_HEALTH"
   | "LABORATORY_TEST"
   | "ULTRASOUND"
   | "OTHER";
@@ -20,39 +16,35 @@ export interface Appointment {
   facilityName: string;
   appointmentType: AppointmentType;
   appointmentTypeLabel: string;
-  scheduledDate: string;
-  scheduledTime: string;
-  providerName?: string;
+  scheduledDate: string; // YYYY-MM-DD
+  scheduledTime: string; // HH:mm
   status: AppointmentStatus;
-  notes?: string;
   createdAt: string;
   updatedAt: string;
+  notes?: string | null;
 }
+
+export type AppointmentListResponse = {
+  appointments: Appointment[];
+  total: number;
+};
 
 export interface AppointmentDetail extends Appointment {
-  providerName: string;
-  cancellationReason?: string;
+  referenceNumber?: string;
+  patientName?: string;
+  facilityId?: string;
 }
 
-export interface AppointmentListResponse {
-  content: Appointment[];
-  totalPages: number;
-  totalElements: number;
-  pageNumber: number;
-  pageSize: number;
-}
-
-export interface CancelAppointmentRequest {
+export type CancelAppointmentRequest = {
   reason?: string;
-}
+};
 
-export interface CancelAppointmentResponse {
-  id: string;
-  status: "CANCELLED";
-  cancelledAt: string;
-}
+export type CancelAppointmentResponse = {
+  ok: boolean;
+  id?: string;
+};
 
-export interface CategorizedAppointments {
+export type CategorizedAppointments = {
   future: Appointment[];
   past: Appointment[];
-}
+};

@@ -21,5 +21,5 @@ import { type Role } from "@/shared/types/auth";
  */
 export function useRole(): Role | undefined {
   const { data: session } = useSession();
-  return session?.user?.role;
+  return session?.user?.role as Role | undefined;
 }

@@ -23,7 +23,7 @@ export function useRole(options?: UseRoleOptions) {
 
   const role =
     options?.previewRole ??
-    currentUser?.role ??
+    (currentUser?.role as UserRole | undefined) ??
     options?.fallbackRole ??
     "patient";
 

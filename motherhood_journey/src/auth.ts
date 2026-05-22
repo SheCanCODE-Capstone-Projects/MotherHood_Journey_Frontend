@@ -63,13 +63,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           const data = await res.json();
 
-          return {
+          return ({
             id: data.user.id as string,
             name: data.user.name as string,
             email: data.user.email as string,
             role: data.user.role as Role,
             facilityId: (data.user.facilityId as string | null) ?? null,
-          };
+          } as any);
         } catch {
           return null; // network error or unexpected backend response
         }
@@ -87,7 +87,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as { role: Role }).role;
-        token.facilityId =
+        (token as any).facilityId =
           (user as { facilityId?: string | null }).facilityId ?? null;
       }
       return token;
@@ -100,7 +100,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (token) {
         session.user.role = token.role as Role;
-        session.user.facilityId = (token.facilityId as string | null) ?? null;
+        (session.user as any).facilityId = (token as any).facilityId ?? null;
         session.user.id = token.sub ?? "";
       }
       return session;

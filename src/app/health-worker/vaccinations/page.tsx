@@ -22,16 +22,16 @@ type ToastState = {
 type AdminDialogState = {
   vaccination: ChildVaccinationSessionRecord;
   lotNumber: string;
-<<<<<<< HEAD
-=======
   error?: string;
->>>>>>> dcbbd5d (feat: Add field-level validation and error display to lot number input)
 } | null;
 
 function formatAge(years: number, months: number) {
-  const ageParts = [years > 0 ? `${years} year${years === 1 ? "" : "s"}` : null, months > 0 ? `${months} month${months === 1 ? "" : "s"}` : null].filter(Boolean);
+  const ageParts = [
+    years > 0 ? `${years} year${years === 1 ? "" : "s"}` : null,
+    months > 0 ? `${months} month${months === 1 ? "" : "s"}` : null,
+  ].filter(Boolean);
 
-  return ageParts.length > 0 ? ageParts.join(" ") : "Newborn";
+  return ageParts.length > 0 ? (ageParts as string[]).join(" ") : "Newborn";
 }
 
 function formatDate(value: string) {
@@ -105,19 +105,12 @@ export default function VaccinationSessionPage() {
 
   const session = sessionQuery.data;
   const dueVaccines = session?.dueVaccines ?? [];
-  const notFound = sessionQuery.isError && sessionQuery.error instanceof ApiError && sessionQuery.error.statusCode === 404;
+  const notFound =
+    sessionQuery.isError && sessionQuery.error instanceof ApiError && sessionQuery.error.statusCode === 404;
 
   const handleConfirmAdministration = useCallback(() => {
-    if (!adminDialog) {
-      return;
-    }
+    if (!adminDialog) return;
 
-<<<<<<< HEAD
-    administerMutation.mutate(
-      {
-      vaccinationId: adminDialog.vaccination.id,
-      lotNumber: adminDialog.lotNumber.trim(),
-=======
     const trimmedLotNumber = adminDialog.lotNumber.trim();
     if (!trimmedLotNumber) {
       setAdminDialog((current) =>
@@ -130,7 +123,6 @@ export default function VaccinationSessionPage() {
       {
         vaccinationId: adminDialog.vaccination.id,
         lotNumber: trimmedLotNumber,
->>>>>>> dcbbd5d (feat: Add field-level validation and error display to lot number input)
       },
       {
         onSuccess: () => {
@@ -141,20 +133,10 @@ export default function VaccinationSessionPage() {
           });
         },
         onError: (error) => {
-<<<<<<< HEAD
           const message = error instanceof ApiError ? error.message : "Unable to administer vaccination.";
           setToast({ tone: "error", message });
         },
-      },
-=======
-          const message =
-            error instanceof ApiError
-              ? error.message
-              : "Unable to administer vaccination.";
-          setToast({ tone: "error", message });
-        },
       }
->>>>>>> dcbbd5d (feat: Add field-level validation and error display to lot number input)
     );
   }, [adminDialog, administerMutation]);
 
@@ -198,10 +180,10 @@ export default function VaccinationSessionPage() {
           {debouncedSearchTerm.length === 0
             ? "Enter a child health ID or birth certificate number to load the vaccination session."
             : sessionQuery.isFetching
-              ? "Searching for the child record..."
-              : session
-                ? `Loaded session for ${session.child.fullName}.`
-                : "Waiting for the backend response."}
+            ? "Searching for the child record..."
+            : session
+            ? `Loaded session for ${session.child.fullName}.`
+            : "Waiting for the backend response."}
         </p>
       </section>
 
@@ -209,7 +191,9 @@ export default function VaccinationSessionPage() {
 
       {sessionQuery.isError && !notFound ? (
         <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm text-red-700 shadow-sm">
-          {sessionQuery.error instanceof Error ? sessionQuery.error.message : "Unable to load the vaccination session."}
+          {sessionQuery.error instanceof Error
+            ? sessionQuery.error.message
+            : "Unable to load the vaccination session."}
         </section>
       ) : null}
 
@@ -355,9 +339,6 @@ export default function VaccinationSessionPage() {
                 id="lot-number"
                 ref={lotNumberInputRef}
                 value={adminDialog.lotNumber}
-<<<<<<< HEAD
-                onChange={(event) => setAdminDialog((current) => (current ? { ...current, lotNumber: event.target.value } : current))}
-=======
                 onChange={(event) => {
                   setAdminDialog((current) =>
                     current
@@ -365,17 +346,12 @@ export default function VaccinationSessionPage() {
                       : current
                   );
                 }}
->>>>>>> dcbbd5d (feat: Add field-level validation and error display to lot number input)
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && canConfirmAdministration) {
                     handleConfirmAdministration();
                   }
                 }}
                 placeholder="Enter lot number"
-<<<<<<< HEAD
-                className="h-12 w-full rounded-2xl border border-[#D5E9E6] px-4 text-sm outline-none transition focus:border-[#1D5551] focus:ring-2 focus:ring-[#1D5551]/15"
-              />
-=======
                 aria-invalid={!!adminDialog.error}
                 className={cn(
                   "h-12 w-full rounded-2xl border px-4 text-sm outline-none transition focus:ring-2",
@@ -387,7 +363,6 @@ export default function VaccinationSessionPage() {
               {adminDialog.error ? (
                 <p className="text-sm font-medium text-red-600">{adminDialog.error}</p>
               ) : null}
->>>>>>> dcbbd5d (feat: Add field-level validation and error display to lot number input)
             </div>
 
             <div className="mt-6 flex flex-wrap justify-end gap-3">

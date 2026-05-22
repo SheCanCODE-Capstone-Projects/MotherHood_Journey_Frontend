@@ -1,37 +1,6 @@
-import axios from 'axios';
+// Compatibility shim for the nested `motherhood_journey` package.
+// Re-export the central API client implementation from the workspace root.
 
-const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+export { apiClient, createApiClient, isApiError } from '../../../../src/lib/api/client';
 
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('authToken');
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
-  }
-);
-
-export { apiClient };
-export default apiClient;
+export type { ApiClient } from '../../../../src/lib/api/client';

@@ -7,18 +7,18 @@
  */
 
 // Re-export role constants and the Resource type.
-export { PERMISSIONS, RESOURCES } from "@/shared/config/rbac";
-export type { Resource } from "@/shared/config/rbac";
+export { PERMISSIONS, RESOURCES } from "../../shared/config/rbac";
+export type { Resource } from "../../shared/config/rbac";
 
 // Re-export user/session types from shared types.
-export { ROLES } from "@/shared/types/auth";
-export type { Role, MvpRole, AppUser } from "@/shared/types/auth";
+export { ROLES } from "../../shared/types/auth";
+export type { Role, MvpRole, AppUser } from "../../shared/types/auth";
 
 // ---------------------------------------------------------------------------
 // API payload types — match the backend REST contract
 // ---------------------------------------------------------------------------
 
-import type { Role } from "@/shared/types/auth";
+import type { Role } from "../../shared/types/auth";
 
 /** POST /api/auth/login — request body */
 export interface LoginRequest {

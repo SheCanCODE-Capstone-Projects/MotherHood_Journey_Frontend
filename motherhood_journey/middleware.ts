@@ -19,8 +19,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth } from "./src/auth";
-import { ROUTE_ROLE_MAP } from "@/shared/config/rbac";
-import type { Role } from "@/shared/types/auth";
+import { ROUTE_ROLE_MAP } from "./src/shared/config/rbac";
+import type { Role } from "./src/shared/types/auth";
 
 // ---------------------------------------------------------------------------
 // Public paths — never require authentication

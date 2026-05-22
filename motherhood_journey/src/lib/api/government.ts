@@ -1,4 +1,4 @@
-import { apiClient } from '@/shared/lib/axios';
+import { apiClient } from '../../shared/lib/axios';
 
 export type ReportType = 'VACCINATION_COVERAGE' | 'ANC_ATTENDANCE' | 'BIRTH_REGISTRATION' | 'MATERNAL_HEALTH';
 export type PeriodType = 'MONTH' | 'QUARTER' | 'YEAR';
@@ -20,7 +20,9 @@ export interface GenerateReportResponse {
   generatedAt: string;
 }
 
-export const generateReport = async (request: GenerateReportRequest): Promise<GenerateReportResponse> => {
-  const { data } = await apiClient.post('/api/v1/reports/generate', request);
+export const generateReport = async (
+  request: GenerateReportRequest,
+): Promise<GenerateReportResponse> => {
+  const data = await apiClient.post<GenerateReportResponse>('/api/v1/reports/generate', request);
   return data;
 };
