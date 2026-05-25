@@ -229,9 +229,10 @@ export default function LoginPage() {
         }}
         alt="login background"
         aria-hidden="true"
-        className={`absolute left-1/2 top-1/2 min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 object-cover transition-opacity duration-1000 ${
+        className={`absolute inset-0 h-full w-full object-cover object-center transition-[opacity,transform] duration-1000 ease-out ${
           visible ? "opacity-100" : "opacity-0"
         }`}
+        style={{ transform: visible ? "scale(1)" : "scale(1.04)" }}
       />
     );
   }
