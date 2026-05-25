@@ -5,8 +5,8 @@
 
 import type {
 	ChildVaccinationSessionRecord,
-	VaccinationSessionChild,
-	VaccinationSessionData,
+	ChildVaccinationSessionChild as VaccinationSessionChild,
+	ChildVaccinationSessionResponse as VaccinationSessionData,
 } from "../types";
 
 /**
