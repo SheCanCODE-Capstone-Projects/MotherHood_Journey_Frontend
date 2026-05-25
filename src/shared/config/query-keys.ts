@@ -22,6 +22,11 @@ export const queryKeys = {
   geo: {
     facilities: ["geo", "facilities"] as const,
   },
+  facilityStats: {
+    list: ["facility-stats", "list"] as const,
+    detail: (id: string) => ["facility-stats", "detail", id] as const,
+    heatmap: ["facility-stats", "heatmap"] as const,
+  },
   notification: {
     list: ["notification", "list"] as const,
   },
