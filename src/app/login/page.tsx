@@ -40,6 +40,9 @@ const languageOptions: Array<{ code: LanguageCode; label: string }> = [
   { code: "fr", label: "Francais" },
 ];
 
+const vimeoBackgroundUrl =
+  "https://player.vimeo.com/video/868311488?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0&controls=0&playsinline=1";
+
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
   const { currentUser, signIn, signUp, logout } = useAuth();
@@ -168,9 +171,56 @@ export default function LoginPage() {
     void i18n.changeLanguage(language);
   };
 
+  // Slides: first is the Vimeo background (keeps existing iframe), then image slides
+  const slides: Array<{ type: "video" } | { type: "image"; src: string }> = [
+    { type: "video" },
+    { type: "image", src: "https://source.unsplash.com/1600x900/?pregnant,woman" },
+    { type: "image", src: "https://source.unsplash.com/1600x900/?mother,baby" },
+    { type: "image", src: "https://source.unsplash.com/1600x900/?mother,child,walking" },
+  ];
+
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSlideIndex((s) => (s + 1) % slides.length);
+    }, 7000);
+
+    return () => clearInterval(interval);
+  }, [slides.length]);
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(58,143,133,0.22),transparent_45%),radial-gradient(circle_at_85%_25%,rgba(42,127,138,0.24),transparent_45%),linear-gradient(140deg,#2F7F7A_0%,#2A7F8A_45%,#3A8F85_100%)] opacity-95" />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[#1B3F42]">
+        {/* Render all slides stacked; control visibility with opacity */}
+        {slides.map((slide, idx) =>
+          slide.type === "video" ? (
+            <iframe
+              key="vimeo-bg"
+              src={vimeoBackgroundUrl}
+              title="Login background video"
+              aria-hidden="true"
+              allow="autoplay; fullscreen; picture-in-picture"
+              className={`absolute left-1/2 top-1/2 h-[56.25vw] min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 scale-[1.35] border-0 transition-opacity duration-1000 ${
+                slideIndex === idx ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          ) : (
+            <img
+              key={slide.src}
+              src={slide.src}
+              alt="login background"
+              aria-hidden="true"
+              className={`absolute left-1/2 top-1/2 min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 object-cover transition-opacity duration-1000 ${
+                slideIndex === idx ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          ),
+        )}
+
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(58,143,133,0.28),transparent_42%),radial-gradient(circle_at_85%_25%,rgba(42,127,138,0.22),transparent_44%),linear-gradient(140deg,rgba(34,93,98,0.55)_0%,rgba(28,82,87,0.3)_50%,rgba(43,111,117,0.4)_100%)]" />
+        <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]" />
+      </div>
 
       <aside className="absolute right-4 top-4 z-20 w-[min(90vw,18rem)] sm:right-6 sm:top-6">
         <div className="rounded-2xl border border-[#A9D6D3] bg-[#E7F7F5] p-3 text-sm text-[#1D5052] shadow-lg">
@@ -220,7 +270,7 @@ export default function LoginPage() {
       </aside>
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-10 sm:px-6">
-        <section className="w-full max-w-md rounded-3xl border border-white/60 bg-white/92 p-7 shadow-[0_20px_55px_-25px_rgba(34,122,127,0.7)] backdrop-blur-sm sm:p-9">
+        <section className="z-10 w-full max-w-md rounded-3xl border border-white/30 bg-white/5 p-7 shadow-[0_20px_55px_-25px_rgba(34,122,127,0.5)] backdrop-blur-md sm:p-9">
           <div className="mb-7">
             <h1 className="text-3xl font-semibold tracking-tight text-[#1D5052]">
               {t("login.title")}
@@ -240,7 +290,7 @@ export default function LoginPage() {
           )}
 
           {currentUser ? (
-            <div className="space-y-4 rounded-2xl border border-[#B4DDD9] bg-[#E7F7F5] p-5 text-[#1D5052]">
+            <div className="space-y-4 rounded-2xl border border-white/25 bg-white/10 p-5 text-[#1D5052] backdrop-blur-sm">
               <p className="text-sm font-medium">
                 {t("login.loggedInAs", { phone: currentUser.phone })}
               </p>
@@ -254,7 +304,7 @@ export default function LoginPage() {
             </div>
           ) : (
             <>
-              <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl bg-[#E4F4F1] p-1">
+              <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl bg-white/10 p-1 backdrop-blur-sm">
                 <button
                   type="button"
                   onClick={() => switchMode("signin")}
@@ -294,7 +344,7 @@ export default function LoginPage() {
                   value={formData.fullName}
                   onChange={(event) => onChangeField("fullName", event.target.value)}
                   placeholder="Jane Doe"
-                  className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
+                  className={`w-full rounded-xl border border-white/35 bg-white/12 px-3 py-2.5 text-[#124548] placeholder:text-[#5C7D7D] transition outline-none backdrop-blur-sm ${
                     errors.fullName
                       ? "border-red-500 ring-2 ring-red-100"
                       : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
@@ -319,7 +369,7 @@ export default function LoginPage() {
                   value={formData.phone}
                   onChange={(event) => onChangeField("phone", event.target.value)}
                   placeholder="+250700000000"
-                  className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
+                  className={`w-full rounded-xl border border-white/35 bg-white/12 px-3 py-2.5 text-[#124548] placeholder:text-[#5C7D7D] transition outline-none backdrop-blur-sm ${
                     errors.phone
                       ? "border-red-500 ring-2 ring-red-100"
                       : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
@@ -343,7 +393,7 @@ export default function LoginPage() {
                   type="password"
                   value={formData.password}
                   onChange={(event) => onChangeField("password", event.target.value)}
-                  className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
+                  className={`w-full rounded-xl border border-white/35 bg-white/12 px-3 py-2.5 text-[#124548] placeholder:text-[#5C7D7D] transition outline-none backdrop-blur-sm ${
                     errors.password
                       ? "border-red-500 ring-2 ring-red-100"
                       : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
@@ -370,7 +420,7 @@ export default function LoginPage() {
                     onChange={(event) =>
                       onChangeField("confirmPassword", event.target.value)
                     }
-                    className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
+                    className={`w-full rounded-xl border border-white/35 bg-white/12 px-3 py-2.5 text-[#124548] placeholder:text-[#5C7D7D] transition outline-none backdrop-blur-sm ${
                       errors.confirmPassword
                         ? "border-red-500 ring-2 ring-red-100"
                         : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
