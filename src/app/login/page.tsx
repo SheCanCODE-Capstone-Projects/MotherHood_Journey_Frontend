@@ -201,9 +201,10 @@ export default function LoginPage() {
               title="Login background video"
               aria-hidden="true"
               allow="autoplay; fullscreen; picture-in-picture"
-              className={`absolute left-1/2 top-1/2 h-[56.25vw] min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 scale-[1.35] border-0 transition-opacity duration-1000 ${
+              className={`absolute inset-0 w-full h-full left-0 top-0 border-0 transition-opacity duration-1000 ${
                 slideIndex === idx ? "opacity-100" : "opacity-0"
               }`}
+              style={{ transform: "scale(1.15)" }}
             />
           ) : (
             <img
