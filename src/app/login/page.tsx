@@ -179,17 +179,17 @@ export default function LoginPage() {
   }> = [
     {
       type: "image",
-      local: "/login-slides/slide1.jpg",
+      local: "/login-slides/slide1.svg",
       fallback: "https://source.unsplash.com/1600x900/?pregnant,woman",
     },
     {
       type: "image",
-      local: "/login-slides/slide2.jpg",
+      local: "/login-slides/slide2.svg",
       fallback: "https://source.unsplash.com/1600x900/?mother,baby",
     },
     {
       type: "image",
-      local: "/login-slides/slide3.jpg",
+      local: "/login-slides/slide3.svg",
       fallback: "https://source.unsplash.com/1600x900/?mother,child,walking",
     },
   ];
