@@ -258,7 +258,7 @@ export default function LoginPage() {
       </div>
 
       <aside className="absolute right-4 top-4 z-20 w-[min(90vw,18rem)] sm:right-6 sm:top-6">
-        <div className="rounded-2xl border border-[#A9D6D3] bg-[#E7F7F5] p-3 text-sm text-[#1D5052] shadow-lg">
+        <div className="rounded-2xl border border-white/30 bg-white/10 p-3 text-sm text-[#1D5052] shadow-lg backdrop-blur-sm">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="font-semibold">{t("login.languageNotice")}</p>
