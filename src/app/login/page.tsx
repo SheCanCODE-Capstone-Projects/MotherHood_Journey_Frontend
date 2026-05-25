@@ -168,109 +168,26 @@ export default function LoginPage() {
     void i18n.changeLanguage(language);
   };
 
-  // Image-only slideshow: prefer remote thumbnails (provided earlier) and fall back to local SVG placeholders
-  const slides: Array<{
-    type: "image";
-    remote?: string;
-    fallback: string;
-  }> = [
-    {
-      type: "image",
-      remote:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTm6FtxzWWYwuEFbYwcH4qmLcxP4YpOwhjPmlaU7UQYnUOvSeclluUZLCo&s",
-      fallback: "/login-slides/slide1.svg",
-    },
-    {
-      type: "image",
-      remote:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUmCM5wGWWdRZwUqV7um_M5VdcvzOvp6h8R0z7nm5--A&s",
-      fallback: "/login-slides/slide2.svg",
-    },
-    {
-      type: "image",
-      remote:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdMwu2uRakOe0EgNArjOQESixHnbtlZJbNRqMzW5haWQ&s",
-      fallback: "/login-slides/slide3.svg",
-    },
-    {
-      type: "image",
-      remote:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTN1XR7LEeOxYpxU7jWG5RiR7nrtym-6RNWz22BO5EeFg&s",
-      fallback: "/login-slides/slide4.svg",
-    },
-  ];
-
-  const [slideIndex, setSlideIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSlideIndex((s) => (s + 1) % slides.length);
-    }, 7000);
-
-    return () => clearInterval(interval);
-  }, [slides.length]);
-
-  function BackgroundImage({
-    remoteSrc,
-    srcFallback,
-    visible,
-  }: {
-    remoteSrc?: string;
-    srcFallback: string;
-    visible: boolean;
-  }) {
-    const [src, setSrc] = useState(remoteSrc ?? srcFallback);
-
-    return (
-      <img
-        src={src}
-        onError={() => {
-          if (src !== srcFallback) setSrc(srcFallback);
-        }}
-        alt="login background"
-        aria-hidden="true"
-        className={`absolute inset-0 h-full w-full object-cover object-center transition-[opacity,transform] duration-1200 ease-out ${
-          visible ? "opacity-100" : "opacity-0"
-        }`}
-        style={{
-          transform: visible ? "scale(1) translateZ(0)" : "scale(1.06) translateZ(0)",
-          willChange: "opacity, transform",
-        }}
-      />
-    );
-  }
-
   return (
-    <main className="relative min-h-screen overflow-hidden bg-white">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[#1B3F42]">
-        {/* Render all slides stacked; control visibility with opacity */}
-        {slides.map((slide, idx) => {
-          const key = slide.remote ?? slide.fallback;
-          return (
-            <BackgroundImage
-              key={key}
-              remoteSrc={slide.remote}
-              srcFallback={slide.fallback}
-              visible={slideIndex === idx}
-            />
-          );
-        })}
-
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(58,143,133,0.28),transparent_42%),radial-gradient(circle_at_85%_25%,rgba(42,127,138,0.22),transparent_44%),linear-gradient(140deg,rgba(34,93,98,0.55)_0%,rgba(28,82,87,0.3)_50%,rgba(43,111,117,0.4)_100%)]" />
-        <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]" />
+    <main className="relative min-h-screen overflow-hidden bg-[#EAF5F3]">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_15%_18%,rgba(255,255,255,0.9),transparent_18%),radial-gradient(circle_at_85%_20%,rgba(235,248,246,0.95),transparent_22%),radial-gradient(circle_at_25%_82%,rgba(187,220,215,0.6),transparent_24%),linear-gradient(135deg,#F7FBFA_0%,#EEF8F6_35%,#DCEDEB_100%)]">
+        <div className="absolute -left-28 top-20 h-72 w-72 rounded-full bg-[#BCE0DB]/35 blur-3xl" />
+        <div className="absolute -right-20 top-1/3 h-80 w-80 rounded-full bg-[#7FB7B1]/25 blur-3xl" />
+        <div className="absolute -bottom-24 left-1/4 h-96 w-96 rounded-full bg-[#2C6F73]/10 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.55)_0%,transparent_38%,rgba(255,255,255,0.12)_100%)]" />
       </div>
 
       <aside className="absolute right-4 top-4 z-20 w-[min(90vw,18rem)] sm:right-6 sm:top-6">
-        <div className="rounded-2xl border border-white/30 bg-white/10 p-3 text-sm text-[#1D5052] shadow-lg backdrop-blur-sm">
+        <div className="rounded-2xl border border-[#B7D6D2] bg-white/75 p-3 text-sm text-[#1D5052] shadow-lg backdrop-blur-md">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="font-semibold">{t("login.languageNotice")}</p>
-              <p className="text-xs text-[#256064]">{t("login.languageMenuHint")}</p>
+              <p className="text-xs text-[#4E7575]">{t("login.languageMenuHint")}</p>
             </div>
             <button
               type="button"
               onClick={() => setShowLanguageMenu((previous) => !previous)}
-              className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#2C6F73]"
+              className="rounded-full bg-[#2C6F73] px-3 py-1 text-xs font-semibold text-white shadow-sm"
             >
               {activeLanguage.toUpperCase()}
             </button>
@@ -295,7 +212,7 @@ export default function LoginPage() {
                     className={`rounded-xl px-3 py-2 text-left text-xs font-semibold transition sm:text-sm ${
                       isActive
                         ? "bg-[#2C6F73] text-white shadow"
-                        : "bg-white text-[#2C6F73] hover:bg-[#D1ECE8]"
+                        : "bg-[#F5FBFA] text-[#2C6F73] hover:bg-[#D1ECE8]"
                     }`}
                   >
                     {option.label}
@@ -308,7 +225,7 @@ export default function LoginPage() {
       </aside>
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-10 sm:px-6">
-        <section className="z-10 w-full max-w-md rounded-3xl border border-white/30 bg-white/5 p-7 shadow-[0_20px_55px_-25px_rgba(34,122,127,0.5)] backdrop-blur-md sm:p-9">
+        <section className="z-10 w-full max-w-md rounded-3xl border border-[#C7E1DD] bg-white/82 p-7 shadow-[0_22px_60px_-28px_rgba(34,122,127,0.38)] backdrop-blur-md sm:p-9">
           <div className="mb-7">
             <h1 className="text-3xl font-semibold tracking-tight text-[#1D5052]">
               {t("login.title")}
@@ -328,7 +245,7 @@ export default function LoginPage() {
           )}
 
           {currentUser ? (
-            <div className="space-y-4 rounded-2xl border border-white/25 bg-white/10 p-5 text-[#1D5052] backdrop-blur-sm">
+            <div className="space-y-4 rounded-2xl border border-[#D4E8E4] bg-white/85 p-5 text-[#1D5052] backdrop-blur-sm">
               <p className="text-sm font-medium">
                 {t("login.loggedInAs", { phone: currentUser.phone })}
               </p>
@@ -342,7 +259,7 @@ export default function LoginPage() {
             </div>
           ) : (
             <>
-              <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl bg-white/10 p-1 backdrop-blur-sm">
+              <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl bg-[#EEF8F6] p-1 backdrop-blur-sm">
                 <button
                   type="button"
                   onClick={() => switchMode("signin")}
