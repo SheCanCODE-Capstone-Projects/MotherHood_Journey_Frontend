@@ -40,9 +40,6 @@ const languageOptions: Array<{ code: LanguageCode; label: string }> = [
   { code: "fr", label: "Francais" },
 ];
 
-const vimeoBackgroundUrl =
-  "https://player.vimeo.com/video/868311488?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0&controls=0&playsinline=1";
-
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
   const { currentUser, signIn, signUp, logout } = useAuth();
@@ -179,18 +176,27 @@ export default function LoginPage() {
   }> = [
     {
       type: "image",
-      local: "/login-slides/slide1.svg",
-      fallback: "https://source.unsplash.com/1600x900/?pregnant,woman",
+      local:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTm6FtxzWWYwuEFbYwcH4qmLcxP4YpOwhjPmlaU7UQYnUOvSeclluUZLCo&s",
+      fallback: "/login-slides/slide1.svg",
     },
     {
       type: "image",
-      local: "/login-slides/slide2.svg",
-      fallback: "https://source.unsplash.com/1600x900/?mother,baby",
+      local:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUmCM5wGWWdRZwUqV7um_M5VdcvzOvp6h8R0z7nm5--A&s",
+      fallback: "/login-slides/slide2.svg",
     },
     {
       type: "image",
-      local: "/login-slides/slide3.svg",
-      fallback: "https://source.unsplash.com/1600x900/?mother,child,walking",
+      local:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdMwu2uRakOe0EgNArjOQESixHnbtlZJbNRqMzW5haWQ&s",
+      fallback: "/login-slides/slide3.svg",
+    },
+    {
+      type: "image",
+      local:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTN1XR7LEeOxYpxU7jWG5RiR7nrtym-6RNWz22BO5EeFg&s",
+      fallback: "/login-slides/slide3.svg",
     },
   ];
 
