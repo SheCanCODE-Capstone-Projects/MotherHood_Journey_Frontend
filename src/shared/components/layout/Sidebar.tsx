@@ -7,10 +7,13 @@ import {
   Building2,
   CalendarDays,
   FileText,
+  Home,
   LayoutDashboard,
   LogOut,
+  MessageCircle,
   Stethoscope,
   Users,
+  Lightbulb,
   type LucideIcon,
 } from "lucide-react";
 
@@ -30,20 +33,25 @@ type SidebarProps = {
 
 const iconByHref: Record<string, LucideIcon> = {
   "/dashboard": LayoutDashboard,
+  "/patient/dashboard": Home,
   "/mothers": Users,
   "/visits": CalendarDays,
   "/diagnoses": Stethoscope,
   "/pregnancies": Baby,
+  "/patient/pregnancies": FileText,
   "/children": Baby,
-  "/my-children": Baby,
+  "/patient/children": Users,
   "/appointments": CalendarDays,
+  "/patient/appointments": CalendarDays,
+  "/patient/chat": MessageCircle,
+  "/tips": Lightbulb,
   "/staff": Users,
   "/reports": FileText,
   "/analytics": LayoutDashboard,
   "/sync": LayoutDashboard,
 };
 
-const mainNavItems = ["/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/children", "/my-children", "/appointments", "/reports", "/analytics", "/staff", "/sync"];
+const mainNavItems = ["/dashboard", "/patient/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/patient/pregnancies", "/children", "/patient/children", "/appointments", "/patient/appointments", "/patient/chat", "/tips", "/reports", "/analytics", "/staff", "/sync"];
 
 const roleTheme = { text: '#085041', border: '#5DCAA5', accent: '#085041' };
 
