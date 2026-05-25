@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, MessageCircle, User, Calendar, X } from "lucide-react";
+import { Plus, MessageCircle, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -10,7 +10,6 @@ export default function PatientDashboardPage() {
       <TopSection />
       <MiddleSection />
       <BottomSection />
-      <Footer />
     </div>
   );
 }
@@ -56,7 +55,9 @@ function TopSection() {
             </button>
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                <User size={18} className="text-white" />
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                </svg>
               </div>
               <div>
                 <p className="text-[9px] text-white/60 uppercase tracking-wider">Prenatal Check-up</p>
@@ -65,7 +66,9 @@ function TopSection() {
             </div>
             <div className="pt-3 border-t border-white/10 space-y-1">
               <div className="flex items-center gap-2">
-                <Calendar size={12} className="text-teal-300" />
+                <svg className="w-3 h-3 text-teal-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
                 <span className="text-xs text-teal-100">Oct 14, 2024</span>
               </div>
               <p className="text-[10px] text-teal-200">2:00 PM • On-Site Exam</p>
@@ -184,18 +187,4 @@ function StatCard({ label, value, unit, status }: { label: string; value: string
   );
 }
 
-function Footer() {
-  return (
-    <footer className="pt-6 mt-2 border-t border-gray-200">
-      <div className="flex flex-wrap justify-center gap-5 text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-        <a href="#" className="hover:text-gray-600">Support</a>
-        <a href="#" className="hover:text-gray-600">Privacy Policy</a>
-        <a href="#" className="hover:text-gray-600">Terms of Service</a>
-        <a href="#" className="hover:text-gray-600">Emergency Contacts</a>
-      </div>
-      <p className="text-center text-[9px] text-gray-300 uppercase tracking-widest font-bold mt-3">
-        © 2026 Maternal Sanctuary Health System
-      </p>
-    </footer>
-  );
-}
+

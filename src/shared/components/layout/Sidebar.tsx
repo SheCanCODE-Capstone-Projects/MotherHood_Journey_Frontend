@@ -4,22 +4,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Baby,
+  Building2,
   CalendarDays,
-  ClipboardList,
   FileText,
+  Home,
   LayoutDashboard,
   LogOut,
-  RefreshCcw,
-  ShieldCheck,
+  MessageCircle,
   Stethoscope,
   Users,
+  Lightbulb,
   type LucideIcon,
 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { useRole } from "@/shared/hooks/useRole";
-import { SkipLink } from "@/shared/components/layout/SkipLink";
 import type { UserRole } from "@/shared/types/auth";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -32,72 +32,30 @@ type SidebarProps = {
 
 const iconByHref: Record<string, LucideIcon> = {
   "/dashboard": LayoutDashboard,
-  "/hw-dashboard": LayoutDashboard,
-  "/facility-dashboard": LayoutDashboard,
+  "/patient/dashboard": Home,
   "/mothers": Users,
   "/visits": CalendarDays,
   "/diagnoses": Stethoscope,
-  "/vaccinations": Baby,
   "/pregnancies": Baby,
+  "/patient/pregnancies": FileText,
   "/children": Baby,
-  "/my-children": Baby,
+  "/patient/children": Users,
   "/appointments": CalendarDays,
-  "/schedule": CalendarDays,
+  "/patient/appointments": CalendarDays,
+  "/patient/chat": MessageCircle,
+  "/tips": Lightbulb,
   "/staff": Users,
   "/reports": FileText,
-  "/district-dashboard": LayoutDashboard,
-  "/facilities": ClipboardList,
   "/analytics": LayoutDashboard,
-  "/national-dashboard": LayoutDashboard,
-  "/national-reports": FileText,
-  "/sync-log": RefreshCcw,
-  "/users": Users,
-  "/service-requests": ClipboardList,
-  "/consent": ShieldCheck,
-  "/documents": FileText,
+  "/sync": LayoutDashboard,
 };
 
-<<<<<<< HEAD
-const mainNavItems = [
-  "/dashboard",
-  "/hw-dashboard",
-  "/facility-dashboard",
-  "/mothers",
-  "/visits",
-  "/diagnoses",
-  "/vaccinations",
-  "/pregnancies",
-  "/children",
-  "/my-children",
-  "/appointments",
-  "/schedule",
-  "/service-requests",
-  "/staff",
-  "/reports",
-  "/district-dashboard",
-  "/facilities",
-  "/analytics",
-  "/national-dashboard",
-  "/national-reports",
-  "/sync-log",
-  "/users",
-  "/consent",
-  "/documents",
-];
-=======
-const mainNavItems = ["/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/children", "/my-children", "/appointments", "/reports", "/analytics", "/staff", "/sync"];
+const mainNavItems = ["/dashboard", "/patient/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/patient/pregnancies", "/children", "/patient/children", "/appointments", "/patient/appointments", "/patient/chat", "/tips", "/reports", "/analytics", "/staff", "/sync"];
 
-const allNavItems = Array.from(
-  new Map(
-    Object.values(ROLE_NAV_ITEMS)
-      .flat()
-      .map((item) => [item.href, item]),
-  ).values(),
-);
->>>>>>> 4afc06f6 (fix(routes): avoid parallel pages — move patient children to /my-children and update nav)
+const roleTheme = { text: '#085041', border: '#5DCAA5', accent: '#085041' };
 
 export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
-  const { role, roleLabel, organizationName, navItems, displayName } = useRole({
+  const { role, roleLabel, roleTheme, organizationName, navItems, displayName } = useRole({
     fallbackRole,
     previewRole,
   });
@@ -128,7 +86,7 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
       >
         <Link href={item.href}>
           {isActive && (
-            <div className="absolute left-0 top-1/2 h-5 w-0.75 -translate-y-1/2 rounded-r bg-[#5DCAA5]" />
+            <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r bg-[#5DCAA5]" />
           )}
           <Icon className="size-5 shrink-0" />
           <span className="text-sm font-medium">{item.label}</span>
@@ -139,18 +97,17 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
 
   return (
     <aside
-      className="hidden w-72 shrink-0 border-r border-[#163E43] lg:flex lg:flex-col print:hidden"
-      style={{ backgroundColor: "#1D5052" }}
+      className="hidden w-72 shrink-0 border-r  lg:flex lg:flex-col print:hidden"
+      style={{ backgroundColor: roleTheme.accent, borderColor: roleTheme.border }}
     >
-      <SkipLink />
       <div className="border-b border-white/10 px-6 py-6">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
           Motherhood Journey
         </p>
-        <h2 className="mt-2 text-2xl font-semibold text-white">
+        <h2 className="mt-2 text-2xl font-semibold" style={{ color: roleTheme.text }}>
           {roleLabel} Portal
         </h2>
-        <p className="mt-2 text-sm text-white/70">
+        <p className="mt-2 text-sm" style={{ color: roleTheme.text }}>
           Role-aware navigation for {role.replaceAll("_", " ")} workflows.
         </p>
       </div>
