@@ -171,12 +171,27 @@ export default function LoginPage() {
     void i18n.changeLanguage(language);
   };
 
-  // Slides: first is the Vimeo background (keeps existing iframe), then image slides
-  const slides: Array<{ type: "video" } | { type: "image"; src: string }> = [
-    { type: "video" },
-    { type: "image", src: "https://source.unsplash.com/1600x900/?pregnant,woman" },
-    { type: "image", src: "https://source.unsplash.com/1600x900/?mother,baby" },
-    { type: "image", src: "https://source.unsplash.com/1600x900/?mother,child,walking" },
+  // Image-only slideshow: prefer local files under /login-slides/, fallback to Unsplash
+  const slides: Array<{
+    type: "image";
+    local?: string;
+    fallback: string;
+  }> = [
+    {
+      type: "image",
+      local: "/login-slides/slide1.jpg",
+      fallback: "https://source.unsplash.com/1600x900/?pregnant,woman",
+    },
+    {
+      type: "image",
+      local: "/login-slides/slide2.jpg",
+      fallback: "https://source.unsplash.com/1600x900/?mother,baby",
+    },
+    {
+      type: "image",
+      local: "/login-slides/slide3.jpg",
+      fallback: "https://source.unsplash.com/1600x900/?mother,child,walking",
+    },
   ];
 
   const [slideIndex, setSlideIndex] = useState(0);
@@ -189,35 +204,47 @@ export default function LoginPage() {
     return () => clearInterval(interval);
   }, [slides.length]);
 
+  function BackgroundImage({
+    srcLocal,
+    srcFallback,
+    visible,
+  }: {
+    srcLocal?: string;
+    srcFallback: string;
+    visible: boolean;
+  }) {
+    const [src, setSrc] = useState(srcLocal ?? srcFallback);
+
+    return (
+      <img
+        src={src}
+        onError={() => {
+          if (src !== srcFallback) setSrc(srcFallback);
+        }}
+        alt="login background"
+        aria-hidden="true"
+        className={`absolute left-1/2 top-1/2 min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 object-cover transition-opacity duration-1000 ${
+          visible ? "opacity-100" : "opacity-0"
+        }`}
+      />
+    );
+  }
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-white">
       <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[#1B3F42]">
         {/* Render all slides stacked; control visibility with opacity */}
-        {slides.map((slide, idx) =>
-          slide.type === "video" ? (
-            <iframe
-              key="vimeo-bg"
-              src={vimeoBackgroundUrl}
-              title="Login background video"
-              aria-hidden="true"
-              allow="autoplay; fullscreen; picture-in-picture"
-              className={`absolute inset-0 w-full h-full left-0 top-0 border-0 transition-opacity duration-1000 ${
-                slideIndex === idx ? "opacity-100" : "opacity-0"
-              }`}
-              style={{ transform: "scale(1.15)" }}
+        {slides.map((slide, idx) => {
+          const key = slide.local ?? slide.fallback;
+          return (
+            <BackgroundImage
+              key={key}
+              srcLocal={slide.local}
+              srcFallback={slide.fallback}
+              visible={slideIndex === idx}
             />
-          ) : (
-            <img
-              key={slide.src}
-              src={slide.src}
-              alt="login background"
-              aria-hidden="true"
-              className={`absolute left-1/2 top-1/2 min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 object-cover transition-opacity duration-1000 ${
-                slideIndex === idx ? "opacity-100" : "opacity-0"
-              }`}
-            />
-          ),
-        )}
+          );
+        })}
 
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(58,143,133,0.28),transparent_42%),radial-gradient(circle_at_85%_25%,rgba(42,127,138,0.22),transparent_44%),linear-gradient(140deg,rgba(34,93,98,0.55)_0%,rgba(28,82,87,0.3)_50%,rgba(43,111,117,0.4)_100%)]" />
         <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]" />
