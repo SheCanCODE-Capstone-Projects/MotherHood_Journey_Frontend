@@ -13,6 +13,12 @@ export type GovSyncLog = {
   lastErrorMessage: string | null;
 };
 
+export type GovSyncTriggerResult = {
+  status: string;
+  source: "api" | "demo";
+  startedAt: string;
+};
+
 export type GovSyncRetryResult = {
   id: string;
   status: GovSyncStatus;
@@ -110,6 +116,27 @@ function writeStoredDemoGovSyncLogs(logs: GovSyncLog[]) {
   window.localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(logs));
 }
 
+function appendDemoSyncLog() {
+  const startedAt = new Date().toISOString();
+  const currentLogs = readStoredDemoGovSyncLogs();
+  const newLog: GovSyncLog = {
+    id:
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `sync-${Date.now()}`,
+    createdAt: startedAt,
+    targetSystem: "HMIS",
+    syncType: "FULL_SYNC",
+    status: "IN_FLIGHT",
+    retryCount: 0,
+    lastErrorMessage: null,
+  };
+
+  writeStoredDemoGovSyncLogs([newLog, ...currentLogs]);
+
+  return { startedAt, id: newLog.id };
+}
+
 function normalizeTargetSystem(value: unknown): GovSyncTargetSystem {
   const normalized = String(value ?? "HMIS").toUpperCase();
   return normalized === "NIDA" || normalized === "IREMBO" ? normalized : "HMIS";
@@ -186,6 +213,29 @@ export async function getGovSyncLogs(): Promise<GovSyncLog[]> {
   }
 
   return readStoredDemoGovSyncLogs();
+}
+
+export async function triggerFullSync(): Promise<GovSyncTriggerResult> {
+  try {
+    const response = await apiClient.post<unknown>("/api/v1/government/sync");
+    return { status: "started", source: "api", startedAt: new Date().toISOString() };
+  } catch {
+    // In demo mode, record a sync entry so the action has a visible effect.
+    const { startedAt } = appendDemoSyncLog();
+    return { status: "started", source: "demo", startedAt };
+  }
+}
+
+export async function exportGovData(format = "csv"): Promise<{ filename: string; content: string } | null> {
+  try {
+    // Attempt to fetch export as text (backend should supply CSV/TXT)
+    const data = await apiClient.get<string>(`/api/v1/government/export?format=${encodeURIComponent(format)}`);
+    const filename = `gov-export.${format}`;
+    return { filename, content: String(data ?? "") };
+  } catch {
+    // No backend — return null to indicate demo/no-op
+    return null;
+  }
 }
 
 export async function retryGovSyncLog(id: string): Promise<GovSyncRetryResult> {

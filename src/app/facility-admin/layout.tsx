@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
 
-import { PortalShell } from "@/shared/components/layout";
-
 type FacilityAdminLayoutProps = {
   children: ReactNode;
 };
@@ -9,5 +7,5 @@ type FacilityAdminLayoutProps = {
 export default function FacilityAdminLayout({
   children,
 }: FacilityAdminLayoutProps) {
-  return <PortalShell fallbackRole="facility_admin">{children}</PortalShell>;
+  return <>{children}</>;
 }

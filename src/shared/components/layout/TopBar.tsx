@@ -1,14 +1,13 @@
 "use client";
 
 import { Bell, Building2, LogOut, Search } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/shared/components/ui/button";
+import { ROLE_NAV_ITEMS } from "@/shared/config/rbac";
 import { useRole } from "@/shared/hooks/useRole";
 import type { UserRole } from "@/shared/types/auth";
-import { ROLE_NAV_ITEMS } from "@/shared/config/rbac";
 
 type TopBarProps = {
   fallbackRole: UserRole;
@@ -26,7 +25,7 @@ function getBreadcrumb(pathname: string): string {
 
     if (matchedItem) {
       breadcrumbs.push(matchedItem.label);
-    } else if (segment.match(/^[a-zA-Z0-9-]+$/)) {
+    } else if (/^[a-zA-Z0-9-]+$/.test(segment)) {
       breadcrumbs.push(segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " "));
     }
   }

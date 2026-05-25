@@ -33,7 +33,7 @@ export function AncAttendanceTrend({ data }: AncAttendanceTrendProps) {
             axisLine={{ stroke: "#D5E7E4" }}
           />
           <YAxis
-            tickFormatter={(value) => `${value.toFixed(0)}%`}
+            tickFormatter={(value: number) => `${value.toFixed(0)}%`}
             tick={{ fill: "#648386", fontSize: 12 }}
             axisLine={false}
             tickLine={false}

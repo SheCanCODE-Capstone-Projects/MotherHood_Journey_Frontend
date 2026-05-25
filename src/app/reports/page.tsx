@@ -1,6 +1,7 @@
 "use client";
 
 import { BarChart3, Calendar, Download, FileText, Heart, TrendingUp, Users, type LucideIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { PageHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui/button";
@@ -16,14 +17,15 @@ type ReportCategory = {
 };
 
 const recentReports = [
-  { name: "Monthly Performance Report - March 2024", type: "PDF", size: "2.4 MB", date: "Apr 1, 2024" },
-  { name: "Vaccination Coverage Report", type: "Excel", size: "1.2 MB", date: "Apr 5, 2024" },
-  { name: "Staff Attendance Report - Q1 2024", type: "PDF", size: "890 KB", date: "Apr 8, 2024" },
-  { name: "Maternal Health Indicators", type: "Excel", size: "1.8 MB", date: "Apr 10, 2024" },
+  { name: "Monthly Performance Report - March 2024", type: "PDF", size: "2.4 MB", date: "Apr 1, 2024", downloads: 45 },
+  { name: "Vaccination Coverage Report", type: "Excel", size: "1.2 MB", date: "Apr 5, 2024", downloads: 23 },
+  { name: "Staff Attendance Report - Q1 2024", type: "PDF", size: "890 KB", date: "Apr 8, 2024", downloads: 12 },
+  { name: "Maternal Health Indicators", type: "Excel", size: "1.8 MB", date: "Apr 10, 2024", downloads: 34 },
 ];
 
 export default function ReportsPage() {
-  const { role } = useRole();
+  const router = useRouter();
+  const { role, roleTheme } = useRole();
   const isGovernment = role === "government";
 
   const reportCategories: ReportCategory[] = [
@@ -40,7 +42,7 @@ export default function ReportsPage() {
         title={isGovernment ? "National Reports" : "Reports"}
         subtitle={isGovernment ? "National maternal health reports and HMIS-ready summaries." : "Facility performance and operational reports."}
         action={
-          <Button className="h-10 rounded-[8px] bg-[#064F56] px-4 text-white">
+          <Button className="h-10 rounded-[8px] bg-[#064F56] px-4 text-white" onClick={() => router.push("/reports/new")}>
             <FileText className="size-4" />
             Create report
           </Button>
@@ -101,7 +103,7 @@ export default function ReportsPage() {
                     <td className="px-4 py-4 text-[#54797C]">{report.size}</td>
                     <td className="px-4 py-4 text-[#54797C]">{report.date}</td>
                     <td className="px-4 py-4 text-right">
-                      <button className="inline-grid size-8 place-items-center rounded-[8px] bg-[#EAF4F2] text-[#0B5554]">
+                      <button className="inline-grid size-8 place-items-center rounded-[8px] bg-[#EAF4F2] text-[#0B5554]" title={`Download ${report.name}`}>
                         <Download className="size-4" />
                       </button>
                     </td>
@@ -112,11 +114,26 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        <aside className="rounded-[8px] bg-[#064F56] p-5 text-white shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/65">Coverage snapshot</p>
-          <p className="mt-4 text-4xl font-semibold">92.4%</p>
-          <p className="mt-2 text-sm leading-6 text-white/70">National program coverage for the selected reporting period.</p>
-          <div className="mt-6 h-24 rounded-[8px] bg-[linear-gradient(135deg,rgba(255,255,255,0.16),rgba(255,255,255,0.04)),radial-gradient(circle_at_35%_45%,rgba(255,255,255,0.28)_0_18%,transparent_19%)]" />
+        <aside className="space-y-4">
+          <div className="rounded-[8px] bg-[#064F56] p-5 text-white shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/65">Coverage snapshot</p>
+            <p className="mt-4 text-4xl font-semibold">92.4%</p>
+            <p className="mt-2 text-sm leading-6 text-white/70">National program coverage for the selected reporting period.</p>
+          </div>
+          <div className="rounded-[8px] border border-[#D5E7E4] p-5 shadow-sm" style={{ backgroundColor: roleTheme.accentSoft }}>
+            <h3 className="text-sm font-semibold" style={{ color: roleTheme.text }}>Custom Reports</h3>
+            <p className="mt-2 text-sm leading-6" style={{ color: roleTheme.text }}>
+              Create reports with specific metrics and date ranges.
+            </p>
+            <div className="mt-4 space-y-2">
+              <Button className="h-10 w-full rounded-[8px] text-white" style={{ backgroundColor: roleTheme.accent }} onClick={() => router.push("/reports/new")}>
+                Create Report
+              </Button>
+              <Button variant="outline" className="h-10 w-full rounded-[8px] border-[#D5E7E4] text-[#153F42]" onClick={() => router.push("/reports/schedule")}>
+                Schedule Report
+              </Button>
+            </div>
+          </div>
         </aside>
       </section>
     </div>

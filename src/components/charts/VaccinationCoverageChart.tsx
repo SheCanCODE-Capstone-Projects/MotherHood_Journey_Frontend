@@ -13,6 +13,13 @@ interface VaccinationCoverageChartProps {
   data: { vaccineType: string; coverage: number }[];
 }
 
+type ChartValue = number | string | Array<number | string> | undefined;
+
+function formatPercentage(value: ChartValue, fractionDigits: number) {
+  const normalizedValue = Array.isArray(value) ? value[0] : value;
+  return `${Number(normalizedValue ?? 0).toFixed(fractionDigits)}%`;
+}
+
 export function VaccinationCoverageChart({ data }: VaccinationCoverageChartProps) {
   return (
     <div className="h-[320px] w-full rounded-[8px] bg-white">
@@ -36,7 +43,7 @@ export function VaccinationCoverageChart({ data }: VaccinationCoverageChartProps
             axisLine={{ stroke: "#D5E7E4" }}
           />
           <YAxis
-            tickFormatter={(value) => `${value.toFixed(0)}%`}
+            tickFormatter={(value: number) => `${value.toFixed(0)}%`}
             tick={{ fill: "#648386", fontSize: 12 }}
             axisLine={false}
             tickLine={false}
@@ -51,7 +58,7 @@ export function VaccinationCoverageChart({ data }: VaccinationCoverageChartProps
             labelStyle={{ color: "#163F42", fontWeight: 600 }}
           />
           <Bar dataKey="coverage" fill="url(#vaccinationBar)" radius={[8, 8, 0, 0]}>
-            <LabelList dataKey="coverage" position="top" formatter={(value) => `${Number(value ?? 0).toFixed(0)}%`} style={{ fill: "#163F42", fontSize: 12, fontWeight: 600 }} />
+            <LabelList dataKey="coverage" position="top" formatter={(value) => formatPercentage(value, 0)} style={{ fill: "#163F42", fontSize: 12, fontWeight: 600 }} />
           </Bar>
         </BarChart>
       </ResponsiveContainer>

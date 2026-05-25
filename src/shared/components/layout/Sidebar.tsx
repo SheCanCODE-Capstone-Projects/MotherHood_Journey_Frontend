@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Baby,
   CalendarDays,
@@ -14,13 +14,12 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 import { Button } from "@/shared/components/ui/button";
-import { cn } from "@/shared/lib/utils";
 import { useRole } from "@/shared/hooks/useRole";
+import { cn } from "@/shared/lib/utils";
 import type { UserRole } from "@/shared/types/auth";
-import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
 type SidebarProps = {
   fallbackRole: UserRole;
@@ -34,6 +33,7 @@ const iconByHref: Record<string, LucideIcon> = {
   "/diagnoses": Stethoscope,
   "/pregnancies": Baby,
   "/children": Baby,
+  "/my-children": Baby,
   "/appointments": CalendarDays,
   "/staff": Users,
   "/service-requests": ClipboardList,
@@ -82,7 +82,7 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
         asChild
         variant="ghost"
         className={cn(
-          "h-10 w-full justify-start gap-3 rounded-xl px-3",
+          "relative h-10 w-full justify-start gap-3 rounded-xl px-3",
           isActive
             ? "bg-[#EAF4F2] text-[#0B5554]"
             : "text-[#6D8587] hover:bg-[#F3F8F7] hover:text-[#0B5554]",
