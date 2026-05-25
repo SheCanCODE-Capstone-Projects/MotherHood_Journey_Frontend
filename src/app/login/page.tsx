@@ -168,35 +168,35 @@ export default function LoginPage() {
     void i18n.changeLanguage(language);
   };
 
-  // Image-only slideshow: prefer local files under /login-slides/, fallback to Unsplash
+  // Image-only slideshow: prefer remote thumbnails (provided earlier) and fall back to local SVG placeholders
   const slides: Array<{
     type: "image";
-    local?: string;
+    remote?: string;
     fallback: string;
   }> = [
     {
       type: "image",
-      local:
+      remote:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTm6FtxzWWYwuEFbYwcH4qmLcxP4YpOwhjPmlaU7UQYnUOvSeclluUZLCo&s",
       fallback: "/login-slides/slide1.svg",
     },
     {
       type: "image",
-      local:
+      remote:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUmCM5wGWWdRZwUqV7um_M5VdcvzOvp6h8R0z7nm5--A&s",
       fallback: "/login-slides/slide2.svg",
     },
     {
       type: "image",
-      local:
+      remote:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdMwu2uRakOe0EgNArjOQESixHnbtlZJbNRqMzW5haWQ&s",
       fallback: "/login-slides/slide3.svg",
     },
     {
       type: "image",
-      local:
+      remote:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTN1XR7LEeOxYpxU7jWG5RiR7nrtym-6RNWz22BO5EeFg&s",
-      fallback: "/login-slides/slide3.svg",
+      fallback: "/login-slides/slide4.svg",
     },
   ];
 
@@ -211,15 +211,15 @@ export default function LoginPage() {
   }, [slides.length]);
 
   function BackgroundImage({
-    srcLocal,
+    remoteSrc,
     srcFallback,
     visible,
   }: {
-    srcLocal?: string;
+    remoteSrc?: string;
     srcFallback: string;
     visible: boolean;
   }) {
-    const [src, setSrc] = useState(srcLocal ?? srcFallback);
+    const [src, setSrc] = useState(remoteSrc ?? srcFallback);
 
     return (
       <img
@@ -229,10 +229,13 @@ export default function LoginPage() {
         }}
         alt="login background"
         aria-hidden="true"
-        className={`absolute inset-0 h-full w-full object-cover object-center transition-[opacity,transform] duration-1000 ease-out ${
+        className={`absolute inset-0 h-full w-full object-cover object-center transition-[opacity,transform] duration-1200 ease-out ${
           visible ? "opacity-100" : "opacity-0"
         }`}
-        style={{ transform: visible ? "scale(1)" : "scale(1.04)" }}
+        style={{
+          transform: visible ? "scale(1) translateZ(0)" : "scale(1.06) translateZ(0)",
+          willChange: "opacity, transform",
+        }}
       />
     );
   }
@@ -242,11 +245,11 @@ export default function LoginPage() {
       <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[#1B3F42]">
         {/* Render all slides stacked; control visibility with opacity */}
         {slides.map((slide, idx) => {
-          const key = slide.local ?? slide.fallback;
+          const key = slide.remote ?? slide.fallback;
           return (
             <BackgroundImage
               key={key}
-              srcLocal={slide.local}
+              remoteSrc={slide.remote}
               srcFallback={slide.fallback}
               visible={slideIndex === idx}
             />
