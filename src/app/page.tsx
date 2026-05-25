@@ -71,6 +71,7 @@ export default function HomePage() {
           <div className="mt-4 flex flex-wrap gap-3">
             {USER_ROLES.map((role) => {
               const isActive = previewRole === role;
+              const roleRoute = role === "patient" ? "/patient" : "/dashboard";
 
               return (
                 <Button
@@ -82,7 +83,13 @@ export default function HomePage() {
                       ? "bg-[#2C6F73] text-white hover:bg-[#245C60]"
                       : "border-[#B9D8D5] bg-white text-[#24585B]"
                   }
-                  onClick={() => setPreviewRole(role)}
+                  onClick={() => {
+                    if (role === "patient") {
+                      window.location.assign(roleRoute);
+                    } else {
+                      setPreviewRole(role);
+                    }
+                  }}
                 >
                   {ROLE_LABELS[role]}
                 </Button>

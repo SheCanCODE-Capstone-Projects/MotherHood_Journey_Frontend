@@ -80,11 +80,11 @@ export const ROLE_THEMES: Record<UserRole, RoleTheme> = {
 
 export const ROLE_NAV_ITEMS: Record<UserRole, RoleNavItem[]> = {
   patient: [
-    { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
-    { href: "/patient/pregnancies", label: "Pregnancies", shortLabel: "Pregnancy" },
-    { href: "/patient/children", label: "Children", shortLabel: "Children" },
+    { href: "/patient/dashboard", label: "Home", shortLabel: "Home" },
+    { href: "/patient/pregnancies", label: "My Records", shortLabel: "Records" },
+    { href: "/patient/children", label: "Team Care", shortLabel: "Care" },
     { href: "/patient/appointments", label: "Appointments", shortLabel: "Visits" },
-    { href: "/patient/chat", label: "Chat", shortLabel: "Chat" },
+    { href: "/tips", label: "Tips", shortLabel: "Tips" },
   ],
   health_worker: [
     { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
