@@ -178,7 +178,7 @@ export default function LoginPage() {
       </div>
 
       <aside className="absolute right-4 top-4 z-20 w-[min(90vw,18rem)] sm:right-6 sm:top-6">
-        <div className="rounded-2xl border border-[#B7D6D2] bg-white/75 p-3 text-sm text-[#1D5052] shadow-lg backdrop-blur-md">
+        <div className="rounded-2xl border border-white/30 bg-white/12 p-3 text-sm text-[#1D5052] shadow-lg backdrop-blur-md">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="font-semibold">{t("login.languageNotice")}</p>
@@ -225,7 +225,7 @@ export default function LoginPage() {
       </aside>
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-10 sm:px-6">
-        <section className="z-10 w-full max-w-md rounded-3xl border border-[#C7E1DD] bg-white/82 p-7 shadow-[0_22px_60px_-28px_rgba(34,122,127,0.38)] backdrop-blur-md sm:p-9">
+        <section className="z-10 w-full max-w-md rounded-3xl border border-white/25 bg-white/12 p-7 shadow-[0_22px_60px_-28px_rgba(34,122,127,0.28)] backdrop-blur-md sm:p-9">
           <div className="mb-7">
             <h1 className="text-3xl font-semibold tracking-tight text-[#1D5052]">
               {t("login.title")}
@@ -245,7 +245,7 @@ export default function LoginPage() {
           )}
 
           {currentUser ? (
-            <div className="space-y-4 rounded-2xl border border-[#D4E8E4] bg-white/85 p-5 text-[#1D5052] backdrop-blur-sm">
+            <div className="space-y-4 rounded-2xl border border-white/25 bg-white/12 p-5 text-[#1D5052] backdrop-blur-sm">
               <p className="text-sm font-medium">
                 {t("login.loggedInAs", { phone: currentUser.phone })}
               </p>
@@ -259,7 +259,7 @@ export default function LoginPage() {
             </div>
           ) : (
             <>
-              <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl bg-[#EEF8F6] p-1 backdrop-blur-sm">
+              <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl border border-white/20 bg-white/10 p-1 backdrop-blur-sm">
                 <button
                   type="button"
                   onClick={() => switchMode("signin")}
