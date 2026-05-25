@@ -12,16 +12,9 @@ interface AncAttendanceTrendProps {
   data: { month: string; attendance: number }[];
 }
 
-type ChartValue = number | string | Array<number | string> | undefined;
-
-function formatPercentage(value: ChartValue, fractionDigits: number) {
-  const normalizedValue = Array.isArray(value) ? value[0] : value;
-  return `${Number(normalizedValue ?? 0).toFixed(fractionDigits)}%`;
-}
-
 export function AncAttendanceTrend({ data }: AncAttendanceTrendProps) {
   return (
-    <div className="h-80 w-full">
+    <div className="h-[320px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
           <CartesianGrid stroke="#E5F3F2" strokeDasharray="3 3" />
@@ -33,12 +26,12 @@ export function AncAttendanceTrend({ data }: AncAttendanceTrendProps) {
             tickLine={false}
           />
           <YAxis
-            tickFormatter={(value: number) => `${value.toFixed(0)}%`}
+            tickFormatter={(value) => `${value.toFixed(0)}%`}
             tick={{ fill: "#54797C", fontSize: 12 }}
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip formatter={(value) => formatPercentage(value, 1)} />
+          <Tooltip formatter={(value: any) => `${Number(value || 0).toFixed(1)}%`} />
           <Line
             type="monotone"
             dataKey="attendance"

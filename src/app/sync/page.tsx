@@ -92,9 +92,9 @@ export default function SyncPage() {
             className="rounded-lg px-4 py-2 text-sm font-semibold"
             style={{ backgroundColor: roleTheme.accent, color: "white" }}
             onClick={() => void triggerMutation.mutate()}
-            disabled={(triggerMutation as any).isLoading}
+            disabled={triggerMutation.isPending}
           >
-            {(triggerMutation as any).isLoading ? "Syncing..." : "Sync All"}
+            {triggerMutation.isPending ? "Syncing..." : "Sync All"}
           </button>
         </div>
         <div className="space-y-2">
@@ -153,15 +153,15 @@ export default function SyncPage() {
             className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold"
             style={{ backgroundColor: roleTheme.accent, color: "white" }}
             onClick={() => void triggerMutation.mutate()}
-            disabled={(triggerMutation as any).isLoading}
+            disabled={triggerMutation.isPending}
           >
-            <Upload className="size-4" /> {(triggerMutation as any).isLoading ? "Running..." : "Full Sync"}
+            <Upload className="size-4" /> {triggerMutation.isPending ? "Running..." : "Full Sync"}
           </button>
           <button
             className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold"
             style={{ borderColor: roleTheme.border, border: "2px solid", color: roleTheme.text }}
             onClick={async () => {
-              const res = await (exportMutation as any).mutateAsync();
+              const res = await exportMutation.mutateAsync(undefined);
               if (res && res.content) {
                 const blob = new Blob([res.content], { type: "text/csv;charset=utf-8;" });
                 const url = URL.createObjectURL(blob);
@@ -176,7 +176,7 @@ export default function SyncPage() {
                 alert("Export not available in demo mode.");
               }
             }}
-            disabled={(exportMutation as any).isLoading}
+            disabled={exportMutation.isPending}
           >
             <Download className="size-4" /> Export Data
           </button>

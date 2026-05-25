@@ -1,6 +1,11 @@
+/// <reference lib="webworker" />
 // Service Worker for vaccination data caching
 // This file is copied to public/sw.js during build
 // DO NOT use ES6 modules - this runs in a service worker context
+
+/* eslint-disable no-restricted-globals */
+declare const self: ServiceWorkerGlobalScope;
+export {};
 
 const CACHE_NAME = "motherhood-vaccination-card-v1";
 const VACCINATION_ROUTE_PATTERN = /\/api\/patient\/children\/[^/]+\/vaccinations$/;
