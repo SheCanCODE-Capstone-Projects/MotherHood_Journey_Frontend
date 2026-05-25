@@ -7,12 +7,14 @@ import { useState, useRef } from "react";
 
 export default function ChatPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeChat, setActiveChat] = useState({
+  const [activeChat, setActiveChat] = useState<ChatMember>({
     name: "Dr. Sarah Chen",
     role: "Obstetrician",
     avatar: "SC",
     online: true,
-    motherId: "mother-1"
+    motherId: "mother-1",
+    message: "Your test results look great! Let's schedule...",
+    time: "2m"
   });
   
   return (
@@ -147,7 +149,7 @@ function SidebarItem({ icon, label, href, active = false }: { icon: React.ReactN
   );
 }
 
-type ChatMember = { name: string; role: string; avatar: string; online: boolean; motherId: string };
+type ChatMember = { name: string; role: string; avatar: string; online: boolean; motherId: string; message: string; time: string; };
 
 function ChatList({ activeChat, onSelectChat }: { activeChat: ChatMember; onSelectChat: (chat: ChatMember) => void }) {
   const careTeam: ChatMember[] = [

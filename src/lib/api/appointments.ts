@@ -185,4 +185,67 @@ export async function getAppointmentByReference(
   }
 }
 
+/**
+ * Get a paginated list of appointments
+ */
+export async function getAppointments(
+  page: number = 1,
+  pageSize: number = 10
+): Promise<{ content: import("@/features/appointment/types").Appointment[]; totalPages: number; totalElements: number; pageNumber: number; pageSize: number }> {
+  const response = await apiClient.get<{ content: import("@/features/appointment/types").Appointment[]; totalPages: number; totalElements: number; pageNumber: number; pageSize: number }>(
+    `${APPOINTMENTS_BASE_PATH}?page=${page}&pageSize=${pageSize}`
+  );
+  return response;
+}
+
+/**
+ * Get appointment detail by ID
+ */
+export async function getAppointmentDetail(
+  appointmentId: string
+): Promise<import("@/features/appointment/types").AppointmentDetail> {
+  const response = await apiClient.get<import("@/features/appointment/types").AppointmentDetail>(
+    `${APPOINTMENTS_BASE_PATH}/${encodeURIComponent(appointmentId)}`
+  );
+  return response;
+}
+
+/**
+ * Get upcoming (future) appointments
+ */
+export async function getUpcomingAppointments(
+  pageSize: number = 10
+): Promise<{ content: import("@/features/appointment/types").Appointment[]; totalPages: number; totalElements: number; pageNumber: number; pageSize: number }> {
+  const response = await apiClient.get<{ content: import("@/features/appointment/types").Appointment[]; totalPages: number; totalElements: number; pageNumber: number; pageSize: number }>(
+    `${APPOINTMENTS_BASE_PATH}?filter=upcoming&pageSize=${pageSize}`
+  );
+  return response;
+}
+
+/**
+ * Get past appointments
+ */
+export async function getPastAppointments(
+  pageSize: number = 10
+): Promise<{ content: import("@/features/appointment/types").Appointment[]; totalPages: number; totalElements: number; pageNumber: number; pageSize: number }> {
+  const response = await apiClient.get<{ content: import("@/features/appointment/types").Appointment[]; totalPages: number; totalElements: number; pageNumber: number; pageSize: number }>(
+    `${APPOINTMENTS_BASE_PATH}?filter=past&pageSize=${pageSize}`
+  );
+  return response;
+}
+
+/**
+ * Cancel an appointment
+ */
+export async function cancelAppointment(
+  appointmentId: string,
+  request?: import("@/features/appointment/types").CancelAppointmentRequest
+): Promise<import("@/features/appointment/types").CancelAppointmentResponse> {
+  const response = await apiClient.post<import("@/features/appointment/types").CancelAppointmentResponse>(
+    `${APPOINTMENTS_BASE_PATH}/${encodeURIComponent(appointmentId)}/cancel`,
+    request
+  );
+  return response;
+}
+
 export { apiClient };

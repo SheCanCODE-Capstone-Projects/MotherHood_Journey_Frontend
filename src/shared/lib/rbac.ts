@@ -17,7 +17,7 @@
 
 import { type Session } from "next-auth";
 import { PERMISSIONS, type Resource } from "@/shared/config/rbac";
-import { type Role } from "@/shared/types/auth";
+import { type UserRole } from "@/shared/types/auth";
 
 // ---------------------------------------------------------------------------
 // hasRole
@@ -35,7 +35,7 @@ import { type Role } from "@/shared/types/auth";
  *   const session = await auth();
  *   if (hasRole(session, ROLES.ADMIN)) { ... }
  */
-export function hasRole(session: Session | null | undefined, role: Role): boolean {
+export function hasRole(session: Session | null | undefined, role: UserRole): boolean {
   return session?.user?.role === role;
 }
 
@@ -59,7 +59,7 @@ export function canAccess(
   session: Session | null | undefined,
   resource: Resource
 ): boolean {
-  const role = session?.user?.role;
+  const role = session?.user?.role as UserRole | undefined;
   if (!role) return false;
   return PERMISSIONS[role]?.includes(resource) ?? false;
 }
@@ -81,7 +81,7 @@ export function canAccess(
  */
 export function requireRole(
   session: Session | null | undefined,
-  role: Role
+  role: UserRole
 ): void {
   if (!session?.user) {
     throw new Error("UNAUTHENTICATED: No active session.");
