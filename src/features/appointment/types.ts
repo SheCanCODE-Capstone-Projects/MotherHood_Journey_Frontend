@@ -1,13 +1,45 @@
 export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "NO_SHOW" | "CANCELLED";
 
-export type AppointmentType =
-  | "PRENATAL_CHECKUP"
-  | "POSTNATAL_CHECKUP"
-  | "IMMUNIZATION"
-  | "NUTRITIONAL_COUNSELING"
-  | "MENTAL_HEALTH"
-  | "LABORATORY_TEST"
-  | "ULTRASOUND"
+export interface AppointmentDetail extends Appointment {
+  providerName?: string;
+  providerTitle?: string;
+  locationRoom?: string;
+  cancelledAt?: string;
+  cancelledBy?: string;
+  cancellationReason?: string;
+}
+
+export interface AppointmentListResponse {
+  content: Appointment[];
+  totalPages: number;
+  totalElements: number;
+  pageNumber: number;
+  pageSize: number;
+}
+
+export interface CancelAppointmentRequest {
+  reason?: string;
+}
+
+export interface CancelAppointmentResponse {
+  id: string;
+  status: AppointmentStatus;
+  updatedAt: string;
+}
+
+export interface CategorizedAppointments {
+  future: Appointment[];
+  past: Appointment[];
+}
+
+export type AppointmentType = 
+  | "PRENATAL_CHECKUP" 
+  | "POSTNATAL_CHECKUP" 
+  | "IMMUNIZATION" 
+  | "NUTRITIONAL_COUNSELING" 
+  | "MENTAL_HEALTH" 
+  | "LABORATORY_TEST" 
+  | "ULTRASOUND" 
   | "OTHER";
 
 export interface Appointment {
@@ -16,35 +48,10 @@ export interface Appointment {
   facilityName: string;
   appointmentType: AppointmentType;
   appointmentTypeLabel: string;
-  scheduledDate: string; // YYYY-MM-DD
-  scheduledTime: string; // HH:mm
+  scheduledDate: string;
+  scheduledTime: string;
   status: AppointmentStatus;
+  notes?: string;
   createdAt: string;
   updatedAt: string;
-  notes?: string | null;
 }
-
-export type AppointmentListResponse = {
-  appointments: Appointment[];
-  total: number;
-};
-
-export interface AppointmentDetail extends Appointment {
-  referenceNumber?: string;
-  patientName?: string;
-  facilityId?: string;
-}
-
-export type CancelAppointmentRequest = {
-  reason?: string;
-};
-
-export type CancelAppointmentResponse = {
-  ok: boolean;
-  id?: string;
-};
-
-export type CategorizedAppointments = {
-  future: Appointment[];
-  past: Appointment[];
-};

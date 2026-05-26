@@ -7,12 +7,14 @@ import { useState, useRef } from "react";
 
 export default function ChatPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeChat, setActiveChat] = useState({
+  const [activeChat, setActiveChat] = useState<ChatMember>({
     name: "Dr. Sarah Chen",
     role: "Obstetrician",
     avatar: "SC",
     online: true,
-    motherId: "mother-1"
+    motherId: "mother-1",
+    message: "Your test results look great! Let's schedule...",
+    time: "2m"
   });
   
   return (
@@ -42,7 +44,7 @@ export default function ChatPage() {
 
 function Sidebar() {
   return (
-    <aside className="hidden lg:flex w-50 bg-white flex-col py-5 px-3 border-r border-gray-100">
+    <aside className="hidden lg:flex w-[200px] bg-white flex-col py-5 px-3 border-r border-gray-100">
       <div className="px-2 mb-6">
         <h1 className="text-xs font-bold text-gray-900">Maternal Sanctuary</h1>
       </div>
@@ -84,7 +86,7 @@ function MobileHeader({ onMenuClick }: { onMenuClick: () => void }) {
 
 function MobileMenu({ onClose }: { onClose: () => void }) {
   return (
-    <div className="fixed top-0 left-0 bottom-0 w-70 bg-white z-50 shadow-2xl lg:hidden">
+    <div className="fixed top-0 left-0 bottom-0 w-[280px] bg-white z-50 shadow-2xl lg:hidden">
       <div className="p-4 border-b border-gray-100 flex items-center justify-between">
         <h1 className="text-sm font-bold text-gray-900">Maternal Sanctuary</h1>
         <button 
@@ -147,7 +149,7 @@ function SidebarItem({ icon, label, href, active = false }: { icon: React.ReactN
   );
 }
 
-type ChatMember = { name: string; role: string; avatar: string; online: boolean; motherId: string; message?: string; time?: string };
+type ChatMember = { name: string; role: string; avatar: string; online: boolean; motherId: string; message: string; time: string; };
 
 function ChatList({ activeChat, onSelectChat }: { activeChat: ChatMember; onSelectChat: (chat: ChatMember) => void }) {
   const careTeam: ChatMember[] = [
@@ -181,7 +183,7 @@ function ChatList({ activeChat, onSelectChat }: { activeChat: ChatMember; onSele
   ];
 
   return (
-    <div className="hidden md:flex w-70 bg-white border-r border-gray-100 flex-col">
+    <div className="hidden md:flex w-[280px] bg-white border-r border-gray-100 flex-col">
       <div className="p-4 border-b border-gray-100">
         <h2 className="text-sm font-bold text-gray-900 mb-1">Care Team</h2>
         <p className="text-[10px] text-gray-500">Your healthcare support network</p>
@@ -213,7 +215,7 @@ function ChatList({ activeChat, onSelectChat }: { activeChat: ChatMember; onSele
   );
 }
 
-function ChatListItem({ name, role, message, time, active = false, avatar, online = false, onClick }: { name: string; role: string; message?: string; time?: string; active?: boolean; avatar: string; online?: boolean; onClick: () => void }) {
+function ChatListItem({ name, role, message, time, active = false, avatar, online = false, onClick }: { name: string; role: string; message: string; time: string; active?: boolean; avatar: string; online?: boolean; onClick: () => void }) {
   return (
     <div onClick={onClick} className={`p-4 border-b border-gray-50 cursor-pointer transition-colors ${active ? 'bg-teal-50' : 'hover:bg-gray-50'}`}>
       <div className="flex items-start gap-3">
@@ -231,7 +233,7 @@ function ChatListItem({ name, role, message, time, active = false, avatar, onlin
             <span className="text-[9px] text-gray-400">{time}</span>
           </div>
           <p className="text-[9px] text-gray-500 mb-1">{role}</p>
-          <p className="text-[10px] text-gray-600 truncate">{message ?? ""}</p>
+          <p className="text-[10px] text-gray-600 truncate">{message}</p>
         </div>
       </div>
     </div>
@@ -353,7 +355,7 @@ function ChatMessages({ messages, activeChatName }: { messages: Array<{id: numbe
           <div key={msg.id} className="flex justify-end">
             <div className="max-w-[70%]">
               <div className="bg-gray-100 rounded-2xl overflow-hidden">
-                <div className="w-full h-48 bg-linear-to-br from-blue-200 to-cyan-200 flex items-center justify-center">
+                <div className="w-full h-48 bg-gradient-to-br from-blue-200 to-cyan-200 flex items-center justify-center">
                   <p className="text-xs text-gray-600">{msg.image.name}</p>
                 </div>
                 {msg.text && (
@@ -391,12 +393,12 @@ function MessageBubble({ sender, message, time, isOwn }: { sender: string; messa
   );
 }
 
-function ImageMessage({ caption, time }: { caption: string; time: string }) {
+function ImageMessage({ sender, imageUrl, caption, time }: { sender: string; imageUrl: string; caption: string; time: string }) {
   return (
     <div className="flex justify-end">
       <div className="max-w-[70%]">
         <div className="bg-gray-100 rounded-2xl overflow-hidden">
-          <div className="w-full h-48 bg-linear-to-br from-blue-200 to-cyan-200 flex items-center justify-center">
+          <div className="w-full h-48 bg-gradient-to-br from-blue-200 to-cyan-200 flex items-center justify-center">
             <p className="text-xs text-gray-600">Ultrasound Image</p>
           </div>
           <div className="px-4 py-3">
@@ -466,7 +468,7 @@ function ChatInput({ onSend }: { onSend: (text: string, image: File | null) => v
 
 function QuickHelp() {
   return (
-    <div className="hidden xl:block w-75 bg-white border-l border-gray-100 p-5">
+    <div className="hidden xl:block w-[300px] bg-white border-l border-gray-100 p-5">
       <div className="mb-6">
         <h3 className="text-sm font-bold text-gray-900 mb-1">Quick Help</h3>
         <p className="text-[10px] text-gray-500">Common questions and resources</p>
