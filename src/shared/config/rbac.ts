@@ -133,21 +133,3 @@ export const ROLE_NAV_ITEMS: Record<UserRole, RoleNavItem[]> = {
   ],
 };
 
-// ---------------------------------------------------------------------------
-// Backwards-compatible PERMISSIONS/RESOURCES
-// Some modules expect `PERMISSIONS` and `RESOURCES` to be exported from
-// this config. Provide a minimal, empty-permissions ACL to avoid build
-// failures after the merge — resources can be filled in later if needed.
-export const RESOURCES = {
-  UNKNOWN: "UNKNOWN",
-} as const;
-
-export type Resource = (typeof RESOURCES)[keyof typeof RESOURCES];
-
-export const PERMISSIONS: Record<UserRole, Resource[]> = {
-  patient: [],
-  health_worker: [],
-  facility_admin: [],
-  district_officer: [],
-  government: [],
-};
