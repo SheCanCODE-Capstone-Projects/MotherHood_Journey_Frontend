@@ -23,6 +23,16 @@ export const ROLE_ROUTE_MAP: Record<UserRole, string[]> = {
   government:       ["/dashboard", "/sync", "/sync-log", "/reports"],
 };
 
+// Backwards-compatible ROUTE_ROLE_MAP used by the middleware. The middleware
+// expects an array of `{ pattern: RegExp, allowedRoles: Role[] }` entries.
+// Build a simple map from the `ROLE_ROUTE_MAP` record so existing middleware
+// that iterates `for (const { pattern, allowedRoles } of ROUTE_ROLE_MAP)`
+// continues to work.
+export const ROUTE_ROLE_MAP: { pattern: RegExp; allowedRoles: UserRole[] }[] =
+  Object.entries(ROLE_ROUTE_MAP).flatMap(([role, paths]) =>
+    paths.map((p) => ({ pattern: new RegExp(`^${p}(\\/.*)?$`), allowedRoles: [role as UserRole] }))
+  );
+
 export type RoleNavItem = {
   href: string;
   label: string;
@@ -99,29 +109,27 @@ export const ROLE_NAV_ITEMS: Record<UserRole, RoleNavItem[]> = {
     { href: "/patient/pregnancies", label: "My Records", shortLabel: "Records" },
     { href: "/patient/children", label: "Team Care", shortLabel: "Care" },
     { href: "/patient/appointments", label: "Appointments", shortLabel: "Visits" },
+    { href: "/patient/chat", label: "Chat", shortLabel: "Chat" },
     { href: "/tips", label: "Tips", shortLabel: "Tips" },
   ],
   health_worker: [
-    { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
     { href: "/mothers", label: "Mothers", shortLabel: "Mothers" },
     { href: "/children", label: "Children", shortLabel: "Children" },
     { href: "/visits", label: "Visits", shortLabel: "Visits" },
     { href: "/diagnoses", label: "Diagnoses", shortLabel: "Cases" },
   ],
   facility_admin: [
-    { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
     { href: "/service-requests", label: "Service Requests", shortLabel: "Requests" },
     { href: "/staff", label: "Staff", shortLabel: "Staff" },
     { href: "/reports", label: "Reports", shortLabel: "Reports" },
   ],
   district_officer: [
-    { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
     { href: "/analytics", label: "Analytics", shortLabel: "Stats" },
   ],
   government: [
-    { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
     { href: "/sync", label: "Sync", shortLabel: "Sync" },
     { href: "/sync-log", label: "Sync Log", shortLabel: "Logs" },
     { href: "/reports", label: "Reports", shortLabel: "Reports" },
   ],
 };
+

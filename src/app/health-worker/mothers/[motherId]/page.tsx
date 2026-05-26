@@ -31,7 +31,7 @@ function PatientDashboardSection({
 }: {
   mother: any;
   activePregnancy: any;
-  children: any[];
+  children: { id: string; name: string; age: string; vaccinationStatus: "on-track" | "due" | "overdue" }[];
   nextAppointment: any;
 }) {
   return (
