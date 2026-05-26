@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 
 import { MobileNav } from "@/shared/components/layout/MobileNav";
 import { Sidebar } from "@/shared/components/layout/Sidebar";
@@ -20,6 +21,9 @@ export function PortalShell({
   fallbackRole,
   previewRole,
 }: PortalShellProps) {
+  const pathname = usePathname();
+  const isLoginRoute = pathname === "/login";
+
   // Always render the shell at the root layout. The previous module-scoped
   // global guard caused the shell to be skipped in some dev hot-reload
   // scenarios (leaving only children rendered). Removing the guard keeps the
@@ -45,19 +49,25 @@ export function PortalShell({
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-[#F8FBFB] print:bg-white">
-      <SkipLink />
-      <Sidebar fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
-
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <TopBar fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
-
-        <main id="main-content" className="flex-1 px-4 py-6 pb-24 print:px-0 print:py-0 print:pb-0 sm:px-6 lg:px-8 lg:pb-8">
-          {children}
-        </main>
-
-        <MobileNav fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
+    isLoginRoute ? (
+      <div className="min-h-screen bg-[#F8FBFB] print:bg-white">
+        {children}
       </div>
-    </div>
+    ) : (
+      <div className="flex min-h-screen bg-[#F8FBFB] print:bg-white">
+        <SkipLink />
+        <Sidebar fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
+
+        <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+          <TopBar fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
+
+          <main id="main-content" className="flex-1 px-4 py-6 pb-24 print:px-0 print:py-0 print:pb-0 sm:px-6 lg:px-8 lg:pb-8">
+            {children}
+          </main>
+
+          <MobileNav fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
+        </div>
+      </div>
+    )
   );
 }
