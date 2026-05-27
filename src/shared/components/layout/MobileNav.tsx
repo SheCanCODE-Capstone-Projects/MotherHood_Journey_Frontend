@@ -44,7 +44,6 @@ const mobileIconByHref: Record<string, LucideIcon> = {
   "/users":               Users,
   "/sync":             RefreshCcw,
   "/sync-log":         RefreshCcw,
-
 };
 
 export function MobileNav({ fallbackRole, previewRole }: MobileNavProps) {
