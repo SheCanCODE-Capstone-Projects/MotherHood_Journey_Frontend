@@ -1,9 +1,52 @@
+import { apiClient } from "./client";
 import type {
   PatientSearchResult,
   ICD10Code,
   VisitFormData,
   VisitResponse,
 } from "@/features/visit/types";
+
+export interface VisitSummary {
+  visit_id: string;
+  patient_health_id: string;
+  patient_name: string;
+  patient_type: "MOTHER" | "CHILD";
+  visit_type: string;
+  primary_diagnosis_code: string | null;
+  primary_diagnosis_name: string | null;
+  recorded_at: string;
+}
+
+const MOCK_VISITS: VisitSummary[] = [
+  { visit_id: "VIS-001", patient_health_id: "MTH-001", patient_name: "Uwimana Marie", patient_type: "MOTHER", visit_type: "ANC", primary_diagnosis_code: "Z34", primary_diagnosis_name: "Supervision of normal pregnancy", recorded_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
+  { visit_id: "VIS-002", patient_health_id: "CHD-001", patient_name: "Habimana Jean", patient_type: "CHILD", visit_type: "IMMUNIZATION", primary_diagnosis_code: "Z23", primary_diagnosis_name: "Immunization", recorded_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
+  { visit_id: "VIS-003", patient_health_id: "MTH-003", patient_name: "Nyiramongi Alice", patient_type: "MOTHER", visit_type: "PNC", primary_diagnosis_code: "Z39", primary_diagnosis_name: "Postpartum care and examination", recorded_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
+  { visit_id: "VIS-004", patient_health_id: "CHD-002", patient_name: "Ishimwe David", patient_type: "CHILD", visit_type: "SICK_CHILD", primary_diagnosis_code: "J18", primary_diagnosis_name: "Pneumonia, unspecified", recorded_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+  { visit_id: "VIS-005", patient_health_id: "MTH-002", patient_name: "Mukamana Jeanne", patient_type: "MOTHER", visit_type: "ANC", primary_diagnosis_code: "O14", primary_diagnosis_name: "Pre-eclampsia", recorded_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
+  { visit_id: "VIS-006", patient_health_id: "MTH-005", patient_name: "Nyirahabimana Claudine", patient_type: "MOTHER", visit_type: "GROWTH_MONITORING", primary_diagnosis_code: "Z10", primary_diagnosis_name: "Routine general health check", recorded_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
+  { visit_id: "VIS-007", patient_health_id: "CHD-003", patient_name: "Uwimana Grace", patient_type: "CHILD", visit_type: "IMMUNIZATION", primary_diagnosis_code: "Z23", primary_diagnosis_name: "Immunization", recorded_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+];
+
+export async function getVisits(search?: string): Promise<VisitSummary[]> {
+  try {
+    const query = search ? `?search=${encodeURIComponent(search)}` : "";
+    const response = await apiClient.get<unknown>(`/api/v1/visits${query}`);
+    if (Array.isArray(response) && (response as VisitSummary[]).length > 0) {
+      return response as VisitSummary[];
+    }
+  } catch {
+    // fall through to mock
+  }
+  const q = search?.toLowerCase() ?? "";
+  return q
+    ? MOCK_VISITS.filter(
+        (v) =>
+          v.patient_name.toLowerCase().includes(q) ||
+          v.patient_health_id.toLowerCase().includes(q) ||
+          v.visit_type.toLowerCase().includes(q),
+      )
+    : [...MOCK_VISITS];
+}
 
 export function searchPatients(
   query: string,

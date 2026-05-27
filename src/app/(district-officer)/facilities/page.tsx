@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
@@ -276,34 +276,30 @@ function FacilitiesContent() {
   const { data: session } = useSession();
   const geoScopeIds = session?.user?.geoScopeIds;
 
-  const selectedId = searchParams.get("id");
-  const [localSelectedId, setLocalSelectedId] = useState<string | null>(null);
-
-  const activeId = selectedId ?? localSelectedId;
+  const activeId = searchParams.get("id");
 
   const facilitiesQuery = useQuery({
     queryKey: [...queryKeys.facilityStats.list, geoScopeIds],
     queryFn: ({ signal }) => getFacilityStats(geoScopeIds, signal),
+    refetchInterval: 5 * 60_000,
   });
 
   const detailQuery = useQuery({
     queryKey: [...queryKeys.facilityStats.detail(activeId ?? ""), activeId],
     queryFn: ({ signal }) => getFacilityStatsById(activeId!, signal),
     enabled: !!activeId,
+    refetchInterval: 5 * 60_000,
   });
 
   const facilities = facilitiesQuery.data ?? [];
   const selectedFacility = activeId ? detailQuery.data ?? null : null;
 
   const handleSelect = (id: string) => {
-    setLocalSelectedId(id);
+    router.push(`/facilities?id=${id}`);
   };
 
   const handleBack = () => {
-    setLocalSelectedId(null);
-    if (selectedId) {
-      router.push("/facilities");
-    }
+    router.push("/facilities");
   };
 
   if (activeId) {
@@ -321,18 +317,29 @@ function FacilitiesContent() {
       );
     }
 
-    if (!selectedFacility) {
+    if (detailQuery.isError || !selectedFacility) {
       return (
         <div className="space-y-6">
           <button
             onClick={handleBack}
-            className="inline-flex items-center gap-2 text-sm font-medium text-[#5B8784] hover:text-[#1D5052] transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-medium text-[#5B8784] transition-colors hover:text-[#1D5052]"
           >
             <ArrowLeft className="size-4" />
             Back to Facilities
           </button>
-          <div className="rounded-xl border border-[#E5F3F2] bg-white p-6 text-center py-12">
-            <p className="text-sm text-[#54797C]">Facility not found.</p>
+          <div className="rounded-xl border border-[#E5F3F2] bg-white px-6 py-12 text-center">
+            <p className="text-sm font-medium text-[#54797C]">
+              {detailQuery.isError ? "Failed to load facility details." : "Facility not found."}
+            </p>
+            {detailQuery.isError && (
+              <button
+                onClick={() => detailQuery.refetch()}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#3A8F85] px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-[#2d7870]"
+              >
+                <RefreshCcw className="size-3.5" />
+                Retry
+              </button>
+            )}
           </div>
         </div>
       );

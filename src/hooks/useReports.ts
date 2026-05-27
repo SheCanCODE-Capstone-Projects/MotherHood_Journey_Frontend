@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import type { Report, ReportStatus, PushHmisResponse, ReportType } from "@/shared/types/report";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { Report, ReportStatus, PushHmisResponse, ReportType, ReportData } from "@/shared/types/report";
+import { getGovernmentReports, type StoredReport } from "@/lib/api/government";
 
-// Mock data for different report types
 const mockReports: Record<string, Report> = {
   "rpt-vaccination-001": {
     id: "rpt-vaccination-001",
@@ -88,131 +88,144 @@ const mockReports: Record<string, Report> = {
   },
 };
 
-/**
- * Custom hook for managing report data and operations
- */
-export function useReports(reportId: string) {
-  const [report, setReport] = useState<Report | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [pushing, setPushing] = useState(false);
-
-  // Fetch report data
-  const fetchReport = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      
-      const mockReport = mockReports[reportId];
-      if (!mockReport) {
-        throw new Error("Report not found");
-      }
-      
-      setReport(mockReport);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch report");
-    } finally {
-      setLoading(false);
-    }
-  }, [reportId]);
-
-  // Push report to HMIS
-  const pushToHmis = useCallback(async (): Promise<PushHmisResponse> => {
-    if (!report) {
-      throw new Error("No report to push");
-    }
-
-    setPushing(true);
-    
-    try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // Simulate random success/failure
-      const success = Math.random() > 0.2;
-      
-      if (success) {
-        // Update local state to reflect pushed status
-        setReport((prev) => prev ? { ...prev, status: "PUSHED" as ReportStatus } : null);
-        
-        return {
-          success: true,
-          message: "Report successfully pushed to HMIS",
-          pushedAt: new Date().toISOString(),
-        };
-      } else {
-        return {
-          success: false,
-          message: "Failed to push report to HMIS. Please try again.",
-        };
-      }
-    } catch (err) {
-      return {
-        success: false,
-        message: err instanceof Error ? err.message : "An error occurred while pushing",
-      };
-    } finally {
-      setPushing(false);
-    }
-  }, [report]);
-
-  // Initial fetch
-  useEffect(() => {
-    fetchReport();
-  }, [fetchReport]);
-
-  return {
-    report,
-    loading,
-    error,
-    pushing,
-    pushToHmis,
-    refetch: fetchReport,
+function buildReportFromStored(stored: StoredReport): Report {
+  const districtName = stored.scopeLevel !== "NATIONAL" ? stored.scopeName : undefined;
+  const base = {
+    id: stored.id,
+    reportType: stored.reportType,
+    status: stored.status,
+    title: stored.title,
+    description: `${stored.scopeName} report covering ${new Date(stored.periodStart).toLocaleDateString("en-GB", { month: "short", year: "numeric" })} – ${new Date(stored.periodEnd).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}`,
+    generatedAt: stored.generatedAt,
+    periodStart: stored.periodStart,
+    periodEnd: stored.periodEnd,
+    districtName,
   };
-}
 
-/**
- * Hook to get all reports (for listing)
- */
-export function useReportList() {
-  const [reports, setReports] = useState<Report[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchReports = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        
-        // Return all mock reports as an array
-        setReports(Object.values(mockReports));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch reports");
-      } finally {
-        setLoading(false);
-      }
+  if (stored.reportType === "VACCINATION_COVERAGE") {
+    const data: ReportData["VACCINATION_COVERAGE"] = {
+      byVaccineType: [
+        { vaccineType: "BCG", coverage: 89, target: 95 },
+        { vaccineType: "DPT-HepB-Hib", coverage: 85, target: 90 },
+        { vaccineType: "Polio", coverage: 88, target: 95 },
+        { vaccineType: "Pentavalent", coverage: 84, target: 90 },
+        { vaccineType: "Measles", coverage: 82, target: 90 },
+        { vaccineType: "TT", coverage: 76, target: 85 },
+      ],
     };
+    return { ...base, data };
+  }
 
-    fetchReports();
-  }, []);
+  if (stored.reportType === "ANC_ATTENDANCE") {
+    const data: ReportData["ANC_ATTENDANCE"] = {
+      monthlyAttendance: [
+        { month: "Jan", attendance: 320 },
+        { month: "Feb", attendance: 355 },
+        { month: "Mar", attendance: 372 },
+        { month: "Apr", attendance: 398 },
+        { month: "May", attendance: 421 },
+        { month: "Jun", attendance: 445 },
+      ],
+    };
+    return { ...base, data };
+  }
 
+  if (stored.reportType === "BIRTH_REGISTRATION") {
+    const data: ReportData["BIRTH_REGISTRATION"] = {
+      byDistrict: [
+        { district: "Nyamata", registrations: 498 },
+        { district: "Rweru", registrations: 294 },
+        { district: "Gashora", registrations: 387 },
+        { district: "Ntarama", registrations: 271 },
+        { district: "Mareba", registrations: 183 },
+        { district: "Rilima", registrations: 219 },
+      ],
+    };
+    return { ...base, data };
+  }
+
+  const data: ReportData["MATERNAL_HEALTH"] = {
+    stats: {
+      maternalMortalityProxy: 0.11,
+      ancCoverage: 87.3,
+      institutionalDeliveryRate: 90.1,
+    },
+  };
+  return { ...base, data };
+}
+
+async function fetchReport(reportId: string): Promise<Report> {
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  const hardcoded = mockReports[reportId];
+  if (hardcoded) return hardcoded;
+  const allReports = await getGovernmentReports();
+  const stored = allReports.find((r) => r.id === reportId);
+  if (stored) return buildReportFromStored(stored);
+  throw new Error("Report not found");
+}
+
+async function pushReportToHmis(reportId: string): Promise<PushHmisResponse> {
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+  if (Math.random() > 0.2) {
+    return {
+      success: true,
+      message: "Report successfully pushed to HMIS",
+      pushedAt: new Date().toISOString(),
+    };
+  }
   return {
-    reports,
-    loading,
-    error,
+    success: false,
+    message: "HMIS gateway returned an error. Please retry.",
   };
 }
 
-/**
- * Get report type label
- */
+export function useReports(reportId: string) {
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: ["report", reportId],
+    queryFn: () => fetchReport(reportId),
+    retry: 1,
+  });
+
+  const pushMutation = useMutation({
+    mutationFn: () => pushReportToHmis(reportId),
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.setQueryData<Report>(["report", reportId], (prev) =>
+          prev ? { ...prev, status: "PUSHED" as ReportStatus } : prev,
+        );
+      }
+    },
+  });
+
+  return {
+    report: query.data ?? null,
+    loading: query.isLoading,
+    error: query.isError ? (query.error instanceof Error ? query.error.message : "Failed to load report") : null,
+    pushing: pushMutation.isPending,
+    pushResult: pushMutation.data ?? null,
+    pushToHmis: pushMutation.mutateAsync,
+    refetch: query.refetch,
+  };
+}
+
+export function useReportList() {
+  const query = useQuery({
+    queryKey: ["reports"],
+    queryFn: async (): Promise<Report[]> => {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      return Object.values(mockReports);
+    },
+  });
+
+  return {
+    reports: query.data ?? [],
+    loading: query.isLoading,
+    error: query.isError ? "Failed to load reports" : null,
+  };
+}
+
 export function getReportTypeLabel(type: ReportType): string {
   const labels: Record<ReportType, string> = {
     VACCINATION_COVERAGE: "Vaccination Coverage",
@@ -223,15 +236,12 @@ export function getReportTypeLabel(type: ReportType): string {
   return labels[type];
 }
 
-/**
- * Get status label
- */
 export function getStatusLabel(status: ReportStatus): string {
   const labels: Record<ReportStatus, string> = {
     NOT_PUSHED: "Not Pushed",
     QUEUED: "Queued",
-    PUSHED: "Pushed",
-    FAILED: "Failed",
+    PUSHED: "Pushed to HMIS",
+    FAILED: "Push Failed",
   };
   return labels[status];
 }

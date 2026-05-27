@@ -62,7 +62,7 @@ export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {
   POSTNATAL_CHECKUP: "Postnatal Checkup",
   IMMUNIZATION: "Immunization",
   NUTRITIONAL_COUNSELING: "Nutritional Counseling",
-  MENTAL_HEALTH: "Mental Health Consultation",
+  DELIVERY_PREPARATION: "Delivery Preparation",
   LABORATORY_TEST: "Laboratory Test",
   ULTRASOUND: "Ultrasound",
   OTHER: "Other Service",

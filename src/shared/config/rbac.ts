@@ -1,11 +1,11 @@
 import type { UserRole } from "@/shared/types/auth";
 
 export const ROLE_ROUTE_MAP: Record<UserRole, string[]> = {
-  patient:          ["/dashboard", "/pregnancies", "/children", "/appointments"],
-  health_worker:    ["/dashboard", "/mothers", "/visits", "/diagnoses"],
-  facility_admin:   ["/dashboard", "/service-requests", "/staff", "/reports"],
-  district_officer: ["/dashboard", "/analytics"],
-  government:       ["/dashboard", "/sync", "/sync-log", "/reports"],
+  patient:          ["/dashboard", "/pregnancies", "/my-children", "/appointments", "/consent", "/documents"],
+  health_worker:    ["/hw-dashboard", "/mothers", "/children", "/visits", "/diagnoses", "/vaccinations"],
+  facility_admin:   ["/facility-dashboard", "/schedule", "/service-requests", "/staff", "/reports"],
+  district_officer: ["/district-dashboard", "/facilities", "/analytics"],
+  government:       ["/national-dashboard", "/national-reports", "/sync-log", "/users"],
 };
 
 export type RoleNavItem = {
@@ -82,30 +82,35 @@ export const ROLE_NAV_ITEMS: Record<UserRole, RoleNavItem[]> = {
   patient: [
     { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
     { href: "/pregnancies", label: "Pregnancies", shortLabel: "Pregnancy" },
-    { href: "/children", label: "Children", shortLabel: "Children" },
+    { href: "/my-children", label: "Children", shortLabel: "Children" },
     { href: "/appointments", label: "Appointments", shortLabel: "Visits" },
+    { href: "/consent", label: "Consent", shortLabel: "Consent" },
+    { href: "/documents", label: "Documents", shortLabel: "Docs" },
   ],
   health_worker: [
-    { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
+    { href: "/hw-dashboard", label: "Dashboard", shortLabel: "Home" },
     { href: "/mothers", label: "Mothers", shortLabel: "Mothers" },
     { href: "/children", label: "Children", shortLabel: "Children" },
     { href: "/visits", label: "Visits", shortLabel: "Visits" },
     { href: "/diagnoses", label: "Diagnoses", shortLabel: "Cases" },
+    { href: "/vaccinations", label: "Vaccinations", shortLabel: "Vaccines" },
   ],
   facility_admin: [
-    { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
+    { href: "/facility-dashboard", label: "Dashboard", shortLabel: "Home" },
+    { href: "/schedule", label: "Schedule", shortLabel: "Calendar" },
     { href: "/service-requests", label: "Service Requests", shortLabel: "Requests" },
     { href: "/staff", label: "Staff", shortLabel: "Staff" },
     { href: "/reports", label: "Reports", shortLabel: "Reports" },
   ],
   district_officer: [
-    { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
+    { href: "/district-dashboard", label: "Dashboard", shortLabel: "Home" },
+    { href: "/facilities", label: "Facilities", shortLabel: "Sites" },
     { href: "/analytics", label: "Analytics", shortLabel: "Stats" },
   ],
   government: [
-    { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
-    { href: "/sync", label: "Sync", shortLabel: "Sync" },
+    { href: "/national-dashboard", label: "Dashboard", shortLabel: "Home" },
+    { href: "/national-reports", label: "Reports", shortLabel: "Reports" },
     { href: "/sync-log", label: "Sync Log", shortLabel: "Logs" },
-    { href: "/reports", label: "Reports", shortLabel: "Reports" },
+    { href: "/users", label: "Users", shortLabel: "Users" },
   ],
 };

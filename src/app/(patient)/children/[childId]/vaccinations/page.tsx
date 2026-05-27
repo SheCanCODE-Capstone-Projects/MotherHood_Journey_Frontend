@@ -4,19 +4,15 @@ import { useEffect, useMemo, useState, use } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
-  CalendarClock,
   CheckCircle2,
   Clock3,
+  CalendarClock,
   Printer,
   RefreshCw,
-  Smartphone,
-  WifiOff,
-  type LucideIcon,
+  ArrowLeft,
 } from "lucide-react";
 
-import { PageHeader } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui/button";
-import { VaccinationStatusPill } from "@/shared/components/status";
 import { cn } from "@/shared/lib/utils";
 import type {
   VaccinationCardCache,
@@ -25,602 +21,359 @@ import type {
   VaccinationStatus,
 } from "@/features/child/types";
 
+// ─── Cache ────────────────────────────────────────────────────────────────────
+
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-type PatientVaccinationPageProps = {
-  params: Promise<{
-    childId: string;
-  }>;
-};
 
-type LoadState = {
-  data: VaccinationCardData | null;
-  source: VaccinationCardCache["source"] | "stale-cache";
-  lastSyncedAt: string | null;
-  isLoading: boolean;
-  isOffline: boolean;
-  errorMessage: string | null;
-};
-
-type StatusConfig = {
-  label: string;
-  icon: LucideIcon;
-  cardClass: string;
-};
-
-const statusConfig: Record<VaccinationStatus, StatusConfig> = {
-  completed: {
-    label: "Completed",
-    icon: CheckCircle2,
-    cardClass: "border-[#B9E4D8] bg-[#F5FCF8]",
-  },
-  due: {
-    label: "Due Soon",
-    icon: Clock3,
-    cardClass: "border-[#F4D49A] bg-[#FFFCF3]",
-  },
-  overdue: {
-    label: "Overdue",
-    icon: AlertTriangle,
-    cardClass: "border-[#F4A5A5] bg-[#FFF7F7]",
-  },
-  upcoming: {
-    label: "Upcoming",
-    icon: CalendarClock,
-    cardClass: "border-[#BFD7EA] bg-[#F5FAFF]",
-  },
-};
-
-function mapVaccinationPillStatus(status: VaccinationStatus) {
-  if (status === "completed") {
-    return "ADMINISTERED";
-  }
-
-  if (status === "overdue") {
-    return "OVERDUE";
-  }
-
-  if (status === "due") {
-    return "MISSED";
-  }
-
-  return "PENDING";
+function cacheKey(id: string) {
+  return `motherhood:vaccination-card:${id}`;
 }
 
-function formatDate(value: string | null | undefined) {
-  if (!value) {
-    return "Not recorded";
-  }
-
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(value));
-}
-
-function formatDateTime(value: string | null | undefined) {
-  if (!value) {
-    return "Not synced yet";
-  }
-
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(value));
-}
-
-function getCacheKey(childId: string) {
-  return `motherhood:vaccination-card:${childId}`;
-}
-
-function readCache(childId: string) {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
+function readCache(id: string): VaccinationCardCache | null {
+  if (typeof window === "undefined") return null;
   try {
-    const rawValue = window.localStorage.getItem(getCacheKey(childId));
-    if (!rawValue) {
-      return null;
-    }
-
-    const parsed = JSON.parse(rawValue) as Partial<VaccinationCardCache>;
-    if (!parsed.savedAt || !parsed.payload) {
-      return null;
-    }
-
+    const raw = window.localStorage.getItem(cacheKey(id));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<VaccinationCardCache>;
+    if (!parsed.savedAt || !parsed.payload) return null;
     return parsed as VaccinationCardCache;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
-function writeCache(childId: string, payload: VaccinationCardCache) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  try {
-    window.localStorage.setItem(getCacheKey(childId), JSON.stringify(payload));
-  } catch {
-    // Ignore storage failures and keep the page functional.
-  }
+function writeCache(id: string, payload: VaccinationCardCache) {
+  if (typeof window === "undefined") return;
+  try { window.localStorage.setItem(cacheKey(id), JSON.stringify(payload)); }
+  catch { /* storage full — continue */ }
 }
 
 function isFresh(savedAt: string) {
   return Date.now() - new Date(savedAt).getTime() <= CACHE_TTL_MS;
 }
 
-function normalizeChildId(childId: string) {
-  return decodeURIComponent(childId).trim();
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function fmtDate(v: string | null | undefined) {
+  if (!v) return "—";
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric", month: "short", year: "numeric",
+  }).format(new Date(v));
 }
 
-function formatChildLabel(childId: string) {
-  const cleaned = childId.replace(/[-_]+/g, " ").trim();
-  return cleaned.length > 0 ? cleaned : "Child record";
+function fmtDateTime(v: string | null | undefined) {
+  if (!v) return "Not synced";
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric", month: "short", year: "numeric",
+    hour: "numeric", minute: "2-digit",
+  }).format(new Date(v));
 }
 
-function getCompletionSummary(vaccines: VaccinationRecord[]) {
-  const completed = vaccines.filter((vaccine) => vaccine.status === "completed").length;
-  const total = vaccines.length;
-  const overdue = vaccines.filter((vaccine) => vaccine.status === "overdue").length;
-  const dueSoon = vaccines.filter((vaccine) => vaccine.status === "due").length;
-
-  return {
-    completed,
-    total,
-    overdue,
-    dueSoon,
-    progress: total === 0 ? 0 : Math.round((completed / total) * 100),
-  };
+function completionSummary(vaccines: VaccinationRecord[]) {
+  const completed = vaccines.filter((v) => v.status === "completed").length;
+  const overdue   = vaccines.filter((v) => v.status === "overdue").length;
+  const total     = vaccines.length;
+  return { completed, overdue, total, pct: total === 0 ? 0 : Math.round((completed / total) * 100) };
 }
 
-function getSoonestPending(vaccines: VaccinationRecord[]) {
-  const pending = vaccines
-    .filter((vaccine) => vaccine.status !== "completed")
-    .slice()
-    .sort((left, right) => new Date(left.dueDate).getTime() - new Date(right.dueDate).getTime());
+// ─── Status cell ──────────────────────────────────────────────────────────────
 
-  return pending[0] ?? null;
-}
+const STATUS_LABEL: Record<VaccinationStatus, string> = {
+  completed: "Given",
+  due:       "Due Soon",
+  overdue:   "Overdue",
+  upcoming:  "Upcoming",
+};
 
-export default function PatientVaccinationCardPage({ params }: PatientVaccinationPageProps) {
-  const resolvedParams = use(params);
-  const childId = normalizeChildId(resolvedParams.childId);
+const STATUS_CLASSES: Record<VaccinationStatus, string> = {
+  completed: "bg-emerald-50 text-emerald-700",
+  due:       "bg-amber-50 text-amber-700",
+  overdue:   "bg-red-50 text-red-700",
+  upcoming:  "bg-gray-50 text-gray-500",
+};
+
+const STATUS_ICON: Record<VaccinationStatus, typeof CheckCircle2> = {
+  completed: CheckCircle2,
+  due:       Clock3,
+  overdue:   AlertTriangle,
+  upcoming:  CalendarClock,
+};
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type LoadState = {
+  data: VaccinationCardData | null;
+  source: VaccinationCardCache["source"] | "stale-cache";
+  lastSyncedAt: string | null;
+  isLoading: boolean;
+  errorMessage: string | null;
+};
+
+type PageProps = { params: Promise<{ childId: string }> };
+
+// ─── Page ──────────────────────────────────────────────────────────────────────
+
+export default function PatientVaccinationCardPage({ params }: PageProps) {
+  const { childId } = use(params);
   const [refreshToken, setRefreshToken] = useState(0);
   const [loadState, setLoadState] = useState<LoadState>({
-    data: null,
-    source: "demo",
-    lastSyncedAt: null,
-    isLoading: true,
-    isOffline: false,
-    errorMessage: null,
+    data: null, source: "demo", lastSyncedAt: null,
+    isLoading: true, errorMessage: null,
   });
 
   useEffect(() => {
-    let isMounted = true;
+    let alive = true;
 
-    async function loadVaccinationCard() {
-      const cachedValue = readCache(childId);
-      const isOffline = typeof navigator !== "undefined" ? !navigator.onLine : false;
-
-      if (cachedValue && isFresh(cachedValue.savedAt)) {
-        if (isMounted) {
-          setLoadState({
-            data: cachedValue.payload,
-            source: cachedValue.source,
-            lastSyncedAt: cachedValue.savedAt,
-            isLoading: false,
-            isOffline,
-            errorMessage: null,
-          });
-        }
-
+    async function load() {
+      const cached = readCache(childId);
+      if (cached && isFresh(cached.savedAt)) {
+        if (alive) setLoadState({ data: cached.payload, source: cached.source,
+          lastSyncedAt: cached.savedAt, isLoading: false, errorMessage: null });
         return;
       }
 
       try {
-        const response = await fetch(`/api/children/${encodeURIComponent(childId)}/vaccinations`, {
-          cache: "no-store",
-          headers: {
-            Accept: "application/json",
-          },
+        const res = await fetch(`/api/children/${encodeURIComponent(childId)}/vaccinations`, {
+          cache: "no-store", headers: { Accept: "application/json" },
         });
-
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
-
-        const payload = (await response.json()) as VaccinationCardData;
-
-        if (isMounted) {
-          const cachePayload: VaccinationCardCache = {
-            savedAt: new Date().toISOString(),
-            source: "live",
-            payload,
-          };
-
-          writeCache(childId, cachePayload);
-
-          setLoadState({
-            data: payload,
-            source: "live",
-            lastSyncedAt: cachePayload.savedAt,
-            isLoading: false,
-            isOffline,
-            errorMessage: null,
-          });
-        }
-
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const payload = (await res.json()) as VaccinationCardData;
+        const entry: VaccinationCardCache = { savedAt: new Date().toISOString(), source: "live", payload };
+        writeCache(childId, entry);
+        if (alive) setLoadState({ data: payload, source: "live",
+          lastSyncedAt: entry.savedAt, isLoading: false, errorMessage: null });
         return;
-      } catch (error) {
-        if (cachedValue) {
-          if (isMounted) {
-            setLoadState({
-              data: cachedValue.payload,
-              source: isFresh(cachedValue.savedAt) ? cachedValue.source : "stale-cache",
-              lastSyncedAt: cachedValue.savedAt,
-              isLoading: false,
-              isOffline: true,
-              errorMessage: error instanceof Error ? error.message : "Unable to sync live vaccination data.",
-            });
-          }
-
+      } catch (err) {
+        if (cached) {
+          if (alive) setLoadState({ data: cached.payload,
+            source: isFresh(cached.savedAt) ? cached.source : "stale-cache",
+            lastSyncedAt: cached.savedAt, isLoading: false,
+            errorMessage: err instanceof Error ? err.message : "Could not sync." });
           return;
         }
       }
 
-      const demoPayload = createDemoVaccinationCard(childId);
-      const cachePayload: VaccinationCardCache = {
-        savedAt: new Date().toISOString(),
-        source: "demo",
-        payload: demoPayload,
-      };
-
-      writeCache(childId, cachePayload);
-
-      if (isMounted) {
-        setLoadState({
-          data: demoPayload,
-          source: "demo",
-          lastSyncedAt: cachePayload.savedAt,
-          isLoading: false,
-          isOffline,
-          errorMessage: "Live data is unavailable, so the card is showing a seeded offline record.",
-        });
-      }
+      const demo = buildDemoCard(childId);
+      const entry: VaccinationCardCache = { savedAt: new Date().toISOString(), source: "demo", payload: demo };
+      writeCache(childId, entry);
+      if (alive) setLoadState({ data: demo, source: "demo",
+        lastSyncedAt: entry.savedAt, isLoading: false,
+        errorMessage: "Showing offline demo record — no live API connection." });
     }
 
-    void loadVaccinationCard();
-
-    return () => {
-      isMounted = false;
-    };
+    void load();
+    return () => { alive = false; };
   }, [childId, refreshToken]);
 
-  const card = loadState.data;
-  const summary = useMemo(() => (card ? getCompletionSummary(card.vaccines) : null), [card]);
-  const nextPending = useMemo(() => (card ? getSoonestPending(card.vaccines) : null), [card]);
-  const overdueVaccines = card?.vaccines.filter((vaccine) => vaccine.status === "overdue") ?? [];
-
-  const handleRefresh = () => {
-    setLoadState((current) => ({ ...current, isLoading: true, errorMessage: null }));
-    setRefreshToken((current) => current + 1);
-  };
-
-  const handlePrint = () => {
-    if (typeof window !== "undefined") {
-      window.print();
-    }
-  };
+  const card    = loadState.data;
+  const summary = useMemo(() => card ? completionSummary(card.vaccines) : null, [card]);
+  const overdue = card?.vaccines.filter((v) => v.status === "overdue") ?? [];
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 pb-6 text-slate-950">
-      <PageHeader
-        title="Vaccination Card"
-        subtitle="Mobile-first record for a child's immunization schedule, with offline cache support and a print-ready layout."
-      />
+    <div className="mx-auto max-w-3xl space-y-5 p-4 sm:p-6 print:p-0">
 
-      <section className="overflow-hidden rounded-[2rem] border border-[#CFE6E2] bg-white shadow-[0_20px_55px_-35px_rgba(18,89,82,0.35)] print:rounded-none print:border-black print:shadow-none">
-        <div className="bg-[linear-gradient(135deg,#1F6F72_0%,#2C8A84_55%,#E8F5F2_100%)] px-5 py-6 text-white sm:px-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/12 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-white/90">
-                <Smartphone className="size-3.5" />
-                Patient view
-              </div>
+      {/* ── Toolbar ── */}
+      <div className="flex items-center gap-3 print:hidden">
+        <Button asChild variant="ghost" size="sm" className="rounded-xl text-gray-500">
+          <Link href="/my-children">
+            <ArrowLeft className="size-4" /> Back
+          </Link>
+        </Button>
+        <div className="flex-1" />
+        <Button
+          variant="outline" size="sm" className="rounded-xl"
+          onClick={() => { setLoadState((s) => ({ ...s, isLoading: true })); setRefreshToken((n) => n + 1); }}
+          disabled={loadState.isLoading}
+        >
+          <RefreshCw className={cn("size-3.5", loadState.isLoading && "animate-spin")} />
+          Refresh
+        </Button>
+        <Button
+          variant="outline" size="sm" className="rounded-xl"
+          onClick={() => window.print()}
+        >
+          <Printer className="size-3.5" /> Print
+        </Button>
+      </div>
 
-              <div>
-                <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
-                  {card ? card.child.fullName : formatChildLabel(childId)}
-                </h1>
-                <p className="mt-2 max-w-xl text-base text-white/90">
-                  {card
-                    ? `${card.child.motherName} · ${card.child.facilityName}`
-                    : "Loading the latest vaccination record."}
-                </p>
-              </div>
+      {/* ── Report card ── */}
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm print:rounded-none print:border-0 print:shadow-none">
 
-              <div className="flex flex-wrap gap-2 text-sm text-white/90">
-                <span className="rounded-full border border-white/20 bg-white/12 px-3 py-1">
-                  Child ID: {childId}
-                </span>
-                {card ? (
-                  <span className="rounded-full border border-white/20 bg-white/12 px-3 py-1">
-                    DOB: {formatDate(card.child.dateOfBirth)}
-                  </span>
-                ) : null}
-                <span className="rounded-full border border-white/20 bg-white/12 px-3 py-1">
-                  {loadState.isOffline ? "Offline ready" : "Online sync available"}
-                </span>
-              </div>
+        {/* Report header */}
+        <div className="border-b border-gray-200 px-6 py-5 print:border-black">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                Vaccination Record
+              </p>
+              <h1 className="mt-1 text-2xl font-bold text-gray-900">
+                {card?.child.fullName ?? "Loading…"}
+              </h1>
             </div>
-
-            <div className="flex flex-wrap gap-3 sm:justify-end print:hidden">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-11 rounded-2xl border-white/30 bg-white/10 px-4 text-white hover:bg-white/20"
-                onClick={handleRefresh}
-                disabled={loadState.isLoading}
-              >
-                <RefreshCw className={cn("size-4", loadState.isLoading && "animate-spin")} />
-                <span>Refresh</span>
-              </Button>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="h-11 rounded-2xl border-white/30 bg-white/10 px-4 text-white hover:bg-white/20"
-                onClick={handlePrint}
-              >
-                <Printer className="size-4" />
-                <span>Print</span>
-              </Button>
+            <div className="text-right text-xs text-gray-400">
+              <p>Child ID: <span className="font-medium text-gray-700">{childId}</span></p>
+              {card && <p className="mt-0.5">DOB: <span className="font-medium text-gray-700">{fmtDate(card.child.dateOfBirth)}</span></p>}
             </div>
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <article className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/75">Completed</p>
-              <p className="mt-1 text-3xl font-semibold">{summary?.completed ?? "--"}</p>
-              <p className="text-sm text-white/80">of {summary?.total ?? "--"} vaccines</p>
-            </article>
-
-            <article className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/75">Overdue</p>
-              <p className="mt-1 text-3xl font-semibold">{summary?.overdue ?? "--"}</p>
-              <p className="text-sm text-white/80">needs CHW follow-up</p>
-            </article>
-
-            <article className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/75">Next due</p>
-              <p className="mt-1 text-lg font-semibold leading-tight">
-                {nextPending ? nextPending.name : "All clear"}
-              </p>
-              <p className="text-sm text-white/80">
-                {nextPending ? formatDate(nextPending.dueDate) : "All vaccines recorded"}
-              </p>
-            </article>
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-white/20 bg-white/15 p-4 backdrop-blur-sm">
-            <div className="flex items-center justify-between gap-3 text-sm font-medium text-white/90">
-              <span>{summary ? `${summary.completed} of ${summary.total} vaccines completed` : "Loading completion summary"}</span>
-              <span>{summary?.progress ?? 0}%</span>
+          {/* Child meta row */}
+          {card && (
+            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-500">
+              <span>Facility: <span className="font-medium text-gray-700">{card.child.facilityName}</span></span>
+              <span>Mother: <span className="font-medium text-gray-700">{card.child.motherName}</span></span>
+              <span>Last synced: <span className="font-medium text-gray-700">{fmtDateTime(loadState.lastSyncedAt)}</span></span>
             </div>
-            <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/20">
+          )}
+        </div>
+
+        {/* Error / offline notice */}
+        {loadState.errorMessage && (
+          <div className="border-b border-amber-100 bg-amber-50 px-6 py-2.5 text-xs text-amber-700">
+            {loadState.errorMessage}
+          </div>
+        )}
+
+        {/* Overdue alert */}
+        {overdue.length > 0 && (
+          <div className="flex items-start gap-3 border-b border-red-200 bg-red-50 px-6 py-3">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-500" />
+            <p className="text-sm text-red-700">
+              <span className="font-semibold">
+                {overdue.length} vaccine{overdue.length > 1 ? "s are" : " is"} overdue.
+              </span>{" "}
+              Please contact your Community Health Worker to schedule a catch-up visit.
+            </p>
+          </div>
+        )}
+
+        {/* Progress summary */}
+        {summary && (
+          <div className="border-b border-gray-100 px-6 py-4">
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <span className="font-medium text-gray-700">
+                {summary.completed} of {summary.total} vaccines given
+              </span>
+              <span className="font-semibold text-gray-900">{summary.pct}%</span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
               <div
-                className="h-full rounded-full bg-white transition-all"
-                style={{ width: `${summary?.progress ?? 0}%` }}
+                className="h-full rounded-full bg-emerald-500 transition-all"
+                style={{ width: `${summary.pct}%` }}
               />
             </div>
-          </div>
-        </div>
-
-        <div className="space-y-4 px-5 py-5 sm:px-6">
-          {loadState.errorMessage ? (
-            <div className="rounded-2xl border border-[#F2A9A9] bg-[#FFF4F4] px-4 py-3 text-sm font-medium text-[#991B1B]">
-              {loadState.errorMessage}
+            <div className="mt-3 flex gap-5 text-xs text-gray-500">
+              <span>
+                <span className="font-semibold text-emerald-600">{summary.completed}</span> Given
+              </span>
+              <span>
+                <span className="font-semibold text-red-500">{summary.overdue}</span> Overdue
+              </span>
+              <span>
+                <span className="font-semibold text-gray-700">{summary.total - summary.completed - summary.overdue}</span> Upcoming
+              </span>
             </div>
-          ) : null}
-
-          {overdueVaccines.length > 0 ? (
-            <div className="rounded-2xl border border-[#E76D6D] bg-[#B91C1C] px-4 py-3 text-white shadow-sm">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="mt-0.5 size-5 shrink-0" />
-                <div>
-                  <p className="text-base font-semibold">Vaccines are overdue</p>
-                  <p className="mt-1 text-sm text-white/90">
-                    {overdueVaccines.length} record{overdueVaccines.length === 1 ? " is" : "s are"} overdue. Please contact the CHW for follow-up and catch-up guidance.
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          <div className="grid gap-4">
-            {card?.vaccines.map((vaccine) => {
-              const config = statusConfig[vaccine.status];
-              const StatusIcon = config.icon;
-
-              return (
-                <article
-                  key={vaccine.id}
-                  className={cn(
-                    "relative overflow-hidden rounded-[1.6rem] border p-4 shadow-sm print:break-inside-avoid",
-                    config.cardClass,
-                    vaccine.status === "overdue" && "ring-2 ring-[#B91C1C]/15",
-                  )}
-                >
-                  {vaccine.status === "overdue" ? (
-                    <div className="-mx-4 -mt-4 mb-4 bg-[#B91C1C] px-4 py-2 text-sm font-semibold text-white">
-                      Overdue. Contact the CHW to plan the next dose.
-                    </div>
-                  ) : null}
-
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#64807C]">
-                        {vaccine.doseLabel}
-                      </p>
-                      <h2 className="mt-2 text-xl font-semibold text-slate-950 sm:text-[1.35rem]">
-                        {vaccine.name}
-                      </h2>
-                    </div>
-
-                    <div className="flex flex-col items-end gap-2">
-                      <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-[#54797C]">
-                        <StatusIcon className="size-3.5" />
-                        {config.label}
-                      </span>
-                      <VaccinationStatusPill status={mapVaccinationPillStatus(vaccine.status)} />
-                    </div>
-                  </div>
-
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-2xl bg-white/75 px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6A7F7A]">Due date</p>
-                      <p className="mt-1 text-lg font-semibold text-[#14532D]">
-                        {formatDate(vaccine.dueDate)}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl bg-white/75 px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6A7F7A]">Administered</p>
-                      <p className="mt-1 text-lg font-semibold text-slate-950">
-                        {vaccine.administeredDate ? formatDate(vaccine.administeredDate) : "Not yet given"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between gap-3 text-sm text-[#54797C]">
-                    <span>Status: {config.label}</span>
-                    <span>{vaccine.note ?? (vaccine.status === "completed" ? "Recorded in the child health file" : "Keep this card with the caregiver")}</span>
-                  </div>
-                </article>
-              );
-            })}
           </div>
+        )}
 
-          <section className="grid gap-4 rounded-[1.6rem] border border-[#D7E8E5] bg-[#F6FBFA] p-4 print:border-black print:bg-white sm:grid-cols-3">
-            <article className="rounded-2xl border border-[#D8E9E4] bg-white p-4 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#64807C]">Facility</p>
-              <p className="mt-2 text-lg font-semibold text-slate-950">{card?.child.facilityName ?? "-"}</p>
-            </article>
-
-            <article className="rounded-2xl border border-[#D8E9E4] bg-white p-4 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#64807C]">Mother</p>
-              <p className="mt-2 text-lg font-semibold text-slate-950">{card?.child.motherName ?? "-"}</p>
-            </article>
-
-            <article className="rounded-2xl border border-[#D8E9E4] bg-white p-4 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#64807C]">Last synced</p>
-              <p className="mt-2 text-lg font-semibold text-slate-950">{formatDateTime(loadState.lastSyncedAt)}</p>
-            </article>
-          </section>
-
-          <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#D7E8E5] bg-white px-4 py-3 text-sm text-[#54797C] print:border-black">
-            <WifiOff className="size-4 shrink-0" />
-            <span>
-              {loadState.source === "live"
-                ? "Live data is synced and cached for the next 24 hours."
-                : loadState.source === "cache" || loadState.source === "stale-cache"
-                  ? "This card is being shown from the local offline cache."
-                  : "This record is a seeded offline fallback and will be replaced when a live API is connected."}
-            </span>
+        {/* Vaccine table */}
+        {loadState.isLoading ? (
+          <div className="space-y-3 px-6 py-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-10 animate-pulse rounded-lg bg-gray-100" />
+            ))}
           </div>
-
-          <div className="flex flex-wrap gap-3 print:hidden">
-            <Button
-              type="button"
-              variant="outline"
-              className="h-11 rounded-2xl border-[#BFD9D4] bg-white px-4 text-[#1D5052]"
-              onClick={handleRefresh}
-              disabled={loadState.isLoading}
-            >
-              <RefreshCw className={cn("size-4", loadState.isLoading && "animate-spin")} />
-              <span>Reload card</span>
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="h-11 rounded-2xl border-[#BFD9D4] bg-white px-4 text-[#1D5052]"
-              onClick={handlePrint}
-            >
-              <Printer className="size-4" />
-              <span>Print card</span>
-            </Button>
-
-            <Button
-              asChild
-              type="button"
-              variant="ghost"
-              className="h-11 rounded-2xl px-4 text-[#1D5052] hover:bg-[#F1F8F6]"
-            >
-              <Link href="/children">
-                <span>Back to children</span>
-              </Link>
-            </Button>
+        ) : card?.vaccines.length ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  <th className="px-6 py-3">#</th>
+                  <th className="px-4 py-3">Vaccine</th>
+                  <th className="px-4 py-3">Dose</th>
+                  <th className="px-4 py-3">Due Date</th>
+                  <th className="px-4 py-3">Date Given</th>
+                  <th className="px-4 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {card.vaccines.map((v, idx) => {
+                  const Icon = STATUS_ICON[v.status];
+                  return (
+                    <tr
+                      key={v.id}
+                      className={cn(
+                        "border-b border-gray-50 last:border-0",
+                        v.status === "overdue" && "bg-red-50/40",
+                      )}
+                    >
+                      <td className="px-6 py-3.5 text-xs text-gray-400">{idx + 1}</td>
+                      <td className="px-4 py-3.5 font-medium text-gray-900">{v.name}</td>
+                      <td className="px-4 py-3.5 text-gray-500">{v.doseLabel}</td>
+                      <td className="px-4 py-3.5 text-gray-500">{fmtDate(v.dueDate)}</td>
+                      <td className="px-4 py-3.5">
+                        {v.administeredDate
+                          ? <span className="font-medium text-gray-900">{fmtDate(v.administeredDate)}</span>
+                          : <span className="text-gray-300">—</span>
+                        }
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span className={cn(
+                          "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                          STATUS_CLASSES[v.status],
+                        )}>
+                          <Icon className="size-3" />
+                          {STATUS_LABEL[v.status]}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
+        ) : (
+          <p className="px-6 py-10 text-center text-sm text-gray-400">No vaccine records found.</p>
+        )}
+
+        {/* Footer */}
+        <div className="border-t border-gray-100 bg-gray-50 px-6 py-3 text-xs text-gray-400">
+          {loadState.source === "live"
+            ? "Data synced from server · cached for 24 hours"
+            : loadState.source === "demo"
+            ? "Showing offline demo record"
+            : "Showing cached data · last synced " + fmtDateTime(loadState.lastSyncedAt)}
         </div>
-      </section>
+      </div>
     </div>
   );
 }
 
-// Demo data generator
-function createDemoVaccinationCard(childId: string): VaccinationCardData {
+// ─── Demo data ─────────────────────────────────────────────────────────────────
+
+function buildDemoCard(childId: string): VaccinationCardData {
+  const today = new Date();
+  const add   = (d: Date, n: number) => new Date(d.getTime() + n * 86400000).toISOString().split("T")[0];
   return {
     child: {
-      id: childId,
-      fullName: "Amina Uwimana",
-      dateOfBirth: "2019-06-13",
-      motherName: "Marie Uwimana",
-      facilityName: "Nyagatare Health Centre",
+      id:           childId,
+      fullName:     "Amara Uwimana",
+      dateOfBirth:  "2024-11-20",
+      motherName:   "Uwimana Marie",
+      facilityName: "Nyamata Health Center",
     },
-    lastUpdatedAt: new Date().toISOString(),
+    lastUpdatedAt: today.toISOString(),
     vaccines: [
-      {
-        id: `${childId}-bcg`,
-        name: "BCG",
-        doseLabel: "Dose 1",
-        status: "completed",
-        dueDate: "2019-06-14",
-        administeredDate: "2019-06-14",
-        note: "Recorded in the child health file",
-      },
-      {
-        id: `${childId}-polio1`,
-        name: "Polio",
-        doseLabel: "Dose 1",
-        status: "completed",
-        dueDate: "2019-06-28",
-        administeredDate: "2019-06-28",
-        note: "Recorded in the child health file",
-      },
-      {
-        id: `${childId}-penta1`,
-        name: "Penta",
-        doseLabel: "Dose 1",
-        status: "overdue",
-        dueDate: "2019-08-01",
-        administeredDate: null,
-        note: "Contact CHW for catch-up",
-      },
-      {
-        id: `${childId}-measles`,
-        name: "Measles",
-        doseLabel: "Dose 1",
-        status: "due",
-        dueDate: "2020-03-01",
-        administeredDate: null,
-        note: "Keep this card with the caregiver",
-      },
+      { id: "bcg",      name: "BCG",                doseLabel: "Dose 1",  status: "completed", dueDate: "2024-11-21", administeredDate: "2024-11-21", note: undefined},
+      { id: "polio0",   name: "Polio (OPV 0)",       doseLabel: "Dose 1",  status: "completed", dueDate: "2024-11-21", administeredDate: "2024-11-21", note: undefined},
+      { id: "penta1",   name: "DPT-HepB-Hib",        doseLabel: "Dose 1",  status: "completed", dueDate: "2025-01-02", administeredDate: "2025-01-05", note: undefined},
+      { id: "polio1",   name: "Polio (OPV 1)",        doseLabel: "Dose 1",  status: "completed", dueDate: "2025-01-02", administeredDate: "2025-01-05", note: undefined},
+      { id: "pcv1",     name: "PCV (Pneumococcal)",   doseLabel: "Dose 1",  status: "completed", dueDate: "2025-01-02", administeredDate: "2025-01-05", note: undefined},
+      { id: "penta2",   name: "DPT-HepB-Hib",        doseLabel: "Dose 2",  status: "completed", dueDate: "2025-01-30", administeredDate: "2025-02-01", note: undefined},
+      { id: "polio2",   name: "Polio (OPV 2)",        doseLabel: "Dose 2",  status: "completed", dueDate: "2025-01-30", administeredDate: "2025-02-01", note: undefined},
+      { id: "penta3",   name: "DPT-HepB-Hib",        doseLabel: "Dose 3",  status: "completed", dueDate: "2025-02-27", administeredDate: "2025-03-02", note: undefined},
+      { id: "measles1", name: "Measles-Rubella",      doseLabel: "Dose 1",  status: "completed", dueDate: "2025-08-20", administeredDate: "2025-08-25", note: undefined},
+      { id: "measles2", name: "Measles-Rubella",      doseLabel: "Dose 2",  status: "due",       dueDate: add(today, 7), administeredDate: null,          note: undefined},
+      { id: "vita",     name: "Vitamin A",             doseLabel: "18 mo",   status: "upcoming",  dueDate: add(today, 60), administeredDate: null,         note: undefined},
+      { id: "dpt-b",    name: "DPT Booster",          doseLabel: "Booster", status: "upcoming",  dueDate: add(today, 90), administeredDate: null,         note: undefined},
+      { id: "ipv",      name: "IPV (Polio)",           doseLabel: "Booster", status: "upcoming",  dueDate: add(today, 120), administeredDate: null,        note: undefined},
     ],
   };
 }

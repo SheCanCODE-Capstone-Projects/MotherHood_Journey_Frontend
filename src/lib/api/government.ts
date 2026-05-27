@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import type { ReportType, ReportStatus } from "@/shared/types/report";
 
 export type GovSyncTargetSystem = "NIDA" | "HMIS" | "IREMBO";
 export type GovSyncStatus = "PENDING" | "IN_FLIGHT" | "SUCCEEDED" | "FAILED" | "DEAD_LETTER";
@@ -297,6 +298,185 @@ export async function getGovSyncLogs(): Promise<GovSyncLog[]> {
 
   return readStoredDemoGovSyncLogs();
 }
+
+// ─── Report generation ──────────────────────────────────────────────────────
+
+export type ReportPeriodType = "MONTH" | "QUARTER" | "YEAR";
+export type ReportScopeLevel = "NATIONAL" | "PROVINCE" | "DISTRICT";
+
+export interface GenerateReportRequest {
+  reportType: ReportType;
+  periodType: ReportPeriodType;
+  periodYear: string;
+  periodMonth?: string;
+  periodQuarter?: string;
+  scopeLevel: ReportScopeLevel;
+  scopeId?: string;
+  scopeName?: string;
+}
+
+export interface StoredReport {
+  id: string;
+  reportType: ReportType;
+  status: ReportStatus;
+  title: string;
+  generatedAt: string;
+  periodStart: string;
+  periodEnd: string;
+  scopeLevel: ReportScopeLevel;
+  scopeName: string;
+}
+
+const GOV_REPORTS_KEY = "motherhood:gov-reports";
+
+const REPORT_TYPE_LABELS: Record<ReportType, string> = {
+  VACCINATION_COVERAGE: "Vaccination Coverage",
+  ANC_ATTENDANCE: "ANC Attendance",
+  BIRTH_REGISTRATION: "Birth Registration",
+  MATERNAL_HEALTH: "Maternal Health",
+};
+
+const SEED_REPORTS: StoredReport[] = [
+  {
+    id: "rpt-vaccination-001",
+    reportType: "VACCINATION_COVERAGE",
+    status: "NOT_PUSHED",
+    title: "Vaccination Coverage Report - Q1 2024",
+    generatedAt: "2024-03-31T10:00:00Z",
+    periodStart: "2024-01-01T00:00:00Z",
+    periodEnd: "2024-03-31T23:59:59Z",
+    scopeLevel: "NATIONAL",
+    scopeName: "National",
+  },
+  {
+    id: "rpt-anc-002",
+    reportType: "ANC_ATTENDANCE",
+    status: "QUEUED",
+    title: "ANC Attendance Report - H1 2024",
+    generatedAt: "2024-06-15T14:30:00Z",
+    periodStart: "2024-01-01T00:00:00Z",
+    periodEnd: "2024-06-30T23:59:59Z",
+    scopeLevel: "DISTRICT",
+    scopeName: "Bugesera District",
+  },
+  {
+    id: "rpt-birth-003",
+    reportType: "BIRTH_REGISTRATION",
+    status: "PUSHED",
+    title: "Birth Registration Report - Q2 2024",
+    generatedAt: "2024-07-01T09:00:00Z",
+    periodStart: "2024-04-01T00:00:00Z",
+    periodEnd: "2024-06-30T23:59:59Z",
+    scopeLevel: "NATIONAL",
+    scopeName: "National",
+  },
+  {
+    id: "rpt-maternal-004",
+    reportType: "MATERNAL_HEALTH",
+    status: "FAILED",
+    title: "Maternal Health Report - H1 2024",
+    generatedAt: "2024-08-10T11:00:00Z",
+    periodStart: "2024-01-01T00:00:00Z",
+    periodEnd: "2024-07-31T23:59:59Z",
+    scopeLevel: "PROVINCE",
+    scopeName: "Eastern Province",
+  },
+];
+
+function readStoredReports(): StoredReport[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(GOV_REPORTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as StoredReport[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function buildPeriodDates(req: GenerateReportRequest): {
+  start: string;
+  end: string;
+  label: string;
+} {
+  const year = parseInt(req.periodYear);
+  if (req.periodType === "YEAR") {
+    return {
+      start: `${year}-01-01T00:00:00Z`,
+      end: `${year}-12-31T23:59:59Z`,
+      label: String(year),
+    };
+  }
+  if (req.periodType === "QUARTER") {
+    const q = parseInt(req.periodQuarter ?? "1");
+    const startMonth = (q - 1) * 3 + 1;
+    const endMonth = q * 3;
+    const endDay = [3, 6, 9].includes(endMonth) ? 30 : 31;
+    return {
+      start: `${year}-${String(startMonth).padStart(2, "0")}-01T00:00:00Z`,
+      end: `${year}-${String(endMonth).padStart(2, "0")}-${endDay}T23:59:59Z`,
+      label: `Q${q} ${year}`,
+    };
+  }
+  const month = parseInt(req.periodMonth ?? "1");
+  const lastDay = new Date(year, month, 0).getDate();
+  const monthLabel = new Date(year, month - 1, 1).toLocaleString("en-US", {
+    month: "long",
+  });
+  return {
+    start: `${year}-${String(month).padStart(2, "0")}-01T00:00:00Z`,
+    end: `${year}-${String(month).padStart(2, "0")}-${lastDay}T23:59:59Z`,
+    label: `${monthLabel} ${year}`,
+  };
+}
+
+export async function getGovernmentReports(): Promise<StoredReport[]> {
+  try {
+    const response = await apiClient.get<unknown>("/api/v1/government/reports");
+    if (Array.isArray(response) && (response as StoredReport[]).length > 0) {
+      return response as StoredReport[];
+    }
+  } catch {
+    // fall through to local
+  }
+  const stored = readStoredReports();
+  const storedIds = new Set(stored.map((r) => r.id));
+  return [...stored, ...SEED_REPORTS.filter((r) => !storedIds.has(r.id))];
+}
+
+export async function generateReport(req: GenerateReportRequest): Promise<{ id: string }> {
+  const { start, end, label } = buildPeriodDates(req);
+  const scopeName =
+    req.scopeName ?? (req.scopeLevel === "NATIONAL" ? "National" : (req.scopeId ?? ""));
+  const id = `rpt-${req.reportType.toLowerCase().replace(/_/g, "-")}-${Date.now()}`;
+  const report: StoredReport = {
+    id,
+    reportType: req.reportType,
+    status: "NOT_PUSHED",
+    title: `${REPORT_TYPE_LABELS[req.reportType]} Report - ${label}`,
+    generatedAt: new Date().toISOString(),
+    periodStart: start,
+    periodEnd: end,
+    scopeLevel: req.scopeLevel,
+    scopeName,
+  };
+
+  try {
+    await apiClient.post("/api/v1/government/reports/generate", req);
+  } catch {
+    // store locally while API is unavailable
+    const existing = readStoredReports();
+    existing.unshift(report);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(GOV_REPORTS_KEY, JSON.stringify(existing.slice(0, 20)));
+    }
+  }
+
+  return { id };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 
 export async function retryGovSyncLog(id: string): Promise<GovSyncRetryResult> {
   try {

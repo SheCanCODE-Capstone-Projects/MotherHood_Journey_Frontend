@@ -14,18 +14,18 @@ export function PageHeader({
   eyebrow,
 }: PageHeaderProps) {
   return (
-    <header className="flex flex-col gap-4 rounded-3xl border border-[#D5E9E6] bg-linear-to-r from-white via-[#F8FCFB] to-white p-5 shadow-sm sm:flex-row sm:items-start sm:justify-between">
+    <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between py-2">
       <div className="space-y-1">
         {eyebrow ? (
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5B8784]">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="text-2xl font-semibold tracking-tight text-[#1D5052]">
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
           {title}
         </h1>
         {subtitle ? (
-          <p className="text-sm leading-6 text-[#54797C]">{subtitle}</p>
+          <p className="text-sm leading-6 text-gray-600">{subtitle}</p>
         ) : null}
       </div>
 
