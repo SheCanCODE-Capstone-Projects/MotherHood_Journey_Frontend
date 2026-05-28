@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 
 import { MobileNav } from "@/shared/components/layout/MobileNav";
 import { Sidebar } from "@/shared/components/layout/Sidebar";
@@ -49,6 +50,12 @@ export function PortalShell({
     window.addEventListener("portal:preview-role", handler as EventListener);
     return () => window.removeEventListener("portal:preview-role", handler as EventListener);
   }, []);
+
+  const pathname = usePathname();
+
+  if (pathname === "/") {
+    return <>{children}</>;
+  }
 
   return (
     <div className="flex min-h-screen bg-[#F4F8F7] text-[#163F42] print:bg-white">
