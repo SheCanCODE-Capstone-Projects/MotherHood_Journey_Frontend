@@ -1,11 +1,19 @@
 import type { UserRole } from "@/shared/types/auth";
 
 export const ROLE_ROUTE_MAP: Record<UserRole, string[]> = {
+<<<<<<< HEAD
   patient:          ["/dashboard", "/pregnancies", "/my-children", "/appointments", "/consent", "/documents"],
   health_worker:    ["/hw-dashboard", "/mothers", "/children", "/visits", "/diagnoses", "/vaccinations"],
   facility_admin:   ["/facility-dashboard", "/schedule", "/service-requests", "/staff", "/reports"],
   district_officer: ["/district-dashboard", "/facilities", "/analytics"],
   government:       ["/national-dashboard", "/national-reports", "/sync-log", "/users"],
+=======
+  patient:          ["/dashboard", "/pregnancies", "/my-children", "/appointments"],
+  health_worker:    ["/dashboard", "/mothers", "/visits", "/diagnoses"],
+  facility_admin:   ["/dashboard", "/service-requests", "/staff", "/reports"],
+  district_officer: ["/dashboard", "/analytics"],
+  government:       ["/dashboard", "/sync", "/reports"],
+>>>>>>> 4afc06f6 (fix(routes): avoid parallel pages — move patient children to /my-children and update nav)
 };
 
 export type RoleNavItem = {

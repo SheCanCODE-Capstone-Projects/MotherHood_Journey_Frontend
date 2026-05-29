@@ -56,6 +56,7 @@ const iconByHref: Record<string, LucideIcon> = {
   "/documents": FileText,
 };
 
+<<<<<<< HEAD
 const mainNavItems = [
   "/dashboard",
   "/hw-dashboard",
@@ -82,6 +83,17 @@ const mainNavItems = [
   "/consent",
   "/documents",
 ];
+=======
+const mainNavItems = ["/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/children", "/my-children", "/appointments", "/reports", "/analytics", "/staff", "/sync"];
+
+const allNavItems = Array.from(
+  new Map(
+    Object.values(ROLE_NAV_ITEMS)
+      .flat()
+      .map((item) => [item.href, item]),
+  ).values(),
+);
+>>>>>>> 4afc06f6 (fix(routes): avoid parallel pages — move patient children to /my-children and update nav)
 
 export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
   const { role, roleLabel, organizationName, navItems, displayName } = useRole({
