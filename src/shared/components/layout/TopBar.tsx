@@ -62,7 +62,26 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
           className="grid size-11 shrink-0 place-items-center rounded-2xl font-semibold text-white"
           style={{ backgroundColor: roleTheme.accent }}
         >
+<<<<<<< HEAD
           {displayName.slice(0, 1).toUpperCase()}
+=======
+          {displayName?.slice(0, 1).toUpperCase()}
+        </div>
+
+        <div className="min-w-0">
+          <div
+            className="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em]"
+            style={{ backgroundColor: roleTheme.accentSoft, color: roleTheme.text }}
+          >
+            {role.replaceAll("_", " ")}
+          </div>
+          <h1 className="truncate text-lg font-semibold text-[#1D5052] sm:text-xl">
+            {displayName}
+          </h1>
+          <p className="truncate text-sm text-[#54797C]">
+            {organizationLabel}: {organizationName}
+          </p>
+>>>>>>> e5d9c333 (fix(layout): correct TopBar JSX nesting to resolve build parse error)
         </div>
       </div>
 

@@ -25,7 +25,6 @@ type MobileNavProps = {
 };
 
 const mobileIconByHref: Record<string, LucideIcon> = {
-<<<<<<< HEAD
   "/dashboard":        LayoutGrid,
   "/pregnancies":      Baby,
   "/children":         Baby,
@@ -45,16 +44,7 @@ const mobileIconByHref: Record<string, LucideIcon> = {
   "/users":               Users,
   "/sync":             RefreshCcw,
   "/sync-log":         RefreshCcw,
-=======
-  "/dashboard": LayoutGrid,
-  "/pregnancies": Baby,
-  "/children": Baby,
-  "/my-children": Baby,
-  "/appointments": CalendarDays,
-  "/mothers": Baby,
-  "/visits": CalendarDays,
-  "/diagnoses": Stethoscope,
->>>>>>> 4afc06f6 (fix(routes): avoid parallel pages — move patient children to /my-children and update nav)
+
 };
 
 export function MobileNav({ fallbackRole, previewRole }: MobileNavProps) {
