@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import type { Report, ReportStatus, ReportType } from "@/shared/types/report";
 
 export type GovSyncTargetSystem = "NIDA" | "HMIS" | "IREMBO";
 export type GovSyncStatus = "PENDING" | "IN_FLIGHT" | "SUCCEEDED" | "FAILED" | "DEAD_LETTER";
@@ -135,117 +136,24 @@ export type GovSyncRetryResult = {
   source: "api" | "demo";
 };
 
-const DEMO_STORAGE_KEY = "motherhood:gov-sync-logs-demo";
+export type GovReport = Report;
 
-function addMinutes(base: Date, minutes: number) {
-  const date = new Date(base);
-  date.setMinutes(date.getMinutes() + minutes);
-  return date.toISOString();
-}
+type ApiListResponse<T> = {
+  content?: T[];
+  data?: T[];
+  items?: T[];
+  logs?: T[];
+  reports?: T[];
+};
 
-function createDemoGovSyncLogs(): GovSyncLog[] {
-  const now = new Date();
+const GOV_REPORT_TYPES: ReportType[] = [
+  "VACCINATION_COVERAGE",
+  "ANC_ATTENDANCE",
+  "BIRTH_REGISTRATION",
+  "MATERNAL_HEALTH",
+];
 
-  return [
-    {
-      id: "742dfbd2-041b-4539-95ab-8e8b91317791",
-      createdAt: addMinutes(now, -6),
-      targetSystem: "HMIS",
-      syncType: "MATERNAL_VISIT_PUSH",
-      status: "IN_FLIGHT",
-      retryCount: 1,
-      lastErrorMessage: null,
-    },
-    {
-      id: "2a6c2c56-c0c2-4818-86f8-7c9df72ea861",
-      createdAt: addMinutes(now, -18),
-      targetSystem: "NIDA",
-      syncType: "NATIONAL_ID_LOOKUP",
-      status: "SUCCEEDED",
-      retryCount: 0,
-      lastErrorMessage: null,
-    },
-    {
-      id: "a2cbb6e9-0d7f-44ad-b13a-010e2b8bcb0c",
-      createdAt: addMinutes(now, -31),
-      targetSystem: "IREMBO",
-      syncType: "APPOINTMENT_NOTIFICATION",
-      status: "FAILED",
-      retryCount: 2,
-      lastErrorMessage:
-        "IREMBO gateway returned HTTP 503 after the appointment payload was accepted by the local queue.",
-    },
-    {
-      id: "c2b5e266-8b49-44f6-8500-a9f63e2d596c",
-      createdAt: addMinutes(now, -47),
-      targetSystem: "HMIS",
-      syncType: "DELIVERY_OUTCOME_PUSH",
-      status: "DEAD_LETTER",
-      retryCount: 5,
-      lastErrorMessage:
-        "HMIS rejected the delivery outcome because facilityCode was missing after all retry attempts.",
-    },
-    {
-      id: "ebb5e723-e3fc-40f2-9384-9d074f1377ad",
-      createdAt: addMinutes(now, -69),
-      targetSystem: "NIDA",
-      syncType: "MOTHER_DEMOGRAPHICS_VERIFY",
-      status: "PENDING",
-      retryCount: 0,
-      lastErrorMessage: null,
-    },
-  ];
-}
-
-function readStoredDemoGovSyncLogs(): GovSyncLog[] {
-  if (typeof window === "undefined") {
-    return createDemoGovSyncLogs();
-  }
-
-  try {
-    const raw = window.localStorage.getItem(DEMO_STORAGE_KEY);
-
-    if (!raw) {
-      const demo = createDemoGovSyncLogs();
-      window.localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(demo));
-      return demo;
-    }
-
-    const parsed = JSON.parse(raw) as GovSyncLog[];
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : createDemoGovSyncLogs();
-  } catch {
-    return createDemoGovSyncLogs();
-  }
-}
-
-function writeStoredDemoGovSyncLogs(logs: GovSyncLog[]) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(logs));
-}
-
-function appendDemoSyncLog() {
-  const startedAt = new Date().toISOString();
-  const currentLogs = readStoredDemoGovSyncLogs();
-  const newLog: GovSyncLog = {
-    id:
-      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-        ? crypto.randomUUID()
-        : `sync-${Date.now()}`,
-    createdAt: startedAt,
-    targetSystem: "HMIS",
-    syncType: "FULL_SYNC",
-    status: "IN_FLIGHT",
-    retryCount: 0,
-    lastErrorMessage: null,
-  };
-
-  writeStoredDemoGovSyncLogs([newLog, ...currentLogs]);
-
-  return { startedAt, id: newLog.id };
-}
+const GOV_REPORT_STATUSES: ReportStatus[] = ["NOT_PUSHED", "QUEUED", "PUSHED", "FAILED"];
 
 function normalizeTargetSystem(value: unknown): GovSyncTargetSystem {
   const normalized = String(value ?? "HMIS").toUpperCase();
@@ -265,6 +173,16 @@ function normalizeStatus(value: unknown): GovSyncStatus {
   }
 
   return "PENDING";
+}
+
+function normalizeReportType(value: unknown): ReportType | null {
+  const normalized = String(value ?? "").toUpperCase() as ReportType;
+  return GOV_REPORT_TYPES.includes(normalized) ? normalized : null;
+}
+
+function normalizeReportStatus(value: unknown): ReportStatus {
+  const normalized = String(value ?? "NOT_PUSHED").toUpperCase() as ReportStatus;
+  return GOV_REPORT_STATUSES.includes(normalized) ? normalized : "NOT_PUSHED";
 }
 
 function normalizeSyncLog(record: unknown): GovSyncLog | null {
@@ -310,40 +228,137 @@ function normalizeSyncLogResponse(response: unknown): GovSyncLog[] {
   return records.map(normalizeSyncLog).filter(Boolean) as GovSyncLog[];
 }
 
-export async function getGovSyncLogs(): Promise<GovSyncLog[]> {
-  try {
-    const response = await apiClient.get<unknown>("/api/v1/government/sync-logs");
-    const logs = normalizeSyncLogResponse(response);
-
-    if (logs.length > 0) {
-      return logs;
-    }
-  } catch {
-    // Keep the page usable while the backend endpoint is not available locally.
+function unwrapApiData<T>(response: unknown): T | null {
+  if (!response || typeof response !== "object") {
+    return null;
   }
 
-  return readStoredDemoGovSyncLogs();
+  const candidate = response as Record<string, unknown>;
+
+  if ("data" in candidate && candidate.data && typeof candidate.data === "object") {
+    return candidate.data as T;
+  }
+
+  return response as T;
+}
+
+function normalizeReport(record: unknown): GovReport | null {
+  if (!record || typeof record !== "object") {
+    return null;
+  }
+
+  const candidate = record as Record<string, unknown>;
+  const payload = candidate.data && typeof candidate.data === "object" ? (candidate.data as Record<string, unknown>) : candidate;
+  const reportType = normalizeReportType(payload.reportType ?? payload.report_type ?? candidate.reportType ?? candidate.report_type);
+
+  if (!reportType) {
+    return null;
+  }
+
+  const generatedAt = payload.generatedAt ?? payload.generated_at ?? candidate.generatedAt ?? candidate.generated_at;
+  const periodStart = payload.periodStart ?? payload.period_start ?? candidate.periodStart ?? candidate.period_start;
+  const periodEnd = payload.periodEnd ?? payload.period_end ?? candidate.periodEnd ?? candidate.period_end;
+  const data = payload.data ?? candidate.data ?? {};
+
+  return {
+    id: String(payload.id ?? candidate.id ?? ""),
+    reportType,
+    status: normalizeReportStatus(payload.status ?? candidate.status),
+    title: String(payload.title ?? candidate.title ?? `${reportType.replaceAll("_", " ")} Report`),
+    description: String(payload.description ?? candidate.description ?? ""),
+    generatedAt: typeof generatedAt === "string" ? generatedAt : new Date().toISOString(),
+    periodStart: typeof periodStart === "string" ? periodStart : new Date().toISOString(),
+    periodEnd: typeof periodEnd === "string" ? periodEnd : new Date().toISOString(),
+    facilityName: typeof payload.facilityName === "string" ? payload.facilityName : typeof candidate.facilityName === "string" ? candidate.facilityName : undefined,
+    districtName: typeof payload.districtName === "string" ? payload.districtName : typeof candidate.districtName === "string" ? candidate.districtName : undefined,
+    data: data as GovReport["data"],
+  };
+}
+
+function normalizeReportResponse(response: unknown): GovReport | null {
+  return normalizeReport(unwrapApiData<GovReport>(response));
+}
+
+function normalizeReportListResponse(response: unknown): GovReport[] {
+  const unwrapped = unwrapApiData<ApiListResponse<GovReport>>(response);
+
+  if (!unwrapped) {
+    return [];
+  }
+
+  const records = unwrapped.content ?? unwrapped.data ?? unwrapped.items ?? unwrapped.reports;
+
+  if (!Array.isArray(records)) {
+    return [];
+  }
+
+  return records.map(normalizeReport).filter(Boolean) as GovReport[];
+}
+
+export async function getGovSyncLogs(): Promise<GovSyncLog[]> {
+  try {
+    const response = await apiClient.get<unknown>("/api/v1/admin/gov-sync?page=0&size=200");
+    return normalizeSyncLogResponse(response);
+  } catch (error) {
+    throw error instanceof Error ? error : new Error("Failed to load sync logs");
+  }
+}
+
+export async function getGovDeadLetterLogs(): Promise<GovSyncLog[]> {
+  try {
+    const response = await apiClient.get<unknown>("/api/v1/admin/gov-sync/dead-letter");
+    return normalizeSyncLogResponse(response);
+  } catch (error) {
+    throw error instanceof Error ? error : new Error("Failed to load dead-letter queue");
+  }
+}
+
+export async function getGovSyncStatus(): Promise<Record<string, number>> {
+  try {
+    const response = await apiClient.get<unknown>("/api/v1/admin/gov-sync/status");
+    const data = unwrapApiData<Record<string, unknown>>(response);
+
+    if (!data) {
+      return {};
+    }
+
+    return Object.entries(data).reduce<Record<string, number>>((accumulator, [key, value]) => {
+      accumulator[key] = Number(value ?? 0);
+      return accumulator;
+    }, {});
+  } catch (error) {
+    throw error instanceof Error ? error : new Error("Failed to load sync status");
+  }
 }
 
 export async function triggerFullSync(): Promise<GovSyncTriggerResult> {
   try {
-    const response = await apiClient.post<unknown>("/api/v1/government/sync");
+    await apiClient.post("/api/v1/government/sync");
     return { status: "started", source: "api", startedAt: new Date().toISOString() };
-  } catch {
-    // In demo mode, record a sync entry so the action has a visible effect.
-    const { startedAt } = appendDemoSyncLog();
-    return { status: "started", source: "demo", startedAt };
+  } catch (error) {
+    throw error instanceof Error ? error : new Error("Failed to start full sync");
   }
 }
 
 export async function exportGovData(format = "csv"): Promise<{ filename: string; content: string } | null> {
   try {
-    // Attempt to fetch export as text (backend should supply CSV/TXT)
-    const data = await apiClient.get<string>(`/api/v1/government/export?format=${encodeURIComponent(format)}`);
-    const filename = `gov-export.${format}`;
-    return { filename, content: String(data ?? "") };
+    const response = await apiClient.get<unknown>(`/api/v1/government/export?format=${encodeURIComponent(format)}`);
+
+    if (typeof response === "string") {
+      return { filename: `gov-export.${format}`, content: response };
+    }
+
+    if (response && typeof response === "object") {
+      const candidate = response as Record<string, unknown>;
+      const content = candidate.content ?? candidate.data ?? candidate.text ?? candidate.csv;
+
+      if (typeof content === "string") {
+        return { filename: `gov-export.${format}`, content };
+      }
+    }
+
+    return null;
   } catch {
-    // No backend — return null to indicate demo/no-op
     return null;
   }
 }
@@ -352,18 +367,23 @@ export async function retryGovSyncLog(id: string): Promise<GovSyncRetryResult> {
   try {
     await apiClient.post(`/api/v1/government/sync-logs/${id}/retry`);
     return { id, status: "PENDING", source: "api" };
-  } catch {
-    const updated = readStoredDemoGovSyncLogs().map((log) =>
-      log.id === id
-        ? {
-            ...log,
-            status: "PENDING" as GovSyncStatus,
-            retryCount: log.retryCount + 1,
-            lastErrorMessage: null,
-          }
-        : log,
-    );
-    writeStoredDemoGovSyncLogs(updated);
-    return { id, status: "PENDING", source: "demo" };
+  } catch (error) {
+    throw error instanceof Error ? error : new Error("Failed to retry sync log");
   }
+}
+
+export async function getGovReport(reportId: string): Promise<GovReport> {
+  const response = await apiClient.get<unknown>(`/api/v1/gov-reports/${reportId}`);
+  const report = normalizeReportResponse(response);
+
+  if (!report) {
+    throw new Error(`Report ${reportId} was returned in an unexpected format`);
+  }
+
+  return report;
+}
+
+export async function getGovReportsByUser(userId: string): Promise<GovReport[]> {
+  const response = await apiClient.get<unknown>(`/api/v1/gov-reports/by-user/${userId}?page=0&size=50`);
+  return normalizeReportListResponse(response);
 }

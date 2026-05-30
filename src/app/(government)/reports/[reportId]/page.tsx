@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -18,7 +17,6 @@ import {
   ArrowLeft,
   Download,
   RefreshCw,
-  Upload,
   AlertCircle,
   CheckCircle,
   Clock,
@@ -28,7 +26,26 @@ import {
 
 import { useReports, getReportTypeLabel, getStatusLabel } from "@/hooks/useReports";
 import type { ReportStatus } from "@/shared/types/report";
-import { useAuth } from "@/shared/hooks/useAuth";
+
+type VaccinationCoverageReportData = {
+  byVaccineType: Array<{ vaccineType: string; coverage: number; target: number }>;
+};
+
+type AncAttendanceReportData = {
+  monthlyAttendance: Array<{ month: string; attendance: number }>;
+};
+
+type BirthRegistrationReportData = {
+  byDistrict: Array<{ district: string; registrations: number }>;
+};
+
+type MaternalHealthReportData = {
+  stats: {
+    maternalMortalityProxy: number;
+    ancCoverage: number;
+    institutionalDeliveryRate: number;
+  };
+};
 
 // Status badge colors
 const statusConfig: Record<
@@ -287,31 +304,7 @@ export default function ReportDetailPage() {
   const params = useParams();
   const router = useRouter();
   const reportId = params.reportId as string;
-  const { report, loading, error, pushing, pushToHmis } = useReports(reportId);
-  const { currentUser } = useAuth();
-  const [pushMessage, setPushMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-
-  // Check if user is government role (MOH_ADMIN)
-  const isMohAdmin = currentUser?.role === "government";
-  const showPushButton = isMohAdmin && report && (report.status === "NOT_PUSHED" || report.status === "FAILED");
-
-  const handlePushToHmis = async () => {
-    try {
-      const result = await pushToHmis();
-      setPushMessage({
-        type: result.success ? "success" : "error",
-        text: result.message,
-      });
-      
-      // Clear message after 5 seconds
-      setTimeout(() => setPushMessage(null), 5000);
-    } catch (err) {
-      setPushMessage({
-        type: "error",
-        text: err instanceof Error ? err.message : "An error occurred",
-      });
-    }
-  };
+  const { report, loading, error, refetch } = useReports(reportId);
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
@@ -319,6 +312,17 @@ export default function ReportDetailPage() {
       month: "short",
       day: "numeric",
     });
+  };
+
+  const handleExport = () => {
+    const payload = JSON.stringify(report, null, 2);
+    const blob = new Blob([payload], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${report.title.replaceAll(" ", "-").toLowerCase()}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -356,6 +360,11 @@ export default function ReportDetailPage() {
       </div>
     );
   }
+
+  const vaccinationData = report.reportType === "VACCINATION_COVERAGE" ? (report.data as VaccinationCoverageReportData) : null;
+  const ancData = report.reportType === "ANC_ATTENDANCE" ? (report.data as AncAttendanceReportData) : null;
+  const birthData = report.reportType === "BIRTH_REGISTRATION" ? (report.data as BirthRegistrationReportData) : null;
+  const maternalData = report.reportType === "MATERNAL_HEALTH" ? (report.data as MaternalHealthReportData) : null;
 
   return (
     <div className="space-y-6">
@@ -402,37 +411,21 @@ export default function ReportDetailPage() {
         {/* Action Buttons */}
         <div className="flex gap-3">
           <button
-            onClick={() => {}}
+            onClick={handleExport}
             className="flex items-center gap-2 rounded-xl border border-[#CFE3E9] bg-white px-4 py-2 text-sm font-medium text-[#194D56] hover:bg-[#E8F2F4]"
           >
             <Download className="h-4 w-4" />
             Export
           </button>
-          {showPushButton && (
-            <button
-              onClick={handlePushToHmis}
-              disabled={pushing}
-              className="flex items-center gap-2 rounded-xl bg-[#1F7280] px-4 py-2 text-sm font-medium text-white hover:bg-[#1A6270] disabled:opacity-50"
-            >
-              <Upload className={`h-4 w-4 ${pushing ? "animate-spin" : ""}`} />
-              {pushing ? "Pushing..." : "Push to HMIS"}
-            </button>
-          )}
+          <button
+            onClick={() => refetch()}
+            className="flex items-center gap-2 rounded-xl bg-[#1F7280] px-4 py-2 text-sm font-medium text-white hover:bg-[#1A6270]"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </button>
         </div>
       </div>
-
-      {/* Push Message */}
-      {pushMessage && (
-        <div
-          className={`rounded-xl p-4 ${
-            pushMessage.type === "success"
-              ? "bg-green-50 text-green-800 border border-green-200"
-              : "bg-red-50 text-red-800 border border-red-200"
-          }`}
-        >
-          {pushMessage.text}
-        </div>
-      )}
 
       {/* Content based on report type */}
       {report.reportType === "VACCINATION_COVERAGE" && (
@@ -441,20 +434,20 @@ export default function ReportDetailPage() {
             <StatCard
               label="Average Coverage"
               value={`${(
-                (report.data as any).byVaccineType.reduce(
-                  (sum: number, item: { coverage: number }) => sum + item.coverage,
-                  0
-                ) / (report.data as any).byVaccineType.length
+                (vaccinationData?.byVaccineType.reduce(
+                  (sum: number, item) => sum + item.coverage,
+                  0,
+                ) ?? 0) / Math.max(vaccinationData?.byVaccineType.length ?? 1, 1)
               ).toFixed(1)}%`}
               color="#1F7280"
             />
             <StatCard
               label="Vaccine Types Tracked"
-              value={(report.data as any).byVaccineType.length}
+              value={vaccinationData?.byVaccineType.length ?? 0}
               color="#10B981"
             />
           </div>
-          <VaccinationCoverageChart data={(report.data as any).byVaccineType} />
+          <VaccinationCoverageChart data={vaccinationData?.byVaccineType ?? []} />
         </>
       )}
 
@@ -463,33 +456,24 @@ export default function ReportDetailPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <StatCard
               label="Total Attendance"
-              value={(report.data as any).monthlyAttendance.reduce(
-                (sum: number, item: { attendance: number }) => sum + item.attendance,
-                0
-              ).toLocaleString()}
+              value={(ancData?.monthlyAttendance.reduce((sum: number, item) => sum + item.attendance, 0) ?? 0).toLocaleString()}
               color="#1F7280"
             />
             <StatCard
               label="Average Monthly"
               value={Math.round(
-                (report.data as any).monthlyAttendance.reduce(
-                  (sum: number, item: { attendance: number }) => sum + item.attendance,
-                  0
-                ) / (report.data as any).monthlyAttendance.length
+                (ancData?.monthlyAttendance.reduce((sum: number, item) => sum + item.attendance, 0) ?? 0) /
+                  Math.max(ancData?.monthlyAttendance.length ?? 1, 1)
               ).toLocaleString()}
               color="#10B981"
             />
             <StatCard
               label="Peak Month"
-              value={Math.max(
-                ...(report.data as any).monthlyAttendance.map(
-                  (item: { attendance: number }) => item.attendance
-                )
-              ).toLocaleString()}
+              value={Math.max(...(ancData?.monthlyAttendance.map((item) => item.attendance) ?? [0])).toLocaleString()}
               color="#3B82F6"
             />
           </div>
-          <AncAttendanceChart data={(report.data as any).monthlyAttendance} />
+          <AncAttendanceChart data={ancData?.monthlyAttendance ?? []} />
         </>
       )}
 
@@ -498,34 +482,27 @@ export default function ReportDetailPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <StatCard
               label="Total Registrations"
-              value={(report.data as any).byDistrict.reduce(
-                (sum: number, item: { registrations: number }) => sum + item.registrations,
-                0
-              ).toLocaleString()}
+              value={(birthData?.byDistrict.reduce((sum: number, item) => sum + item.registrations, 0) ?? 0).toLocaleString()}
               color="#1F7280"
             />
             <StatCard
               label="Districts Covered"
-              value={(report.data as any).byDistrict.length}
+              value={birthData?.byDistrict.length ?? 0}
               color="#10B981"
             />
             <StatCard
               label="Highest District"
-              value={Math.max(
-                ...(report.data as any).byDistrict.map(
-                  (item: { registrations: number }) => item.registrations
-                )
-              ).toLocaleString()}
+              value={Math.max(...(birthData?.byDistrict.map((item) => item.registrations) ?? [0])).toLocaleString()}
               color="#3B82F6"
             />
           </div>
-          <BirthRegistrationChart data={(report.data as any).byDistrict} />
+          <BirthRegistrationChart data={birthData?.byDistrict ?? []} />
         </>
       )}
 
       {report.reportType === "MATERNAL_HEALTH" && (
         <>
-          <MaternalHealthStats stats={(report.data as any).stats} />
+          <MaternalHealthStats stats={maternalData?.stats ?? { maternalMortalityProxy: 0, ancCoverage: 0, institutionalDeliveryRate: 0 }} />
           {/* Additional info card */}
           <div className="rounded-2xl border bg-white p-5 shadow-sm" style={{ borderColor: "#CFE3E9" }}>
             <h3 className="mb-3 text-base font-semibold" style={{ color: "#194D56" }}>
@@ -539,7 +516,7 @@ export default function ReportDetailPage() {
                 <div>
                   <p className="text-sm font-medium text-[#194D56]">ANC Coverage Target</p>
                   <p className="text-xs text-[#5B8784]">
-                    {(report.data as any).stats.ancCoverage >= 85 ? "Met" : "Below target"} (Target: 85%)
+                    {(maternalData?.stats.ancCoverage ?? 0) >= 85 ? "Met" : "Below target"} (Target: 85%)
                   </p>
                 </div>
               </div>
@@ -550,7 +527,7 @@ export default function ReportDetailPage() {
                 <div>
                   <p className="text-sm font-medium text-[#194D56]">Institutional Delivery</p>
                   <p className="text-xs text-[#5B8784]">
-                    {(report.data as any).stats.institutionalDeliveryRate >= 90 ? "Excellent" : "Needs improvement"} (Target: 90%)
+                    {(maternalData?.stats.institutionalDeliveryRate ?? 0) >= 90 ? "Excellent" : "Needs improvement"} (Target: 90%)
                   </p>
                 </div>
               </div>
