@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   Search,
   Check,
@@ -21,6 +22,7 @@ import {
   searchPatients,
   searchICD10Codes,
   submitVisit,
+  setVisitAuthContext,
 } from "@/lib/api/visits";
 import { cn } from "@/shared/lib/utils";
 import {
@@ -96,9 +98,19 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
 
 export default function NewVisitPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [step, setStep] = useState(1);
   const [status, setStatus] = useState<FormStatus>("form");
   const [visitResult, setVisitResult] = useState<VisitResponse | null>(null);
+
+  useEffect(() => {
+    if (session?.user?.facilityId && session?.user?.accessToken) {
+      setVisitAuthContext({
+        facilityId: String(session.user.facilityId),
+        healthWorkerId: session.user.id ?? "",
+      });
+    }
+  }, [session]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<PatientSearchResult[]>([]);

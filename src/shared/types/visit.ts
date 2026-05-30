@@ -5,4 +5,10 @@ export {
   type VisitResponse,
   type PatientType,
   type VisitType,
+  type BackendHealthVisit,
+  type BackendDiagnosis,
+  type BackendPrescription,
+  type CreateVisitRequest,
+  type CreateVisitDiagnosis,
+  type CreateVisitPrescription,
 } from "@/features/visit/types";
