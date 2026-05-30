@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api/client";
-import type { Mother, MotherRegistrationRequest, MotherRegistrationResponse } from "../types";
+import type { PageResponse } from "@/shared/types/api";
+import type { Mother, MotherPageResponse, MotherRegistrationRequest, MotherRegistrationResponse } from "../types";
 
 /**
  * Register a new mother
@@ -19,6 +20,46 @@ export async function registerMother(
       home_location: data.home_location,
       education_level: data.education_level,
     }
+  );
+}
+
+/**
+ * Search mothers by health_id, name, or NID
+ * GET /api/v1/mothers/search
+ * NOTE: This endpoint may not exist on backend yet — kept for future use.
+ */
+export async function searchMothers(
+  searchTerm?: string,
+  page: number = 1,
+  pageSize: number = 10
+): Promise<MotherPageResponse> {
+  const params = new URLSearchParams();
+  if (searchTerm) {
+    params.append("search_term", searchTerm);
+  }
+  params.append("page", (page - 1).toString());
+  params.append("page_size", pageSize.toString());
+
+  return apiClient.get<MotherPageResponse>(
+    `/api/v1/mothers/search?${params.toString()}`
+  );
+}
+
+/**
+ * Get all mothers with pagination
+ * GET /api/v1/mothers
+ * NOTE: This endpoint may not exist on backend yet — kept for future use.
+ */
+export async function getMothers(
+  page: number = 1,
+  pageSize: number = 10
+): Promise<MotherPageResponse> {
+  const params = new URLSearchParams();
+  params.append("page", (page - 1).toString());
+  params.append("page_size", pageSize.toString());
+
+  return apiClient.get<MotherPageResponse>(
+    `/api/v1/mothers?${params.toString()}`
   );
 }
 
