@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { listServiceRequests, reviewServiceRequest } from "@/lib/api/ServiceRequests";
+import { useSession } from "next-auth/react";
+import { listServiceRequests, reviewServiceRequest, setServiceRequestAuthContext } from "@/lib/api/ServiceRequests";
 import ReviewQueueTable from "@/features/service-requests/components/ReviewQueueTable";
 import ReviewSidePanel from "@/features/service-requests/components/ReviewSidePanel";
 import RejectDialog from "@/features/service-requests/components/RejectDialog";
@@ -11,6 +12,15 @@ import type { ServiceTypeId, ServiceRequestStatus } from "@/features/service-req
 
 export default function ServiceRequestReviewPage() {
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (session?.user?.facilityId) {
+      setServiceRequestAuthContext({
+        facilityId: String(session.user.facilityId),
+      });
+    }
+  }, [session]);
   const [statusFilter, setStatusFilter] = useState<ServiceRequestStatus | "ALL">("ALL");
   const [typeFilter, setTypeFilter] = useState<ServiceTypeId | "ALL">("ALL");
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
@@ -61,10 +71,9 @@ export default function ServiceRequestReviewPage() {
     reviewMutation.mutate({ id: selectedRequestId, action: "REJECTED", rejectionReason: reason });
   }, [selectedRequestId, reviewMutation]);
 
-  const handleEscalate = useCallback((id: string) => {
-    setActionLoading(id);
-    reviewMutation.mutate({ id, action: "ESCALATED" });
-  }, [reviewMutation]);
+  const handleEscalate = useCallback((_id: string) => {
+    alert("Escalate is not yet supported by the backend. Please contact your system administrator.");
+  }, []);
 
   const handleClosePanel = useCallback(() => {
     setSelectedRequestId(null);
