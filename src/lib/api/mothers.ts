@@ -3,6 +3,7 @@ import type {
   MotherProfileDTO,
   PregnancyDTO,
 } from "@/shared/types/mother";
+import { createPregnancy, updatePregnancy } from "@/features/maternal/api/pregnancies.api";
 
 const MOTHERS_BASE_PATH = "/api/v1/mothers";
 
@@ -77,18 +78,17 @@ export function openPregnancy(
   motherId: string,
   data: Pick<PregnancyDTO, "lmpDate">
 ): Promise<PregnancyDTO> {
-  return apiClient.post<PregnancyDTO>(
-    `${MOTHERS_BASE_PATH}/${encodeURIComponent(motherId)}/pregnancies`,
-    data
-  );
+  return createPregnancy({
+    motherId,
+    lmpDate: data.lmpDate,
+  }) as unknown as Promise<PregnancyDTO>;
 }
 
 export function closePregnancy(
-  motherId: string,
+  _motherId: string,
   pregnancyId: string
 ): Promise<PregnancyDTO> {
-  return apiClient.patch<PregnancyDTO>(
-    `${MOTHERS_BASE_PATH}/${encodeURIComponent(motherId)}/pregnancies/${encodeURIComponent(pregnancyId)}/close`,
-    {}
-  );
+  return updatePregnancy(pregnancyId, {
+    status: "DELIVERED",
+  }) as unknown as Promise<PregnancyDTO>;
 }
