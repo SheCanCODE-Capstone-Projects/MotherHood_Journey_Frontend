@@ -83,12 +83,14 @@ export async function submitServiceRequest(
 
     return {
       referenceNumber: response.referenceNo,
+      requestId: response.id,
     };
   } catch (error) {
     console.warn("submitServiceRequest API call failed, using mock:", error);
     await new Promise((res) => setTimeout(res, 1800));
     return {
       referenceNumber: `SR-2026-${Math.floor(10000 + Math.random() * 90000)}`,
+      requestId: `mock-${Date.now()}`,
     };
   }
 }
@@ -166,19 +168,19 @@ export async function uploadServiceRequestDocument(
   requestId: string,
   documentType: string,
   file: File,
+  fileHash?: string,
 ): Promise<BackendServiceRequestDocResponse> {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("documentType", documentType);
+  if (fileHash) {
+    formData.append("fileHash", fileHash);
+  }
 
-  const response = await apiClient.post<BackendServiceRequestDocResponse>(
+  return apiClient.post<BackendServiceRequestDocResponse>(
     `/api/v1/service-requests/${requestId}/documents`,
     formData,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-    },
   );
-  return response;
 }
 
 export async function getServiceRequestDocuments(

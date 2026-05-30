@@ -7,9 +7,15 @@ import Step1ServiceType from "./Step1ServiceType";
 import Step2UploadDocs from "./Step2UploadDocs";
 import Step3ReviewSubmit from "./Step3ReviewSubmit";
 import SuccessScreen from "./SuccessScreen";
-import { submitServiceRequest } from "@/lib/api/ServiceRequests";
-
-const REQUEST_ID = "SR-2024-0892";
+import {
+  submitServiceRequest,
+  uploadServiceRequestDocument,
+} from "@/lib/api/ServiceRequests";
+import {
+  validateFileSize,
+  validateFileMimeType,
+  computeSHA256,
+} from "@/features/service-requests/utils/fileValidation";
 
 export default function ServiceRequestForm() {
   const [step, setStep] = useState(1);
@@ -35,14 +41,42 @@ export default function ServiceRequestForm() {
     setSubmitting(true);
     setSubmitError(null);
     try {
+      // 1. Create the service request
       const result = await submitServiceRequest({
         serviceType: selectedService!,
         files: uploadedFiles,
       });
+
+      // 2. Validate & upload each file in parallel
+      if (Object.keys(uploadedFiles).length > 0) {
+        const uploads = Object.entries(uploadedFiles).map(
+          async ([docKey, file]) => {
+            const sizeCheck = validateFileSize(file);
+            if (!sizeCheck.valid) throw new Error(sizeCheck.error);
+
+            const mimeCheck = await validateFileMimeType(file);
+            if (!mimeCheck.valid) throw new Error(mimeCheck.error);
+
+            const hash = await computeSHA256(file);
+            await uploadServiceRequestDocument(
+              result.requestId,
+              docKey,
+              file,
+              hash,
+            );
+          },
+        );
+        await Promise.all(uploads);
+      }
+
       setRefNum(result.referenceNumber);
       setStep(4);
     } catch (error) {
-      setSubmitError("Something went wrong while submitting your request. Please try again.");
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong while submitting your request. Please try again.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -77,7 +111,7 @@ export default function ServiceRequestForm() {
           onRemove={handleRemove}
           onBack={() => setStep(1)}
           onNext={() => setStep(3)}
-          requestId={REQUEST_ID}
+          requestId={selectedService ?? ""}
         />
       )}
 

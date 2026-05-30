@@ -32,6 +32,7 @@ export interface SubmitPayload {
   
 export interface SubmitResponse {
   referenceNumber: string;
+  requestId: string;
 }
 
 export type ServiceRequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "ESCALATED";

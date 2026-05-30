@@ -120,10 +120,17 @@ export function createApiClient(): ApiClient {
 
     const url = endpoint.startsWith("http") ? endpoint : `${apiBaseUrl}${endpoint}`;
 
+    const bodyIsFormData = options.body instanceof FormData;
+
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       ...options.headers,
     };
+
+    // For FormData, let the browser set Content-Type with boundary
+    if (bodyIsFormData) {
+      delete headers["Content-Type"];
+    }
 
     // Auto-attach bearer token if available
     const token = await getBearerToken();
@@ -181,7 +188,7 @@ export function createApiClient(): ApiClient {
       return request<T>(endpoint, {
         ...options,
         method: "POST",
-        body: body ? JSON.stringify(body) : undefined,
+        body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
       });
     },
 
@@ -198,7 +205,7 @@ export function createApiClient(): ApiClient {
       return request<T>(endpoint, {
         ...options,
         method: "PUT",
-        body: body ? JSON.stringify(body) : undefined,
+        body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
       });
     },
 
@@ -215,7 +222,7 @@ export function createApiClient(): ApiClient {
       return request<T>(endpoint, {
         ...options,
         method: "PATCH",
-        body: body ? JSON.stringify(body) : undefined,
+        body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
       });
     },
 
