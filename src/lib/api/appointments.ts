@@ -5,7 +5,6 @@ import type {
   PatientInfo,
   AvailableSlotsResponse,
 } from "@/lib/schemas/appointmentSchema";
-import type { Appointment } from "@/features/appointment/types";
 
 const APPOINTMENTS_BASE_PATH = "/api/v1/appointments";
 

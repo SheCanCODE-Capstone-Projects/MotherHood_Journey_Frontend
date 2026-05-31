@@ -1,55 +1,73 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import {
-  Baby,
-  HeartPulse,
-  BarChart3,
-  CheckCircle2,
-  Users,
-  Activity,
-  ArrowRight,
-  MapPin,
-} from "lucide-react";
+import { useState, useEffect } from "react";
 
-function Navbar() {
-  return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-[#D5E9E6]">
-      <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-        <span className="font-bold text-[#1D5052] text-base">
-          MotherHood Journey
-        </span>
-        <div className="hidden md:flex items-center gap-4 text-sm font-medium text-[#54797C]">
-          <a href="#" className="hover:text-[#1D5052] transition-colors border-b-2 border-[#1D5052] pb-0.5 text-[#1D5052]">Home</a>
-          <a href="#portals" className="hover:text-[#1D5052] transition-colors">About Us</a>
-          <a href="#impact" className="hover:text-[#1D5052] transition-colors">Impact</a>
-          <a href="#portals" className="hover:text-[#1D5052] transition-colors">Partners</a>
-          <a href="#contact" className="hover:text-[#1D5052] transition-colors">Contact</a>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href="/login" className="px-4 py-1.5 text-sm font-medium text-[#1D5052] hover:underline">
-            Login
-          </Link>
-          <Link href="/login" className="px-4 py-1.5 text-sm font-semibold text-[#1D5052] border border-[#1D5052] rounded-full hover:bg-[#1D5052] hover:text-white transition-colors">
-            Register
-          </Link>
-        </div>
-      </div>
-    </nav>
-  );
-}
+import { PageHeader } from "@/shared/components/layout";
+import { Button } from "@/shared/components/ui/button";
+import { ROLE_LABELS } from "@/shared/config/rbac";
+import type { UserRole } from "@/shared/types/auth";
 
-function Hero() {
+const USER_ROLES: UserRole[] = [
+  "patient",
+  "health_worker",
+  "facility_admin",
+  "district_officer",
+  "government",
+];
+
+const previewHighlights: Record<UserRole, string[]> = {
+  patient: [
+    "Track pregnancy progress",
+    "Review upcoming appointments",
+    "Check child follow-up records",
+  ],
+  health_worker: [
+    "Manage registered mothers",
+    "Record visit outcomes",
+    "Review diagnosis queue",
+  ],
+  facility_admin: [
+    "Monitor staff activity",
+    "Review facility reports",
+    "Track service coverage",
+  ],
+  district_officer: [
+    "Inspect district analytics",
+    "Compare facility performance",
+    "Monitor key trends",
+  ],
+  government: [
+    "Review national reports",
+    "Monitor sync status",
+    "Check ministry-wide summaries",
+  ],
+};
+
+export default function HomePage() {
+  const [previewRole, setPreviewRole] = useState<UserRole>("patient");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      (window as any).__portalPreviewRole = previewRole;
+      window.dispatchEvent(new CustomEvent("portal:preview-role", { detail: previewRole }));
+    }
+  }, [previewRole]);
+
   return (
-    <section className="pt-14 relative min-h-[80vh] flex items-center overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/images/pregnantPic.png"
-          alt="Pregnant mother"
-          fill
-          className="object-cover object-center"
-          priority
+    <div className="space-y-6">
+        <PageHeader
+          title="Shared Layout Preview"
+          subtitle="This screen previews the Sidebar, TopBar, MobileNav, and PageHeader with role-aware navigation."
+          action={
+            <Button
+              type="button"
+              variant="outline"
+              className="border-[#B9D8D5] bg-white text-[#24585B]"
+              onClick={() => window.location.assign("/login")}
+            >
+              Open Login
+            </Button>
+          }
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0D3234]/75 via-[#0D3234]/35 to-transparent" />
       </div>
@@ -201,15 +219,25 @@ function FeatureSection() {
             {FEATURES.map((f) => {
               const Icon = f.icon;
               return (
-                <div key={f.title} className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-[#E2F2F5] flex items-center justify-center shrink-0 mt-0.5">
-                    <Icon className="size-4 text-[#1D5052]" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-[#1D5052]">{f.title}</p>
-                    <p className="text-xs leading-relaxed text-[#54797C] mt-0.5">{f.description}</p>
-                  </div>
-                </div>
+                <Button
+                  key={role}
+                  type="button"
+                  variant={isActive ? "default" : "outline"}
+                  className={
+                    isActive
+                      ? "bg-[#2C6F73] text-white hover:bg-[#245C60]"
+                      : "border-[#B9D8D5] bg-white text-[#24585B]"
+                  }
+                  onClick={() => {
+                    if (role === "patient") {
+                      window.location.assign(roleRoute);
+                    } else {
+                      setPreviewRole(role);
+                    }
+                  }}
+                >
+                  {ROLE_LABELS[role]}
+                </Button>
               );
             })}
           </div>
@@ -287,21 +315,12 @@ function ImpactSection() {
               <p className="text-[11px] text-[#54797C] mt-1 leading-relaxed">
                 Facilities coordinating care at district level.
               </p>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-[#D5E9E6] bg-[#F8FCFB] p-5 flex flex-col justify-between">
-            <div className="w-8 h-8 rounded-lg bg-[#E2F2F5] flex items-center justify-center mb-3">
-              <CheckCircle2 className="size-4 text-[#1D5052]" />
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-[#1D5052]">95%</p>
-              <p className="text-xs font-semibold text-[#1D5052] mt-1">Vaccination Coverage</p>
-              <div className="mt-2 h-1.5 bg-[#D5E9E6] rounded-full overflow-hidden">
-                <div className="h-full bg-[#1D5052] rounded-full" style={{ width: "95%" }} />
-              </div>
-              <p className="text-[11px] text-[#54797C] mt-1 leading-relaxed">
-                New benchmark for immunization tracking.
+              <h2 className="mt-3 text-lg font-semibold text-[#1D5052]">
+                {item}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-[#54797C]">
+                This is simple placeholder content so you can see the layout
+                components working in the interface before wiring feature pages.
               </p>
             </div>
           </div>
@@ -376,7 +395,6 @@ function Footer() {
         </div>
         <p className="text-xs text-white/40">(c) 2026 MotherHood Journey</p>
       </div>
-    </footer>
   );
 }
 

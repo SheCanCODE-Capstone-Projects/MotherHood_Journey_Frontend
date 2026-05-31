@@ -1,5 +1,20 @@
 import type { UserRole } from "@/shared/types/auth";
 
+export type Resource = 
+  | "HMIS_PUSH" 
+  | "DOWNLOAD_BIRTH_CERT" 
+  | "MANAGE_USERS" 
+  | "VIEW_REPORTS"
+  | "EDIT_PATIENT";
+
+export const PERMISSIONS: Record<UserRole, Resource[]> = {
+  patient: ["DOWNLOAD_BIRTH_CERT"],
+  health_worker: ["EDIT_PATIENT"],
+  facility_admin: ["MANAGE_USERS", "VIEW_REPORTS"],
+  district_officer: ["VIEW_REPORTS"],
+  government: ["HMIS_PUSH", "VIEW_REPORTS"],
+};
+
 export const ROLE_ROUTE_MAP: Record<UserRole, string[]> = {
   patient:          ["/dashboard", "/pregnancies", "/children", "/appointments", "/patient"],
   health_worker:    ["/dashboard", "/mothers", "/visits", "/diagnoses"],
@@ -90,11 +105,12 @@ export const ROLE_THEMES: Record<UserRole, RoleTheme> = {
 
 export const ROLE_NAV_ITEMS: Record<UserRole, RoleNavItem[]> = {
   patient: [
-    { href: "/dashboard", label: "Dashboard", shortLabel: "Home" },
-    { href: "/pregnancies", label: "Pregnancies", shortLabel: "Pregnancy" },
-    { href: "/children", label: "Children", shortLabel: "Children" },
-    { href: "/appointments", label: "Appointments", shortLabel: "Visits" },
-    { href: "/chat", label: "Chat", shortLabel: "Chat" },
+    { href: "/patient/dashboard", label: "Home", shortLabel: "Home" },
+    { href: "/patient/pregnancies", label: "My Records", shortLabel: "Records" },
+    { href: "/patient/children", label: "Team Care", shortLabel: "Care" },
+    { href: "/patient/appointments", label: "Appointments", shortLabel: "Visits" },
+    { href: "/patient/chat", label: "Chat", shortLabel: "Chat" },
+    { href: "/tips", label: "Tips", shortLabel: "Tips" },
   ],
   health_worker: [
     { href: "/mothers", label: "Mothers", shortLabel: "Mothers" },
@@ -117,21 +133,3 @@ export const ROLE_NAV_ITEMS: Record<UserRole, RoleNavItem[]> = {
   ],
 };
 
-// ---------------------------------------------------------------------------
-// Backwards-compatible PERMISSIONS/RESOURCES
-// Some modules expect `PERMISSIONS` and `RESOURCES` to be exported from
-// this config. Provide a minimal, empty-permissions ACL to avoid build
-// failures after the merge — resources can be filled in later if needed.
-export const RESOURCES = {
-  UNKNOWN: "UNKNOWN",
-} as const;
-
-export type Resource = (typeof RESOURCES)[keyof typeof RESOURCES];
-
-export const PERMISSIONS: Record<UserRole, Resource[]> = {
-  patient: [],
-  health_worker: [],
-  facility_admin: [],
-  district_officer: [],
-  government: [],
-};

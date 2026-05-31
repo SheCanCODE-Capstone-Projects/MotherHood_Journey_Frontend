@@ -21,11 +21,12 @@ export function useRole(options?: UseRoleOptions) {
   const currentUser = useAuth((state) => state.currentUser);
   const logout = useAuth((state) => state.logout);
 
-  const role =
+  const role = (
     options?.previewRole ??
     (currentUser?.role as UserRole | undefined) ??
     options?.fallbackRole ??
-    "patient";
+    "patient"
+  ) as UserRole;
 
   return useMemo(() => {
     const roleLabel = ROLE_LABELS[role];

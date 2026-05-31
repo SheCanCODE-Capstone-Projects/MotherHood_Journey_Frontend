@@ -7,11 +7,13 @@ import {
   CalendarDays,
   ClipboardList,
   FileText,
+  Home,
   LayoutDashboard,
   LogOut,
   RefreshCcw,
   Stethoscope,
   Users,
+  Lightbulb,
   type LucideIcon,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
@@ -28,13 +30,18 @@ type SidebarProps = {
 
 const iconByHref: Record<string, LucideIcon> = {
   "/dashboard": LayoutDashboard,
+  "/patient/dashboard": Home,
   "/mothers": Users,
   "/visits": CalendarDays,
   "/diagnoses": Stethoscope,
   "/pregnancies": Baby,
+  "/patient/pregnancies": FileText,
   "/children": Baby,
-  "/my-children": Baby,
+  "/patient/children": Users,
   "/appointments": CalendarDays,
+  "/patient/appointments": CalendarDays,
+  "/patient/chat": MessageCircle,
+  "/tips": Lightbulb,
   "/staff": Users,
   "/service-requests": ClipboardList,
   "/reports": FileText,

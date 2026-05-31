@@ -176,7 +176,7 @@ export default function LoginPage() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="font-semibold">{t("login.languageNotice")}</p>
-              <p className="text-xs text-[#256064]">{t("login.languageMenuHint")}</p>
+              <p className="text-xs text-[#4E7575]">{t("login.languageMenuHint")}</p>
             </div>
             <button
               type="button"
@@ -322,7 +322,7 @@ export default function LoginPage() {
                   value={formData.fullName}
                   onChange={(event) => onChangeField("fullName", event.target.value)}
                   placeholder="Jane Doe"
-                  className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
+                  className={`w-full rounded-xl border border-white/35 bg-white/12 px-3 py-2.5 text-[#124548] placeholder:text-[#5C7D7D] transition outline-none backdrop-blur-sm ${
                     errors.fullName
                       ? "border-red-500 ring-2 ring-red-100"
                       : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
@@ -347,7 +347,7 @@ export default function LoginPage() {
                   value={formData.phone}
                   onChange={(event) => onChangeField("phone", event.target.value)}
                   placeholder="+250700000000"
-                  className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
+                  className={`w-full rounded-xl border border-white/35 bg-white/12 px-3 py-2.5 text-[#124548] placeholder:text-[#5C7D7D] transition outline-none backdrop-blur-sm ${
                     errors.phone
                       ? "border-red-500 ring-2 ring-red-100"
                       : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
@@ -371,7 +371,7 @@ export default function LoginPage() {
                   type="password"
                   value={formData.password}
                   onChange={(event) => onChangeField("password", event.target.value)}
-                  className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
+                  className={`w-full rounded-xl border border-white/35 bg-white/12 px-3 py-2.5 text-[#124548] placeholder:text-[#5C7D7D] transition outline-none backdrop-blur-sm ${
                     errors.password
                       ? "border-red-500 ring-2 ring-red-100"
                       : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
@@ -398,7 +398,7 @@ export default function LoginPage() {
                     onChange={(event) =>
                       onChangeField("confirmPassword", event.target.value)
                     }
-                    className={`w-full rounded-xl border px-3 py-2.5 text-[#124548] transition outline-none ${
+                    className={`w-full rounded-xl border border-white/35 bg-white/12 px-3 py-2.5 text-[#124548] placeholder:text-[#5C7D7D] transition outline-none backdrop-blur-sm ${
                       errors.confirmPassword
                         ? "border-red-500 ring-2 ring-red-100"
                         : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"

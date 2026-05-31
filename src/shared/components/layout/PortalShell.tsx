@@ -27,6 +27,9 @@ export function PortalShell({
   fallbackRole,
   previewRole,
 }: PortalShellProps) {
+  const pathname = usePathname();
+  const isLoginRoute = pathname === "/login";
+
   // Always render the shell at the root layout. The previous module-scoped
   // global guard caused the shell to be skipped in some dev hot-reload
   // scenarios (leaving only children rendered). Removing the guard keeps the
@@ -62,15 +65,16 @@ export function PortalShell({
       <SkipLink />
       <Sidebar fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
 
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <TopBar fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
+        <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+          <TopBar fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
 
         <main id="main-content" className="flex-1 px-4 py-5 pb-24 print:px-0 print:py-0 print:pb-0 sm:px-6 lg:px-8 lg:pb-8">
           <div className="mx-auto w-full max-w-7xl">{children}</div>
         </main>
 
-        <MobileNav fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
+          <MobileNav fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
+        </div>
       </div>
-    </div>
+    )
   );
 }

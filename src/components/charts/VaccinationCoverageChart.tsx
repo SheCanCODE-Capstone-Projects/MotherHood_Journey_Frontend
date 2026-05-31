@@ -13,13 +13,6 @@ interface VaccinationCoverageChartProps {
   data: { vaccineType: string; coverage: number }[];
 }
 
-type ChartValue = number | string | Array<number | string> | undefined;
-
-function formatPercentage(value: ChartValue, fractionDigits: number) {
-  const normalizedValue = Array.isArray(value) ? value[0] : value;
-  return `${Number(normalizedValue ?? 0).toFixed(fractionDigits)}%`;
-}
-
 export function VaccinationCoverageChart({ data }: VaccinationCoverageChartProps) {
   return (
     <div className="h-[320px] w-full rounded-[8px] bg-white">

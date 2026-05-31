@@ -1,3 +1,5 @@
+"use client";
+
 import { getMotherProfile } from "@/lib/api/mothers";
 import { NidaStatusBadge } from "@/shared/components/status/NidaStatusBadge";
 import type { PregnancyDTO } from "@/shared/types/mother";
@@ -9,13 +11,270 @@ import {
   ArrowRight,
   Baby,
   CheckCircle2,
+  MessageCircle,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
+import { use } from "react";
 
 type MotherProfilePageProps = {
   params: Promise<{ motherId: string }>;
 };
 
+
+// Patient Dashboard Section Component
+function PatientDashboardSection({
+  mother,
+  activePregnancy,
+  children,
+  nextAppointment,
+}: {
+  mother: any;
+  activePregnancy: any;
+  children: { id: string; name: string; age: string; vaccinationStatus: "on-track" | "due" | "overdue" }[];
+  nextAppointment: any;
+}) {
+  return (
+    <div className="space-y-5">
+      {/* Active Pregnancy Card */}
+      <div className="rounded-3xl border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100 p-6 shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
+          {/* Left - Pregnancy Info */}
+          <div>
+            <span className="inline-block px-3 py-1 bg-teal-600 text-white text-xs font-bold rounded-full uppercase tracking-wider mb-3">
+              Active Pregnancy
+            </span>
+            <h2 className="text-3xl font-bold text-gray-900 mb-1">Hello, {mother.name.split(' ')[0]}.</h2>
+            <p className="text-sm text-gray-600 mb-5">
+              You're in <span className="font-semibold text-gray-800">Week {activePregnancy.currentWeek}</span> of your pregnancy. Your baby is the size of an eggplant!
+            </p>
+
+            <div className="flex items-end gap-4 mb-4">
+              <div>
+                <p className="text-5xl font-bold text-gray-900 leading-none">{activePregnancy.daysUntilEdd}</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">Days Until EDD</p>
+              </div>
+            </div>
+
+            <div className="h-2 bg-teal-200 rounded-full overflow-hidden w-full max-w-xs mb-2">
+              <div
+                className="h-full bg-teal-600 rounded-full transition-all"
+                style={{ width: `${(activePregnancy.currentWeek / 40) * 100}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500">Week {activePregnancy.currentWeek} of 40 • Trimester {activePregnancy.trimester}</p>
+          </div>
+
+          {/* Right - CHW Card */}
+          <div className="bg-teal-800 rounded-2xl p-5 text-white">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                <User size={20} />
+              </div>
+              <div>
+                <p className="text-xs text-teal-200 uppercase tracking-wider">Assigned CHW</p>
+                <h4 className="font-bold text-lg">{mother.chw.name}</h4>
+              </div>
+            </div>
+            <div className="space-y-2 pt-3 border-t border-white/20">
+              <div className="flex items-center gap-2">
+                <Phone size={14} className="text-teal-300" />
+                <span className="text-sm text-teal-100">{mother.chw.phone}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar size={14} className="text-teal-300" />
+                <span className="text-sm text-teal-100">{nextAppointment.date}</span>
+              </div>
+              <p className="text-xs text-teal-200">{nextAppointment.time} • {nextAppointment.type}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions & Content Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-5">
+        {/* Quick Actions */}
+        <div>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-1">Quick Actions</p>
+          <div className="space-y-3">
+            <Link href={`/health-worker/mothers/${mother.id}/visits/new`}>
+              <div className="bg-white rounded-xl p-4 shadow-sm border-2 border-gray-100 hover:border-teal-300 hover:shadow-md transition-all cursor-pointer group">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <Plus size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">Request Service</p>
+                    <p className="text-xs text-gray-500">Submit new request</p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+            <Link href="/patient/chat">
+              <div className="bg-white rounded-xl p-4 shadow-sm border-2 border-gray-100 hover:border-teal-300 hover:shadow-md transition-all cursor-pointer group">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <MessageCircle size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">Chat with CHW</p>
+                    <p className="text-xs text-gray-500">Get instant support</p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {/* Daily Health Tips */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-1">Daily Health Tips</p>
+            <div className="flex gap-2">
+              <button className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50">
+                <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50">
+                <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="rounded-2xl overflow-hidden h-40 relative group cursor-pointer hover:shadow-xl transition-shadow bg-teal-700">
+              <img src="/imagefood.webp" alt="Third Trimester Essentials" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <h4 className="text-white font-semibold text-sm">Third Trimester Essentials</h4>
+              </div>
+            </div>
+            <div className="rounded-2xl overflow-hidden h-40 relative group cursor-pointer hover:shadow-xl transition-shadow bg-teal-700">
+              <img src="/sleepPosition.png" alt="Managing Sleep Positions" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <h4 className="text-white font-semibold text-sm">Managing Sleep Positions</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Children & Health Metrics */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Children List */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-gray-900">Children</h3>
+            <Link href="/patient/children" className="text-sm text-teal-600 hover:text-teal-700 font-medium">
+              View All →
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {children.map((child) => {
+              const statusConfig = {
+                "on-track": { bg: "bg-green-100", text: "text-green-700", label: "On Track" },
+                due: { bg: "bg-amber-100", text: "text-amber-700", label: "Due Soon" },
+                overdue: { bg: "bg-red-100", text: "text-red-700", label: "Overdue" },
+              };
+              const status = statusConfig[child.vaccinationStatus];
+
+              return (
+                <div key={child.id} className="bg-white rounded-2xl p-4 border-2 border-gray-100 hover:border-teal-300 hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
+                        <Baby size={20} className="text-teal-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{child.name}</h4>
+                        <p className="text-sm text-gray-500">{child.age}</p>
+                      </div>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${status.bg} ${status.text}`}>
+                      {status.label}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Health Metrics */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Health Metrics</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white rounded-xl p-4 shadow-sm border-2 border-gray-100">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Blood Pressure</p>
+              <div className="mb-1">
+                <span className="text-2xl font-bold text-teal-700">118/76</span>
+                <span className="text-xs font-semibold text-gray-500 ml-1">mmHg</span>
+              </div>
+              <p className="text-xs font-semibold text-gray-500">Normal</p>
+            </div>
+            <div className="bg-white rounded-xl p-4 shadow-sm border-2 border-gray-100">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Weight</p>
+              <div className="mb-1">
+                <span className="text-2xl font-bold text-teal-700">154</span>
+                <span className="text-xs font-semibold text-gray-500 ml-1">Lbs</span>
+              </div>
+              <p className="text-xs font-semibold text-gray-500">+2 this week</p>
+            </div>
+            <div className="bg-white rounded-xl p-4 shadow-sm border-2 border-gray-100">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Heart Rate</p>
+              <div className="mb-1">
+                <span className="text-2xl font-bold text-teal-700">72</span>
+                <span className="text-xs font-semibold text-gray-500 ml-1">BPM</span>
+              </div>
+              <p className="text-xs font-semibold text-gray-500">Normal</p>
+            </div>
+            <div className="bg-white rounded-xl p-4 shadow-sm border-2 border-gray-100">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Baby Height</p>
+              <div className="mb-1">
+                <span className="text-2xl font-bold text-teal-700">High</span>
+              </div>
+              <p className="text-xs font-semibold text-gray-500">35 cm</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Next Appointment */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">Next Appointment</h3>
+        <div className="bg-white rounded-2xl p-5 border-2 border-teal-200 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center flex-shrink-0">
+              <Calendar size={24} className="text-teal-600" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-bold text-gray-900 mb-1">{nextAppointment.type}</h4>
+              <div className="space-y-1 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <Calendar size={14} className="text-teal-600" />
+                  <span>{nextAppointment.date} at {nextAppointment.time}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin size={14} className="text-teal-600" />
+                  <span>{nextAppointment.facilityName}</span>
+                </div>
+              </div>
+            </div>
+            <Link
+              href="/patient/appointments"
+              className="px-4 py-2 bg-teal-600 text-white text-sm font-semibold rounded-lg hover:bg-teal-700 transition-colors"
+            >
+              View Details
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function PregnancyCard({
   pregnancy,
@@ -135,13 +394,59 @@ function PregnancyCard({
   );
 }
 
-export default async function MotherProfilePage({
+export default function MotherProfilePage({
   params,
 }: MotherProfilePageProps) {
-  const { motherId } = await params;
-  const { mother, pregnancies, activePregnancy } = await getMotherProfile(
-    motherId
-  );
+  const { motherId } = use(params);
+  // TODO: Replace with actual API call using react-query
+  const mother = {
+    id: motherId,
+    name: "Sarah Uwera",
+    phone: "+250 788 123 456",
+    dateOfBirth: "1990-05-15",
+    nidaStatus: "verified" as const,
+    location: {
+      village: "Nyamirambo",
+      cell: "Muhima",
+      sector: "Nyarugenge",
+      district: "Kigali",
+      province: "Kigali City",
+    },
+    chw: {
+      id: "chw-1",
+      name: "Dr. Helena Smith",
+      phone: "+250 788 999 888",
+    },
+  };
+
+  const activePregnancy = {
+    id: "preg-1",
+    motherId,
+    gravida: 2,
+    para: 1,
+    lmpDate: "2024-02-01",
+    eddDate: "2024-12-15",
+    status: "active" as const,
+    isActive: true,
+    currentWeek: 28,
+    trimester: 3,
+    daysUntilEdd: 84,
+  };
+
+  const pregnancies = [activePregnancy];
+
+  const children = [
+    { id: "1", name: "Grace Uwera", age: "1y 3m", vaccinationStatus: "on-track" as const },
+    { id: "2", name: "Emmanuel Mugisha", age: "3y 2m", vaccinationStatus: "due" as const },
+  ];
+
+  const nextAppointment = {
+    id: "apt-1",
+    date: "Oct 14, 2024",
+    time: "2:00 PM",
+    facilityName: "Nyamata Health Center",
+    type: "Prenatal Check-up",
+  };
 
   const initials = mother.name
     .split(" ")
@@ -151,6 +456,14 @@ export default async function MotherProfilePage({
 
   return (
     <div className="mx-auto max-w-7xl space-y-5">
+      {/* Patient Dashboard Section */}
+      <PatientDashboardSection
+        mother={mother}
+        activePregnancy={activePregnancy}
+        children={children}
+        nextAppointment={nextAppointment}
+      />
+
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
         <div className="min-w-0 flex-1 space-y-5">
           <section className="rounded-3xl border border-[#D5E9E6] bg-white p-6 shadow-sm">
