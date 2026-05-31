@@ -12,7 +12,9 @@ import { queryKeys } from "@/shared/config/query-keys";
 import { useRole } from "@/shared/hooks/useRole";
 import { cn } from "@/shared/lib/utils";
 import {
+  getGovDeadLetterLogs,
   getGovSyncLogs,
+  getGovSyncStatus,
   retryGovSyncLog,
   type GovSyncLog,
   type GovSyncTargetSystem,
@@ -106,6 +108,18 @@ export default function GovernmentSyncLogPage() {
     refetchInterval: 30_000,
   });
 
+  const deadLetterQuery = useQuery({
+    queryKey: [...queryKeys.government.syncLogs, "dead-letter"],
+    queryFn: getGovDeadLetterLogs,
+    refetchInterval: 30_000,
+  });
+
+  const syncStatusQuery = useQuery({
+    queryKey: [...queryKeys.government.sync, "status"],
+    queryFn: getGovSyncStatus,
+    refetchInterval: 30_000,
+  });
+
   const retryMutation = useMutation({
     mutationFn: retryGovSyncLog,
     onMutate: async (id: string) => {
@@ -124,20 +138,25 @@ export default function GovernmentSyncLogPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.government.syncLogs });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.government.sync, "status"] });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.government.syncLogs, "dead-letter"] });
     },
   });
 
   const logs = useMemo(() => sortLogs(syncLogsQuery.data ?? []), [syncLogsQuery.data]);
+  const deadLetterLogs = useMemo(() => sortLogs(deadLetterQuery.data ?? []), [deadLetterQuery.data]);
   const canRetryDeadLetters =
     sessionRole === "MOH_ADMIN" || String(currentUser?.role ?? "").toUpperCase() === "MOH_ADMIN";
 
+  const statusCounts = useMemo(() => syncStatusQuery.data ?? {}, [syncStatusQuery.data]);
   const summary = useMemo(
     () => ({
-      total: logs.length,
-      inFlight: logs.filter((log) => log.status === "IN_FLIGHT").length,
-      failed: logs.filter((log) => log.status === "FAILED" || log.status === "DEAD_LETTER").length,
+      total: Object.values(statusCounts).reduce((accumulator, value) => accumulator + Number(value ?? 0), 0) || logs.length,
+      pending: Number(statusCounts.PENDING ?? 0),
+      inFlight: Number(statusCounts.IN_FLIGHT ?? 0),
+      deadLetter: Number(statusCounts.DEAD_LETTER ?? 0) || deadLetterLogs.length,
     }),
-    [logs],
+    [deadLetterLogs.length, logs.length, statusCounts],
   );
 
   const toggleError = (id: string) => {
@@ -178,14 +197,24 @@ export default function GovernmentSyncLogPage() {
           <p className="mt-2 text-3xl font-semibold" style={{ color: roleTheme.text }}>{summary.total}</p>
         </article>
         <article className="rounded-3xl border bg-white p-5 shadow-sm" style={{ borderColor: roleTheme.border }}>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">In flight</p>
-          <p className="mt-2 text-3xl font-semibold text-blue-700">{summary.inFlight}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">Pending</p>
+          <p className="mt-2 text-3xl font-semibold text-blue-700">{summary.pending}</p>
         </article>
         <article className="rounded-3xl border bg-white p-5 shadow-sm" style={{ borderColor: roleTheme.border }}>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">Needs attention</p>
-          <p className="mt-2 text-3xl font-semibold text-amber-700">{summary.failed}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">In flight</p>
+          <p className="mt-2 text-3xl font-semibold text-amber-700">{summary.inFlight}</p>
+        </article>
+        <article className="rounded-3xl border bg-white p-5 shadow-sm" style={{ borderColor: roleTheme.border }}>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">Dead letter</p>
+          <p className="mt-2 text-3xl font-semibold text-red-700">{summary.deadLetter}</p>
         </article>
       </section>
+
+      {syncStatusQuery.error || syncLogsQuery.error ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+          Unable to load one or more sync sources. Refresh to try again.
+        </div>
+      ) : null}
 
       <section className="overflow-hidden rounded-3xl border bg-white shadow-sm" style={{ borderColor: roleTheme.border }}>
         <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4" style={{ borderColor: roleTheme.border }}>
@@ -202,7 +231,7 @@ export default function GovernmentSyncLogPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-[980px] w-full text-left text-sm">
+          <table className="w-full text-left text-sm" style={{ minWidth: 980 }}>
             <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
               <tr>
                 <th className="px-5 py-4">ID</th>
@@ -289,6 +318,107 @@ export default function GovernmentSyncLogPage() {
 
         {!syncLogsQuery.isLoading && logs.length === 0 ? (
           <div className="px-5 py-12 text-center text-sm text-slate-500">No sync log entries found.</div>
+        ) : null}
+      </section>
+
+      <section className="overflow-hidden rounded-3xl border bg-white shadow-sm" style={{ borderColor: roleTheme.border }}>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4" style={{ borderColor: roleTheme.border }}>
+          <div>
+            <h2 className="text-lg font-semibold" style={{ color: roleTheme.text }}>Dead-letter queue</h2>
+            <p className="mt-1 text-sm text-slate-500">Entries that exhausted retries and need manual intervention.</p>
+          </div>
+          {deadLetterQuery.error ? (
+            <div className="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700">
+              <AlertCircle className="size-4" />
+              Unable to load queue
+            </div>
+          ) : null}
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm" style={{ minWidth: 980 }}>
+            <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <tr>
+                <th className="px-5 py-4">ID</th>
+                <th className="px-5 py-4">Created</th>
+                <th className="px-5 py-4">Target</th>
+                <th className="px-5 py-4">Sync type</th>
+                <th className="px-5 py-4">Retries</th>
+                <th className="px-5 py-4">Last error</th>
+                <th className="px-5 py-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {deadLetterLogs.map((log) => {
+                const hasError = Boolean(log.lastErrorMessage);
+                const isExpanded = expandedErrors.has(log.id);
+                const retryingThisRow = retryMutation.isPending && retryMutation.variables === log.id;
+
+                return (
+                  <tr key={log.id} className="bg-red-50/40">
+                    <td className="px-5 py-4 font-mono text-xs text-slate-600" title={log.id}>
+                      {truncateUuid(log.id)}
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap text-slate-700">
+                      {formatCreatedDate(log.createdAt)}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className={cn("inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1", getTargetSystemClassName(log.targetSystem))}>
+                        {log.targetSystem}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 font-medium text-slate-800">{log.syncType}</td>
+                    <td className="px-5 py-4 text-slate-700">{log.retryCount}</td>
+                    <td className="max-w-[320px] px-5 py-4 text-slate-600">
+                      {hasError ? (
+                        <button
+                          className="text-left text-sm leading-5 hover:text-slate-900"
+                          onClick={() => toggleError(log.id)}
+                          title={log.lastErrorMessage ?? undefined}
+                          type="button"
+                        >
+                          {isExpanded ? log.lastErrorMessage : truncateError(log.lastErrorMessage ?? "")}
+                          {log.lastErrorMessage && log.lastErrorMessage.length > ERROR_PREVIEW_LENGTH ? (
+                            <span className="ml-1 font-semibold text-[#1F7280]">
+                              {isExpanded ? "Show less" : "Expand"}
+                            </span>
+                          ) : null}
+                        </button>
+                      ) : (
+                        <span className="text-slate-400">None</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      {canRetryDeadLetters ? (
+                        <Button
+                          className="h-8 rounded-full px-3"
+                          disabled={retryingThisRow}
+                          onClick={() => retryMutation.mutate(log.id)}
+                          size="sm"
+                        >
+                          <RotateCcw className={cn("size-3.5", retryingThisRow && "animate-spin")} />
+                          Retry
+                        </Button>
+                      ) : (
+                        <span className="text-slate-300">-</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {deadLetterQuery.isLoading ? (
+          <div className="flex items-center justify-center gap-2 px-5 py-12 text-sm text-slate-500">
+            <RefreshCcw className="size-4 animate-spin" />
+            Loading dead-letter queue
+          </div>
+        ) : null}
+
+        {!deadLetterQuery.isLoading && deadLetterLogs.length === 0 ? (
+          <div className="px-5 py-12 text-center text-sm text-slate-500">Dead-letter queue is empty.</div>
         ) : null}
       </section>
     </div>

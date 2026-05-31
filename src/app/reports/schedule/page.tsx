@@ -115,7 +115,7 @@ export default function ScheduleReportPage() {
 
         {scheduled ? (
           <p className="mt-4 rounded-xl border px-4 py-3 text-sm font-medium" style={{ borderColor: roleTheme.border, color: roleTheme.text }}>
-            Schedule saved in demo mode. Connect the backend job scheduler to activate recurring delivery.
+            Schedule saved locally. Backend scheduling support is not exposed yet, so use Generate Report for now.
           </p>
         ) : null}
       </section>
