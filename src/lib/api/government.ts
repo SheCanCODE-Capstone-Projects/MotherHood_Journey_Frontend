@@ -1,6 +1,14 @@
 import { apiClient } from "@/lib/api/client";
 import type { Report, ReportStatus, ReportType } from "@/shared/types/report";
 
+export type GovReportRequest = {
+  reportType: ReportType;
+  period: string;
+  scopeLevel: string;
+  geoLocationId: string;
+  aggregates: Record<string, unknown>;
+};
+
 export type GovSyncTargetSystem = "NIDA" | "HMIS" | "IREMBO";
 export type GovSyncStatus = "PENDING" | "IN_FLIGHT" | "SUCCEEDED" | "FAILED" | "DEAD_LETTER";
 
@@ -100,6 +108,20 @@ function generateMockDashboardData(
   };
 }
 
+function getRecordValue(record: Record<string, unknown>, keys: string[]): unknown {
+  for (const key of keys) {
+    if (key in record) {
+      return record[key];
+    }
+  }
+
+  return undefined;
+}
+
+function normalizePeriodLabel(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
 export async function getNationalDashboardMetrics(
   metric: DashboardMetric,
   period: string,
@@ -175,6 +197,24 @@ function normalizeStatus(value: unknown): GovSyncStatus {
   return "PENDING";
 }
 
+function normalizeGovReportStatus(value: unknown): ReportStatus {
+  const normalized = String(value ?? "").toUpperCase();
+
+  if (normalized === "IN_FLIGHT" || normalized === "QUEUED") {
+    return "QUEUED";
+  }
+
+  if (normalized === "SUCCEEDED" || normalized === "PUSHED") {
+    return "PUSHED";
+  }
+
+  if (normalized === "FAILED" || normalized === "DEAD_LETTER") {
+    return "FAILED";
+  }
+
+  return "NOT_PUSHED";
+}
+
 function normalizeReportType(value: unknown): ReportType | null {
   const normalized = String(value ?? "").toUpperCase() as ReportType;
   return GOV_REPORT_TYPES.includes(normalized) ? normalized : null;
@@ -228,6 +268,66 @@ function normalizeSyncLogResponse(response: unknown): GovSyncLog[] {
   return records.map(normalizeSyncLog).filter(Boolean) as GovSyncLog[];
 }
 
+function normalizeMeProfileId(response: unknown): string | null {
+  const unwrapped = unwrapApiData<Record<string, unknown>>(response);
+
+  if (!unwrapped) {
+    return null;
+  }
+
+  const profile = "data" in unwrapped && unwrapped.data && typeof unwrapped.data === "object"
+    ? (unwrapped.data as Record<string, unknown>)
+    : unwrapped;
+  const id = getRecordValue(profile, ["id", "userId", "uuid"]);
+
+  return typeof id === "string" && id ? id : null;
+}
+
+export type GovernmentProfile = {
+  id: string;
+  geoLocationId: string | null;
+};
+
+function normalizeGovernmentProfile(response: unknown): GovernmentProfile | null {
+  const unwrapped = unwrapApiData<Record<string, unknown>>(response);
+
+  if (!unwrapped) {
+    return null;
+  }
+
+  const profile = "data" in unwrapped && unwrapped.data && typeof unwrapped.data === "object"
+    ? (unwrapped.data as Record<string, unknown>)
+    : unwrapped;
+  const id = getRecordValue(profile, ["id", "userId", "uuid"]);
+  const geoLocationId = getRecordValue(profile, ["geoLocationId", "geo_location_id"]);
+
+  if (typeof id !== "string" || !id) {
+    return null;
+  }
+
+  return {
+    id,
+    geoLocationId: typeof geoLocationId === "string" && geoLocationId ? geoLocationId : null,
+  };
+}
+
+function normalizeReportPeriod(report: Record<string, unknown>): string {
+  const period = normalizePeriodLabel(getRecordValue(report, ["period"]));
+
+  if (period) {
+    return period;
+  }
+
+  const periodStart = normalizePeriodLabel(getRecordValue(report, ["periodStart", "period_start"]));
+  const periodEnd = normalizePeriodLabel(getRecordValue(report, ["periodEnd", "period_end"]));
+
+  if (periodStart && periodEnd) {
+    return `${periodStart} - ${periodEnd}`;
+  }
+
+  return periodStart ?? periodEnd ?? new Date().toISOString();
+}
+
 function unwrapApiData<T>(response: unknown): T | null {
   if (!response || typeof response !== "object") {
     return null;
@@ -249,29 +349,44 @@ function normalizeReport(record: unknown): GovReport | null {
 
   const candidate = record as Record<string, unknown>;
   const payload = candidate.data && typeof candidate.data === "object" ? (candidate.data as Record<string, unknown>) : candidate;
-  const reportType = normalizeReportType(payload.reportType ?? payload.report_type ?? candidate.reportType ?? candidate.report_type);
+  const reportType = normalizeReportType(
+    getRecordValue(payload, ["reportType", "report_type"]) ?? getRecordValue(candidate, ["reportType", "report_type"]),
+  );
 
   if (!reportType) {
     return null;
   }
 
-  const generatedAt = payload.generatedAt ?? payload.generated_at ?? candidate.generatedAt ?? candidate.generated_at;
-  const periodStart = payload.periodStart ?? payload.period_start ?? candidate.periodStart ?? candidate.period_start;
-  const periodEnd = payload.periodEnd ?? payload.period_end ?? candidate.periodEnd ?? candidate.period_end;
-  const data = payload.data ?? candidate.data ?? {};
+  const generatedAt = getRecordValue(payload, ["generatedAt", "generated_at"]) ?? getRecordValue(candidate, ["generatedAt", "generated_at"]);
+  const period = normalizeReportPeriod(payload);
+  const aggregates = getRecordValue(payload, ["aggregates", "data"]) ?? getRecordValue(candidate, ["aggregates", "data"]);
+  const scopeLevel = getRecordValue(payload, ["scopeLevel", "scope_level", "scope"]);
+  const geoLocationId = getRecordValue(payload, ["geoLocationId", "geo_location_id"]);
+  const generatedById = getRecordValue(payload, ["generatedById", "generated_by_id"]);
+  const hmisPushStatus = getRecordValue(payload, ["hmisPushStatus", "hmis_push_status"]);
 
   return {
     id: String(payload.id ?? candidate.id ?? ""),
     reportType,
-    status: normalizeReportStatus(payload.status ?? candidate.status),
+    status: normalizeGovReportStatus(hmisPushStatus ?? payload.status ?? candidate.status),
     title: String(payload.title ?? candidate.title ?? `${reportType.replaceAll("_", " ")} Report`),
-    description: String(payload.description ?? candidate.description ?? ""),
+    description: String(
+      payload.description ??
+        candidate.description ??
+        `${reportType.replaceAll("_", " ")} analytics for ${String(scopeLevel ?? "national").toLowerCase()}`,
+    ),
     generatedAt: typeof generatedAt === "string" ? generatedAt : new Date().toISOString(),
-    periodStart: typeof periodStart === "string" ? periodStart : new Date().toISOString(),
-    periodEnd: typeof periodEnd === "string" ? periodEnd : new Date().toISOString(),
+    period,
+    scopeLevel: typeof scopeLevel === "string" ? scopeLevel : undefined,
+    generatedById: typeof generatedById === "string" ? generatedById : undefined,
+    geoLocationId: typeof geoLocationId === "string" ? geoLocationId : undefined,
+    hmisPushStatus: typeof hmisPushStatus === "string" ? hmisPushStatus : undefined,
+    periodStart: period,
+    periodEnd: period,
     facilityName: typeof payload.facilityName === "string" ? payload.facilityName : typeof candidate.facilityName === "string" ? candidate.facilityName : undefined,
     districtName: typeof payload.districtName === "string" ? payload.districtName : typeof candidate.districtName === "string" ? candidate.districtName : undefined,
-    data: data as GovReport["data"],
+    data: aggregates as GovReport["data"],
+    aggregates: aggregates as Record<string, unknown>,
   };
 }
 
@@ -280,19 +395,45 @@ function normalizeReportResponse(response: unknown): GovReport | null {
 }
 
 function normalizeReportListResponse(response: unknown): GovReport[] {
-  const unwrapped = unwrapApiData<ApiListResponse<GovReport>>(response);
+  const unwrapped = unwrapApiData<ApiListResponse<GovReport> | Record<string, unknown>>(response);
 
   if (!unwrapped) {
     return [];
   }
 
-  const records = unwrapped.content ?? unwrapped.data ?? unwrapped.items ?? unwrapped.reports;
+  const candidate = unwrapped as Record<string, unknown>;
+  const nestedData = candidate.data && typeof candidate.data === "object" ? (candidate.data as Record<string, unknown>) : null;
+  const records =
+    (Array.isArray((candidate as ApiListResponse<GovReport>).content) && (candidate as ApiListResponse<GovReport>).content) ||
+    (Array.isArray(candidate.content) && candidate.content) ||
+    (Array.isArray(candidate.items) && candidate.items) ||
+    (Array.isArray(candidate.reports) && candidate.reports) ||
+    (nestedData && (Array.isArray(nestedData.content) ? nestedData.content : Array.isArray(nestedData.items) ? nestedData.items : Array.isArray(nestedData.reports) ? nestedData.reports : null)) ||
+    (nestedData && Array.isArray(nestedData.data) ? nestedData.data : null);
 
   if (!Array.isArray(records)) {
     return [];
   }
 
   return records.map(normalizeReport).filter(Boolean) as GovReport[];
+}
+
+export async function getCurrentGovernmentUserId(): Promise<string | null> {
+  try {
+    const response = await apiClient.get<unknown>("/api/v1/me");
+    return normalizeMeProfileId(response);
+  } catch {
+    return null;
+  }
+}
+
+export async function getCurrentGovernmentProfile(): Promise<GovernmentProfile | null> {
+  try {
+    const response = await apiClient.get<unknown>("/api/v1/me");
+    return normalizeGovernmentProfile(response);
+  } catch {
+    return null;
+  }
 }
 
 export async function getGovSyncLogs(): Promise<GovSyncLog[]> {
@@ -386,4 +527,15 @@ export async function getGovReport(reportId: string): Promise<GovReport> {
 export async function getGovReportsByUser(userId: string): Promise<GovReport[]> {
   const response = await apiClient.get<unknown>(`/api/v1/gov-reports/by-user/${userId}?page=0&size=50`);
   return normalizeReportListResponse(response);
+}
+
+export async function generateGovReport(request: GovReportRequest): Promise<GovReport> {
+  const response = await apiClient.post<unknown>("/api/v1/gov-reports", request);
+  const report = normalizeReportResponse(response);
+
+  if (!report) {
+    throw new Error("Government report generation returned an unexpected format");
+  }
+
+  return report;
 }

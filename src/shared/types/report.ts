@@ -81,11 +81,17 @@ export interface Report {
   title: string;
   description: string;
   generatedAt: string;
+  period?: string;
+  scopeLevel?: string;
+  generatedById?: string;
+  geoLocationId?: string;
+  hmisPushStatus?: string;
   periodStart: string;
   periodEnd: string;
   facilityName?: string;
   districtName?: string;
   data: ReportData[ReportType];
+  aggregates?: Record<string, unknown>;
 }
 
 /**

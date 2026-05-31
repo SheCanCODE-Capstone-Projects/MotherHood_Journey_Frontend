@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ReportStatus, ReportType } from "@/shared/types/report";
 
-import { getGovReport, getGovReportsByUser } from "@/lib/api/government";
+import { getCurrentGovernmentUserId, getGovReport, getGovReportsByUser } from "@/lib/api/government";
 
 /**
  * Custom hook for managing report data and operations
@@ -26,16 +26,26 @@ export function useReports(reportId: string) {
  * Hook to get all reports (for listing)
  */
 export function useReportList(userId?: string) {
+  const currentUserQuery = useQuery({
+    queryKey: ["government", "me", "report-user"],
+    queryFn: getCurrentGovernmentUserId,
+    enabled: !userId,
+  });
+
+  const resolvedUserId = userId ?? currentUserQuery.data ?? undefined;
+
   const reportListQuery = useQuery({
-    queryKey: ["government", "reports", "list", userId ?? "anonymous"],
-    queryFn: () => getGovReportsByUser(userId ?? ""),
-    enabled: Boolean(userId),
+    queryKey: ["government", "reports", "list", resolvedUserId ?? "anonymous"],
+    queryFn: () => getGovReportsByUser(resolvedUserId ?? ""),
+    enabled: Boolean(resolvedUserId),
   });
 
   return {
     reports: reportListQuery.data ?? [],
-    loading: reportListQuery.isLoading,
-    error: reportListQuery.error instanceof Error ? reportListQuery.error.message : null,
+    loading: currentUserQuery.isLoading || reportListQuery.isLoading,
+    error:
+      (currentUserQuery.error instanceof Error ? currentUserQuery.error.message : null) ??
+      (reportListQuery.error instanceof Error ? reportListQuery.error.message : null),
   };
 }
 

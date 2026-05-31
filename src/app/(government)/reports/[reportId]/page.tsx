@@ -307,7 +307,13 @@ export default function ReportDetailPage() {
   const { report, loading, error, refetch } = useReports(reportId);
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("en-US", {
+    const date = new Date(dateStr);
+
+    if (Number.isNaN(date.getTime())) {
+      return dateStr;
+    }
+
+    return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -393,7 +399,7 @@ export default function ReportDetailPage() {
             </span>
             <span>
               <span className="font-semibold">Period:</span>{" "}
-              {formatDate(report.periodStart)} - {formatDate(report.periodEnd)}
+              {report.period ?? `${formatDate(report.periodStart)} - ${formatDate(report.periodEnd)}`}
             </span>
             {report.facilityName && (
               <span>
@@ -434,16 +440,16 @@ export default function ReportDetailPage() {
             <StatCard
               label="Average Coverage"
               value={`${(
-                (vaccinationData?.byVaccineType.reduce(
+                ((vaccinationData?.byVaccineType ?? []).reduce(
                   (sum: number, item) => sum + item.coverage,
                   0,
-                ) ?? 0) / Math.max(vaccinationData?.byVaccineType.length ?? 1, 1)
+                ) ?? 0) / Math.max(vaccinationData?.byVaccineType?.length ?? 1, 1)
               ).toFixed(1)}%`}
               color="#1F7280"
             />
             <StatCard
               label="Vaccine Types Tracked"
-              value={vaccinationData?.byVaccineType.length ?? 0}
+              value={vaccinationData?.byVaccineType?.length ?? 0}
               color="#10B981"
             />
           </div>
@@ -456,20 +462,20 @@ export default function ReportDetailPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <StatCard
               label="Total Attendance"
-              value={(ancData?.monthlyAttendance.reduce((sum: number, item) => sum + item.attendance, 0) ?? 0).toLocaleString()}
+              value={((ancData?.monthlyAttendance ?? []).reduce((sum: number, item) => sum + item.attendance, 0) ?? 0).toLocaleString()}
               color="#1F7280"
             />
             <StatCard
               label="Average Monthly"
               value={Math.round(
-                (ancData?.monthlyAttendance.reduce((sum: number, item) => sum + item.attendance, 0) ?? 0) /
-                  Math.max(ancData?.monthlyAttendance.length ?? 1, 1)
+                ((ancData?.monthlyAttendance ?? []).reduce((sum: number, item) => sum + item.attendance, 0) ?? 0) /
+                  Math.max(ancData?.monthlyAttendance?.length ?? 1, 1)
               ).toLocaleString()}
               color="#10B981"
             />
             <StatCard
               label="Peak Month"
-              value={Math.max(...(ancData?.monthlyAttendance.map((item) => item.attendance) ?? [0])).toLocaleString()}
+              value={Math.max(...((ancData?.monthlyAttendance ?? []).map((item) => item.attendance) ?? [0])).toLocaleString()}
               color="#3B82F6"
             />
           </div>
@@ -482,17 +488,17 @@ export default function ReportDetailPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <StatCard
               label="Total Registrations"
-              value={(birthData?.byDistrict.reduce((sum: number, item) => sum + item.registrations, 0) ?? 0).toLocaleString()}
+              value={((birthData?.byDistrict ?? []).reduce((sum: number, item) => sum + item.registrations, 0) ?? 0).toLocaleString()}
               color="#1F7280"
             />
             <StatCard
               label="Districts Covered"
-              value={birthData?.byDistrict.length ?? 0}
+              value={birthData?.byDistrict?.length ?? 0}
               color="#10B981"
             />
             <StatCard
               label="Highest District"
-              value={Math.max(...(birthData?.byDistrict.map((item) => item.registrations) ?? [0])).toLocaleString()}
+              value={Math.max(...((birthData?.byDistrict ?? []).map((item) => item.registrations) ?? [0])).toLocaleString()}
               color="#3B82F6"
             />
           </div>
