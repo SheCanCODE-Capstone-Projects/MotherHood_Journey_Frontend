@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
@@ -227,7 +228,7 @@ export default function DistrictDashboardPage() {
   });
 
   const facilities = facilitiesQuery.data ?? [];
-  const heatmapData = heatmapQuery.data ?? [];
+  const heatmapData = useMemo(() => heatmapQuery.data ?? [], [heatmapQuery.data]);
 
   const criticalAlerts = useMemo(
     () =>

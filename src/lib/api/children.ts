@@ -11,6 +11,7 @@ import { VACCINATION_API } from "@/features/child/api/constants";
 
 const CHILDREN_BASE_PATH = "/api/v1/children";
 
+<<<<<<< HEAD
 export type ChildHealthStatus = "HEALTHY" | "AT_RISK" | "CRITICAL";
 
 export interface VaccinationRow {
@@ -222,26 +223,35 @@ export function registerChild(data: ChildFormData): Promise<ChildRegistrationRes
         vaccination_schedule,
       });
     }, 1000);
+=======
+/**
+ * Register a new child with the backend API
+ * Returns the child data along with the vaccination schedule
+ */
+export async function registerChild(data: ChildFormData): Promise<ChildRegistrationResponse> {
+  return apiClient.post<ChildRegistrationResponse>(CHILDREN_BASE_PATH, {
+    mother_health_id: data.mother_health_id,
+    first_name: data.first_name,
+    gender: data.gender,
+    date_of_birth: data.date_of_birth,
+    birth_weight: data.birth_weight,
+    delivery_type: data.delivery_type,
+    birth_certificate_number: data.birth_certificate_number,
+>>>>>>> main
   });
 }
 
-export function searchMothers(query: string): Promise<MotherSearchResult[]> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const mockMothers: MotherSearchResult[] = [
-        { health_id: "MTH-001", name: "Uwimana Marie", phone: "+250 788 000 000" },
-        { health_id: "MTH-002", name: "Mukamana Jeanne", phone: "+250 788 111 111" },
-        { health_id: "MTH-003", name: "Nyiramongi Alice", phone: "+250 788 222 222" },
-        { health_id: "MTH-004", name: "Uwase Beatrice", phone: "+250 788 333 333" },
-        { health_id: "MTH-005", name: "Nyirahabimana Claudine", phone: "+250 788 444 444" },
-      ].filter(
-        (m) =>
-          m.health_id.toLowerCase().includes(query.toLowerCase()) ||
-          m.name.toLowerCase().includes(query.toLowerCase())
-      );
-      resolve(mockMothers);
-    }, 300);
-  });
+/**
+ * Search mothers by health ID or name
+ * Used for linking child to mother during registration
+ */
+export async function searchMothers(query: string): Promise<MotherSearchResult[]> {
+  const params = new URLSearchParams();
+  params.set("search_term", query.trim());
+
+  return apiClient.get<MotherSearchResult[]>(
+    `/api/v1/mothers/search?${params.toString()}`
+  );
 }
 
 export async function searchChildVaccinationSession(searchTerm: string) {

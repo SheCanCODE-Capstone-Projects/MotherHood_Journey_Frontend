@@ -1,5 +1,6 @@
 "use client";
 
+<<<<<<< HEAD
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Report, ReportStatus, PushHmisResponse, ReportType, ReportData } from "@/shared/types/report";
 import { getGovernmentReports, type StoredReport } from "@/lib/api/government";
@@ -100,8 +101,30 @@ function buildReportFromStored(stored: StoredReport): Report {
     periodStart: stored.periodStart,
     periodEnd: stored.periodEnd,
     districtName,
+=======
+import { useQuery } from "@tanstack/react-query";
+import type { ReportStatus, ReportType } from "@/shared/types/report";
+
+import { getCurrentGovernmentUserId, getGovReport, getGovReportsByUser } from "@/lib/api/government";
+
+/**
+ * Custom hook for managing report data and operations
+ */
+export function useReports(reportId: string) {
+  const reportQuery = useQuery({
+    queryKey: ["government", "reports", reportId],
+    queryFn: () => getGovReport(reportId),
+  });
+
+  return {
+    report: reportQuery.data ?? null,
+    loading: reportQuery.isLoading,
+    error: reportQuery.error instanceof Error ? reportQuery.error.message : null,
+    refetch: reportQuery.refetch,
+>>>>>>> main
   };
 
+<<<<<<< HEAD
   if (stored.reportType === "VACCINATION_COVERAGE") {
     const data: ReportData["VACCINATION_COVERAGE"] = {
       byVaccineType: [
@@ -129,6 +152,25 @@ function buildReportFromStored(stored: StoredReport): Report {
     };
     return { ...base, data };
   }
+=======
+/**
+ * Hook to get all reports (for listing)
+ */
+export function useReportList(userId?: string) {
+  const currentUserQuery = useQuery({
+    queryKey: ["government", "me", "report-user"],
+    queryFn: getCurrentGovernmentUserId,
+    enabled: !userId,
+  });
+
+  const resolvedUserId = userId ?? currentUserQuery.data ?? undefined;
+
+  const reportListQuery = useQuery({
+    queryKey: ["government", "reports", "list", resolvedUserId ?? "anonymous"],
+    queryFn: () => getGovReportsByUser(resolvedUserId ?? ""),
+    enabled: Boolean(resolvedUserId),
+  });
+>>>>>>> main
 
   if (stored.reportType === "BIRTH_REGISTRATION") {
     const data: ReportData["BIRTH_REGISTRATION"] = {
@@ -174,6 +216,7 @@ async function pushReportToHmis(reportId: string): Promise<PushHmisResponse> {
     };
   }
   return {
+<<<<<<< HEAD
     success: false,
     message: "HMIS gateway returned an error. Please retry.",
   };
@@ -223,6 +266,13 @@ export function useReportList() {
     reports: query.data ?? [],
     loading: query.isLoading,
     error: query.isError ? "Failed to load reports" : null,
+=======
+    reports: reportListQuery.data ?? [],
+    loading: currentUserQuery.isLoading || reportListQuery.isLoading,
+    error:
+      (currentUserQuery.error instanceof Error ? currentUserQuery.error.message : null) ??
+      (reportListQuery.error instanceof Error ? reportListQuery.error.message : null),
+>>>>>>> main
   };
 }
 

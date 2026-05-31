@@ -26,9 +26,12 @@ type AdminDialogState = {
 } | null;
 
 function formatAge(years: number, months: number) {
-  const ageParts = [years > 0 ? `${years} year${years === 1 ? "" : "s"}` : null, months > 0 ? `${months} month${months === 1 ? "" : "s"}` : null].filter(Boolean);
+  const ageParts = [
+    years > 0 ? `${years} year${years === 1 ? "" : "s"}` : null,
+    months > 0 ? `${months} month${months === 1 ? "" : "s"}` : null,
+  ].filter(Boolean);
 
-  return ageParts.length > 0 ? ageParts.join(" ") : "Newborn";
+  return ageParts.length > 0 ? (ageParts as string[]).join(" ") : "Newborn";
 }
 
 function formatDate(value: string) {
@@ -102,10 +105,17 @@ export default function VaccinationSessionPage() {
 
   const session = sessionQuery.data;
   const dueVaccines = session?.dueVaccines ?? [];
-  const notFound = sessionQuery.isError && sessionQuery.error instanceof ApiError && sessionQuery.error.statusCode === 404;
+  const notFound =
+    sessionQuery.isError && sessionQuery.error instanceof ApiError && sessionQuery.error.statusCode === 404;
 
   const handleConfirmAdministration = useCallback(() => {
-    if (!adminDialog) {
+    if (!adminDialog) return;
+
+    const trimmedLotNumber = adminDialog.lotNumber.trim();
+    if (!trimmedLotNumber) {
+      setAdminDialog((current) =>
+        current ? { ...current, error: "Lot number is required." } : current
+      );
       return;
     }
 
@@ -181,10 +191,10 @@ export default function VaccinationSessionPage() {
           {debouncedSearchTerm.length === 0
             ? "Enter a child health ID or birth certificate number to load the vaccination session."
             : sessionQuery.isFetching
-              ? "Searching for the child record..."
-              : session
-                ? `Loaded session for ${session.child.fullName}.`
-                : "Waiting for the backend response."}
+            ? "Searching for the child record..."
+            : session
+            ? `Loaded session for ${session.child.fullName}.`
+            : "Waiting for the backend response."}
         </p>
       </section>
 
@@ -192,7 +202,9 @@ export default function VaccinationSessionPage() {
 
       {sessionQuery.isError && !notFound ? (
         <section className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm text-red-700 shadow-sm">
-          {sessionQuery.error instanceof Error ? sessionQuery.error.message : "Unable to load the vaccination session."}
+          {sessionQuery.error instanceof Error
+            ? sessionQuery.error.message
+            : "Unable to load the vaccination session."}
         </section>
       ) : null}
 

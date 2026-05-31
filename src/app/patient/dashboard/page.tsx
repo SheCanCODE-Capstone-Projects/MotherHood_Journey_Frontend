@@ -187,4 +187,3 @@ function StatCard({ label, value, unit, status }: { label: string; value: string
   );
 }
 
-

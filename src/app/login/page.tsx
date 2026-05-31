@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
@@ -43,7 +43,14 @@ const languageOptions: Array<{ code: LanguageCode; label: string }> = [
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
   const { currentUser, signIn, signUp, logout } = useAuth();
-  const [mode, setMode] = useState<AuthMode>("signin");
+  const [mode, setMode] = useState<AuthMode>(() => {
+    if (typeof window === "undefined") {
+      return "signin";
+    }
+
+    const requestedMode = new URLSearchParams(window.location.search).get("mode");
+    return requestedMode === "signup" || requestedMode === "signin" ? requestedMode : "signin";
+  });
   const [formData, setFormData] = useState<LoginForm>({
     fullName: "",
     phone: "",
@@ -62,14 +69,6 @@ export default function LoginPage() {
     const code = i18n.language?.slice(0, 2) as LanguageCode | undefined;
     return code === "rw" || code === "fr" ? code : "en";
   }, [i18n.language]);
-
-  useEffect(() => {
-    const requestedMode = new URLSearchParams(window.location.search).get("mode");
-
-    if (requestedMode === "signup" || requestedMode === "signin") {
-      setMode(requestedMode);
-    }
-  }, []);
 
   const switchMode = (nextMode: AuthMode) => {
     setMode(nextMode);
@@ -227,7 +226,10 @@ export default function LoginPage() {
       <div className="relative mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-10 sm:px-6">
         <section className="z-10 w-full max-w-md rounded-3xl border border-white/25 bg-white/12 p-7 shadow-[0_22px_60px_-28px_rgba(34,122,127,0.28)] backdrop-blur-md sm:p-9">
           <div className="mb-7">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#1D5052]">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5B8784]">
+              Secure Access
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#1D5052]">
               {t("login.title")}
             </h1>
           </div>
@@ -252,7 +254,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={onLogout}
-                className="w-full rounded-xl bg-linear-to-r from-[#2F7F7A] via-[#2C6F73] to-[#2A7F8A] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.95)] transition hover:brightness-105"
+                className="w-full rounded-[8px] bg-[#064F56] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.75)] transition hover:brightness-105"
               >
                 {t("login.logout")}
               </button>
@@ -395,7 +397,7 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                className="w-full rounded-xl bg-linear-to-r from-[#2F7F7A] via-[#2C6F73] to-[#2A7F8A] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.95)] transition hover:brightness-105"
+                className="w-full rounded-[8px] bg-[#064F56] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.75)] transition hover:brightness-105"
               >
                 {mode === "signup" ? t("login.submitSignUp") : t("login.submitSignIn")}
               </button>

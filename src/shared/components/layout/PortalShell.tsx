@@ -16,6 +16,12 @@ type PortalShellProps = {
   previewRole?: UserRole;
 };
 
+declare global {
+  interface Window {
+    __portalPreviewRole?: UserRole;
+  }
+}
+
 export function PortalShell({
   children,
   fallbackRole,
@@ -32,7 +38,11 @@ export function PortalShell({
 
   const [runtimePreviewRole, setRuntimePreviewRole] = useState<UserRole | undefined>(() => {
     if (typeof window !== "undefined") {
+<<<<<<< HEAD
       return (window as any).__portalPreviewRole ?? previewRole;
+=======
+      return window.__portalPreviewRole ?? previewRole;
+>>>>>>> main
     }
     return previewRole;
   });
@@ -48,6 +58,7 @@ export function PortalShell({
     return () => window.removeEventListener("portal:preview-role", handler as EventListener);
   }, []);
 
+<<<<<<< HEAD
   return (
     isLoginRoute ? (
       <div className="min-h-screen bg-[#F8FBFB] print:bg-white">
@@ -68,6 +79,29 @@ export function PortalShell({
           <MobileNav fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
         </div>
       </div>
+=======
+  const pathname = usePathname();
+
+  if (pathname === "/") {
+    return <>{children}</>;
+  }
+
+  return (
+    <div className="flex min-h-screen bg-[#F4F8F7] text-[#163F42] print:bg-white">
+      <SkipLink />
+      <Sidebar fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
+
+        <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+          <TopBar fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
+
+        <main id="main-content" className="flex-1 px-4 py-5 pb-24 print:px-0 print:py-0 print:pb-0 sm:px-6 lg:px-8 lg:pb-8">
+          <div className="mx-auto w-full max-w-7xl">{children}</div>
+        </main>
+
+          <MobileNav fallbackRole={fallbackRole} previewRole={runtimePreviewRole ?? previewRole} />
+        </div>
+      </div>
+>>>>>>> main
     )
   );
 }

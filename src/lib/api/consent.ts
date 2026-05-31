@@ -25,6 +25,7 @@ export interface ConsentRequest {
   expiryDate?: string;
 }
 
+<<<<<<< HEAD
 // Mutable mock store — modifications persist for the lifetime of the page session
 const MOCK_CONSENTS: ConsentRecord[] = [
   {
@@ -66,24 +67,21 @@ const MOCK_CONSENTS: ConsentRecord[] = [
     description: "Facility Transfer",
   },
 ];
+=======
+>>>>>>> main
 
 export async function getAllConsents(patientId: string): Promise<ConsentRecord[]> {
-  try {
-    const response = await apiClient.get<ConsentRecord[]>(
-      `${CONSENT_BASE_PATH}?patientId=${encodeURIComponent(patientId)}`
-    );
-    return response;
-  } catch (error) {
-    console.warn("getAllConsents failed, using mock data:", error);
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return MOCK_CONSENTS.filter(c => c.patientId === patientId);
-  }
+  const response = await apiClient.get<ConsentRecord[]>(
+    `${CONSENT_BASE_PATH}?patientId=${encodeURIComponent(patientId)}`
+  );
+  return response;
 }
 
 export async function grantConsent(
   patientId: string,
   request: ConsentRequest
 ): Promise<ConsentRecord> {
+<<<<<<< HEAD
   try {
     const response = await apiClient.post<ConsentRecord>(CONSENT_BASE_PATH, {
       ...request,
@@ -131,6 +129,17 @@ export async function revokeConsent(consentId: string): Promise<void> {
     const record = MOCK_CONSENTS.find((c) => c.id === consentId);
     if (record) record.status = "REVOKED";
   }
+=======
+  const response = await apiClient.post<ConsentRecord>(CONSENT_BASE_PATH, {
+    ...request,
+    patientId
+  });
+  return response;
+}
+
+export async function revokeConsent(consentId: string): Promise<void> {
+  await apiClient.delete(`${CONSENT_BASE_PATH}/${encodeURIComponent(consentId)}`);
+>>>>>>> main
 }
 
 function getConsentDescription(type: ConsentType): string {
