@@ -5,7 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { PageHeader } from "@/shared/components/layout";
 import { getAllConsents, grantConsent, revokeConsent, type ConsentRecord, type ConsentType } from "@/lib/api/consent";
-import { AlertTriangle, CheckCircle, XCircle, Calendar, Scale } from "lucide-react";
+import { AlertTriangle, CheckCircle, XCircle, Calendar, Scale, Loader2, AlertCircle } from "lucide-react";
+import { isApiError } from "@/lib/api/client";
 
 const CONSENT_TYPES: { type: ConsentType; title: string; description: string }[] = [
   {
@@ -38,13 +39,16 @@ export default function PatientConsentPage() {
 
   const queryClient = useQueryClient();
 
-  // Assume patient ID is 1 for demo purposes
+  // Get patient ID from auth state (for now using a demo ID)
+  // In production, this should come from the authenticated user session
   const patientId = "1";
 
-  // Fetch all consents
-  const { data: consents = [], isLoading } = useQuery({
+  // Fetch all consents with proper error handling
+  const { data: consents = [], isLoading, error } = useQuery({
     queryKey: ["consents", patientId],
     queryFn: () => getAllConsents(patientId),
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Mutation for granting consent
@@ -107,6 +111,48 @@ export default function PatientConsentPage() {
     }
   };
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow="Privacy compliance"
+          title="Consent & Privacy Audit"
+          subtitle="Manage data sharing preferences and review consent status."
+        />
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-[#2C6F73]" />
+          <span className="ml-3 text-sm text-gray-600">Loading consent records...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    const errorMessage = isApiError(error) ? error.message : "Failed to load consent records";
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow="Privacy compliance"
+          title="Consent & Privacy Audit"
+          subtitle="Manage data sharing preferences and review consent status."
+        />
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
+          <h3 className="mt-3 text-lg font-semibold text-red-800">Error Loading Consents</h3>
+          <p className="mt-2 text-sm text-red-600">{errorMessage}</p>
+          <button
+            onClick={() => queryClient.invalidateQueries({ queryKey: ["consents", patientId] })}
+            className="mt-4 rounded-[8px] bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -133,6 +179,8 @@ export default function PatientConsentPage() {
               isLoading={isLoading || grantMutation.isPending || revokeMutation.isPending}
               onToggle={() => handleToggle(consentType.type)}
               formatDate={formatDate}
+              isRevoking={revokeMutation.isPending}
+              isGranting={grantMutation.isPending}
             />
           );
         })}
@@ -188,6 +236,8 @@ interface ConsentCardProps {
   expiryDate?: string;
   legalBasis?: string;
   isLoading: boolean;
+  isRevoking?: boolean;
+  isGranting?: boolean;
   onToggle: () => void;
   formatDate: (date: string) => string;
 }
@@ -200,6 +250,8 @@ function ConsentCard({
   expiryDate,
   legalBasis,
   isLoading,
+  isRevoking = false,
+  isGranting = false,
   onToggle,
   formatDate,
 }: ConsentCardProps) {
@@ -220,10 +272,10 @@ function ConsentCard({
         {/* Toggle Switch */}
         <button
           onClick={onToggle}
-          disabled={isLoading}
+          disabled={isLoading || isRevoking || isGranting}
           className={`relative ml-4 h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#1D5052] focus:ring-offset-2 ${
             isGranted ? "bg-[#1D5052]" : "bg-gray-300"
-          }`}
+          } ${isLoading || isRevoking || isGranting ? 'opacity-50 cursor-not-allowed' : ''}`}
           role="switch"
           aria-checked={isGranted}
           aria-label={`Toggle ${title}`}
