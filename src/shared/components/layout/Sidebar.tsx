@@ -1,30 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Baby,
-  Building2,
   CalendarDays,
+  ClipboardList,
   FileText,
   Home,
   LayoutDashboard,
   LogOut,
-  MessageCircle,
+  RefreshCcw,
   Stethoscope,
   Users,
   Lightbulb,
   type LucideIcon,
 } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 import { Button } from "@/shared/components/ui/button";
-import { cn } from "@/shared/lib/utils";
 import { useRole } from "@/shared/hooks/useRole";
-import { SkipLink } from "@/shared/components/layout/SkipLink";
+import { cn } from "@/shared/lib/utils";
 import type { UserRole } from "@/shared/types/auth";
-import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { ROLE_NAV_ITEMS } from "@/shared/config/rbac";
 
 type SidebarProps = {
   fallbackRole: UserRole;
@@ -46,17 +43,31 @@ const iconByHref: Record<string, LucideIcon> = {
   "/patient/chat": MessageCircle,
   "/tips": Lightbulb,
   "/staff": Users,
+  "/service-requests": ClipboardList,
   "/reports": FileText,
   "/analytics": LayoutDashboard,
-  "/sync": LayoutDashboard,
+  "/sync": RefreshCcw,
+  "/sync-log": RefreshCcw,
 };
 
-const mainNavItems = ["/dashboard", "/patient/dashboard", "/mothers", "/visits", "/diagnoses", "/pregnancies", "/patient/pregnancies", "/children", "/patient/children", "/appointments", "/patient/appointments", "/patient/chat", "/tips", "/reports", "/analytics", "/staff", "/sync"];
-
-const roleTheme = { text: '#085041', border: '#5DCAA5', accent: '#085041' };
+const mainNavItems = [
+  "/dashboard",
+  "/mothers",
+  "/children",
+  "/visits",
+  "/diagnoses",
+  "/pregnancies",
+  "/appointments",
+  "/service-requests",
+  "/reports",
+  "/analytics",
+  "/staff",
+  "/sync",
+  "/sync-log",
+];
 
 export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
-  const { role, roleLabel, roleTheme, organizationName, navItems, displayName } = useRole({
+  const { roleLabel, roleTheme, organizationName, navItems, displayName } = useRole({
     fallbackRole,
     previewRole,
   });
@@ -78,16 +89,16 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
         asChild
         variant="ghost"
         className={cn(
-          "h-10 w-full justify-start gap-3 rounded-xl px-3",
+          "relative h-10 w-full justify-start gap-3 rounded-xl px-3",
           isActive
-            ? "bg-[#5DCAA5]/20 text-white"
-            : "text-white/60 hover:bg-white/10 hover:text-white",
+            ? "bg-[#EAF4F2] text-[#0B5554]"
+            : "text-[#6D8587] hover:bg-[#F3F8F7] hover:text-[#0B5554]",
         )}
         style={{ backgroundColor: isActive ? undefined : "transparent" }}
       >
         <Link href={item.href}>
           {isActive && (
-            <div className="absolute left-0 top-1/2 h-5 w-0.75 -translate-y-1/2 rounded-r bg-[#5DCAA5]" />
+            <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r bg-[#0B5554]" />
           )}
           <Icon className="size-5 shrink-0" />
           <span className="text-sm font-medium">{item.label}</span>
@@ -98,19 +109,29 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
 
   return (
     <aside
-      className="hidden w-72 shrink-0 border-r  lg:flex lg:flex-col print:hidden"
-      style={{ backgroundColor: roleTheme.accent, borderColor: roleTheme.border }}
+      className="hidden w-72 shrink-0 border-r border-[#E4EFED] bg-white lg:flex lg:flex-col print:hidden"
+      style={{ borderColor: roleTheme.border }}
     >
-      <SkipLink />
-      <div className="border-b border-white/10 px-6 py-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
-          Motherhood Journey
+      <div className="border-b border-[#E4EFED] px-6 py-6">
+        <div className="flex items-center gap-3">
+          <div className="grid size-10 place-items-center rounded-[8px] bg-[#0B5554] text-sm font-bold text-white">
+            MS
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8AA2A4]">
+              Maternal
+            </p>
+            <h2 className="text-lg font-semibold text-[#153F42]">Sanctuary</h2>
+          </div>
+        </div>
+        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-[#8AA2A4]">
+          Workspace
         </p>
-        <h2 className="mt-2 text-2xl font-semibold" style={{ color: roleTheme.text }}>
+        <h3 className="mt-2 text-xl font-semibold text-[#153F42]">
           {roleLabel} Portal
-        </h2>
-        <p className="mt-2 text-sm" style={{ color: roleTheme.text }}>
-          Role-aware navigation for {role.replaceAll("_", " ")} workflows.
+        </h3>
+        <p className="mt-2 text-sm leading-6 text-[#6D8587]">
+          {organizationName}
         </p>
       </div>
 
@@ -120,18 +141,18 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
           .map(renderNavItem)}
       </nav>
 
-      <div className="border-t border-white/10 p-3">
-        <div className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
-          <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#5DCAA5] font-semibold text-[#085041] text-sm">
+      <div className="border-t border-[#E4EFED] p-3">
+        <div className="flex items-center gap-3 rounded-[8px] border border-[#E4EFED] bg-[#F8FBFA] p-3">
+          <div className="grid size-9 shrink-0 place-items-center rounded-[8px] bg-[#E1F2EF] text-sm font-semibold text-[#0B5554]">
             {displayName.slice(0, 1).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-white">{displayName}</p>
-            <p className="truncate text-[11px] text-white/50">{roleLabel}</p>
+            <p className="truncate text-sm font-medium text-[#153F42]">{displayName}</p>
+            <p className="truncate text-[11px] text-[#7B9597]">{roleLabel}</p>
           </div>
           <Button
             variant="ghost"
-            className="h-8 w-8 shrink-0 rounded-lg p-0 text-white/50 hover:bg-white/10 hover:text-white"
+            className="h-8 w-8 shrink-0 rounded-lg p-0 text-[#7B9597] hover:bg-[#EAF4F2] hover:text-[#0B5554]"
             style={{ backgroundColor: "transparent" }}
             onClick={() => void handleLogout()}
             title="Logout"

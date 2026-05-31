@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 
 import { PageHeader } from "@/shared/components/layout";
-import { ROLE_THEMES } from "@/shared/config/rbac";
+import { Button } from "@/shared/components/ui/button";
 import { useRole } from "@/shared/hooks/useRole";
 import { useReportList, getReportTypeLabel, getStatusLabel } from "@/hooks/useReports";
 import { AlertCircle, BarChart3, Calendar, Heart, RefreshCw, TrendingUp, Users, Download } from "lucide-react";
@@ -19,8 +19,7 @@ const REPORT_TYPES = [
 
 export default function ReportsPage() {
   const router = useRouter();
-  const { role } = useRole();
-  const roleTheme = role === "government" ? ROLE_THEMES.government : ROLE_THEMES.facility_admin;
+  const { role, roleTheme } = useRole();
   const isGovernment = role === "government";
   const { reports, loading, error } = useReportList();
 
@@ -78,6 +77,7 @@ export default function ReportsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow={isGovernment ? "Government analytics" : "Facility analytics"}
         title={isGovernment ? "National Reports" : "Reports"}
         subtitle={isGovernment ? "Backend-backed national maternal health analytics and HMIS reporting." : "Facility performance and operational reports."}
       />
@@ -147,10 +147,13 @@ export default function ReportsPage() {
                     View
                   </button>
                 </div>
+                <Button variant="outline" className="h-9 rounded-[8px] border-[#D5E7E4] text-[#153F42]">
+                  View
+                </Button>
               </div>
-            );
-          })}
-        </div>
+            </article>
+          );
+        })}
       </section>
 
       {/* Recent Reports */}
@@ -183,7 +186,6 @@ export default function ReportsPage() {
             </div>
           ) : null}
         </div>
-      </section>
 
       {error ? (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">

@@ -1,8 +1,18 @@
 "use client";
 
-import { Plus, MessageCircle, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useState } from "react";
+import {
+  Calendar,
+  HeartPulse,
+  MessageCircle,
+  Plus,
+  ShieldCheck,
+  User,
+  X,
+} from "lucide-react";
 
 export default function PatientDashboardPage() {
   return (
@@ -18,17 +28,28 @@ function TopSection() {
   const [showDoctor, setShowDoctor] = useState(true);
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-      <p className="text-[9px] font-bold text-teal-600 uppercase tracking-widest mb-3 border border-teal-200 bg-teal-50 inline-block px-2 py-0.5 rounded-full">
+    <div className="relative overflow-hidden rounded-2xl border border-teal-100 bg-white p-6 shadow-sm">
+      <div className="absolute inset-y-0 right-0 hidden w-[42%] lg:block">
+        <Image
+          src="/images/pregnantPic.png"
+          alt="Pregnancy care"
+          fill
+          priority
+          sizes="42vw"
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/65 to-transparent" />
+      </div>
+
+      <p className="relative text-[9px] font-bold text-teal-600 uppercase tracking-widest mb-3 border border-teal-200 bg-teal-50 inline-block px-2 py-0.5 rounded-full">
         Pregnancy Status
       </p>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-6">
-        {/* Left */}
+      <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Hello, Sarah.</h2>
           <p className="text-xs text-gray-500 mb-5">
-            You're in <span className="font-semibold text-gray-700">Week 28</span> of your pregnancy. Your baby is the size of an eggplant!
+            You&apos;re in <span className="font-semibold text-gray-700">Week 28</span> of your pregnancy. Your baby is the size of an eggplant!
           </p>
 
           <div className="flex items-end gap-4 mb-4">
@@ -41,19 +62,45 @@ function TopSection() {
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden w-full max-w-xs">
             <div className="h-full bg-teal-600 rounded-full" style={{ width: "70%" }} />
           </div>
-          <p className="text-[9px] text-gray-400 mt-1.5">Week 28 of 40 • Trimester 3</p>
+          <p className="text-[9px] text-gray-400 mt-1.5">Week 28 of 40 - Trimester 3</p>
+
+          <div className="mt-5 grid max-w-md grid-cols-2 gap-2">
+            <div className="rounded-xl border border-teal-100 bg-teal-50/80 p-3">
+              <div className="flex items-center gap-2 text-teal-700">
+                <ShieldCheck size={14} />
+                <p className="text-[10px] font-bold uppercase tracking-wider">Care plan</p>
+              </div>
+              <p className="mt-1 text-[10px] leading-relaxed text-teal-900/70">3 tasks ready for this week.</p>
+            </div>
+            <div className="rounded-xl border border-rose-100 bg-rose-50/80 p-3">
+              <div className="flex items-center gap-2 text-rose-700">
+                <HeartPulse size={14} />
+                <p className="text-[10px] font-bold uppercase tracking-wider">Wellness</p>
+              </div>
+              <p className="mt-1 text-[10px] leading-relaxed text-rose-900/70">Vitals are looking steady.</p>
+            </div>
+          </div>
         </div>
 
-        {/* Doctor card */}
         {showDoctor && (
-          <div className="bg-teal-800 rounded-2xl p-4 text-white relative">
+          <div className="relative overflow-hidden rounded-2xl bg-teal-900 p-4 text-white shadow-xl shadow-teal-900/15">
+            <div className="absolute inset-0 opacity-25">
+              <Image
+                src="/images/doctors.jpg"
+                alt="Healthcare provider"
+                fill
+                sizes="280px"
+                className="object-cover"
+              />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-br from-teal-950 via-teal-900/90 to-teal-700/70" />
             <button
               onClick={() => setShowDoctor(false)}
-              className="absolute top-3 right-3 w-6 h-6 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+              className="absolute top-3 right-3 z-10 w-6 h-6 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
             >
               <X size={12} />
             </button>
-            <div className="flex items-center gap-3 mb-3">
+            <div className="relative flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
@@ -64,14 +111,14 @@ function TopSection() {
                 <h4 className="text-sm font-bold">Dr. Helena Smith</h4>
               </div>
             </div>
-            <div className="pt-3 border-t border-white/10 space-y-1">
+            <div className="relative pt-3 border-t border-white/10 space-y-1">
               <div className="flex items-center gap-2">
                 <svg className="w-3 h-3 text-teal-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <span className="text-xs text-teal-100">Oct 14, 2024</span>
               </div>
-              <p className="text-[10px] text-teal-200">2:00 PM • On-Site Exam</p>
+              <p className="text-[10px] text-teal-200">2:00 PM - On-Site Exam</p>
             </div>
           </div>
         )}
@@ -105,7 +152,7 @@ function QuickActions() {
   );
 }
 
-function ActionButton({ icon, label, sublabel }: { icon: React.ReactNode; label: string; sublabel: string }) {
+function ActionButton({ icon, label, sublabel }: { icon: ReactNode; label: string; sublabel: string }) {
   return (
     <div className="w-full bg-white rounded-xl p-3.5 shadow-sm border border-gray-100 hover:shadow-md transition-all flex items-center gap-3 cursor-pointer group">
       <div className="w-9 h-9 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -151,7 +198,13 @@ function ContentCards() {
 function ContentCard({ title, imagePath }: { title: string; imagePath: string }) {
   return (
     <Link href="/tips" className="rounded-2xl overflow-hidden h-40 relative group cursor-pointer hover:shadow-xl transition-shadow block bg-teal-700">
-      <img src={imagePath} alt={title} className="absolute inset-0 w-full h-full object-cover" />
+      <Image
+        src={imagePath}
+        alt={title}
+        fill
+        sizes="(max-width: 768px) 100vw, 50vw"
+        className="object-cover transition-transform duration-500 group-hover:scale-105"
+      />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-4">
         <h4 className="text-white font-semibold text-sm group-hover:translate-x-1 transition-transform">{title}</h4>
@@ -187,4 +240,18 @@ function StatCard({ label, value, unit, status }: { label: string; value: string
   );
 }
 
-
+function Footer() {
+  return (
+    <footer className="pt-6 mt-2 border-t border-gray-200">
+      <div className="flex flex-wrap justify-center gap-5 text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+        <a href="#" className="hover:text-gray-600">Support</a>
+        <a href="#" className="hover:text-gray-600">Privacy Policy</a>
+        <a href="#" className="hover:text-gray-600">Terms of Service</a>
+        <a href="#" className="hover:text-gray-600">Emergency Contacts</a>
+      </div>
+      <p className="text-center text-[9px] text-gray-300 uppercase tracking-widest font-bold mt-3">
+        (c) 2026 Maternal Sanctuary Health System
+      </p>
+    </footer>
+  );
+}

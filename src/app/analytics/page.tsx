@@ -1,119 +1,162 @@
 "use client";
 
+import { AlertCircle, Building2, CheckCircle, TrendingDown, TrendingUp, Users, type LucideIcon } from "lucide-react";
+
 import { PageHeader } from "@/shared/components/layout";
 import { ROLE_THEMES } from "@/shared/config/rbac";
-import { TrendingUp, Building2, Users, Heart, CheckCircle, AlertCircle } from "lucide-react";
+
+type MetricCard = {
+  label: string;
+  value: string;
+  icon: LucideIcon;
+  tone?: "success" | "danger";
+};
+
+const keyMetrics: MetricCard[] = [
+  { label: "Total Facilities", value: "24", icon: Building2 },
+  { label: "Active Mothers", value: "2,456", icon: Users },
+  { label: "Coverage Rate", value: "89%", icon: CheckCircle, tone: "success" },
+  { label: "At Risk Cases", value: "34", icon: AlertCircle, tone: "danger" },
+];
+
+const facilityPerformance = [
+  { name: "Nyamata Health Center", mothers: 342, coverage: 94, status: "Excellent", visits: 234 },
+  { name: "Kicukiro Health Center", mothers: 289, coverage: 87, status: "Good", visits: 198 },
+  { name: "Mbuye Health Clinic", mothers: 156, coverage: 76, status: "Fair", visits: 112 },
+  { name: "Kanombe Health Post", mothers: 234, coverage: 91, status: "Excellent", visits: 178 },
+  { name: "Bugesera Health Center", mothers: 198, coverage: 82, status: "Good", visits: 145 },
+];
+
+const trends = [
+  { metric: "Maternal Coverage", current: "89%", previous: "84%", change: "+5%", positive: true },
+  { metric: "Child Immunization", current: "92%", previous: "89%", change: "+3%", positive: true },
+  { metric: "Dropout Rate", current: "8%", previous: "12%", change: "-4%", positive: true },
+  { metric: "Complication Rate", current: "2.1%", previous: "2.3%", change: "-0.2%", positive: true },
+];
+
+const statusStyles: Record<string, string> = {
+  Excellent: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+  Good: "bg-sky-50 text-sky-700 ring-1 ring-sky-200",
+  Fair: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+};
 
 export default function AnalyticsPage() {
   const roleTheme = ROLE_THEMES.district_officer;
 
-  const keyMetrics = [
-    { label: "Total Facilities", value: "24", icon: Building2 },
-    { label: "Active Mothers", value: "2,456", icon: Users },
-    { label: "Coverage Rate", value: "89%", icon: CheckCircle, color: "#10B981" },
-    { label: "At Risk Cases", value: "34", icon: AlertCircle, color: "#EF4444" },
-  ];
-
-  const facilityPerformance = [
-    { name: "Nyamata Health Center", mothers: 342, coverage: 94, status: "Excellent", visits: 234 },
-    { name: "Kicukiro Health Center", mothers: 289, coverage: 87, status: "Good", visits: 198 },
-    { name: "Mbuye Health Clinic", mothers: 156, coverage: 76, status: "Fair", visits: 112 },
-    { name: "Kanombe Health Post", mothers: 234, coverage: 91, status: "Excellent", visits: 178 },
-    { name: "Bugesera Health Center", mothers: 198, coverage: 82, status: "Good", visits: 145 },
-  ];
-
-  const trends = [
-    { metric: "Maternal Coverage", current: "89%", previous: "84%", change: "+5%", positive: true },
-    { metric: "Child Immunization", current: "92%", previous: "89%", change: "+3%", positive: true },
-    { metric: "Dropout Rate", current: "8%", previous: "12%", change: "-4%", positive: true },
-    { metric: "Complication Rate", current: "2.1%", previous: "2.3%", change: "-0.2%", positive: true },
-  ];
-
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="District command"
         title="Analytics"
-        subtitle="District health metrics and performance analytics."
+        subtitle="District health metrics and facility performance analytics."
       />
 
-      {/* Key Metrics */}
-      <section className="grid gap-4 md:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {keyMetrics.map((metric) => {
           const Icon = metric.icon;
+          const color =
+            metric.tone === "success"
+              ? "#10B981"
+              : metric.tone === "danger"
+                ? "#EF4444"
+                : roleTheme.accent;
+
           return (
-            <div key={metric.label} className="rounded-3xl border-2 bg-white p-5" style={{ borderColor: roleTheme.border }}>
-              <div className="flex items-start justify-between">
+            <article
+              key={metric.label}
+              className="rounded-[8px] border border-[#D5E7E4] bg-white/[0.94] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_20px_38px_-30px_rgba(22,63,66,0.75)]"
+            >
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: roleTheme.text }}>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#5B8784]">
                     {metric.label}
                   </p>
-                  <p className="mt-2 text-3xl font-bold" style={{ color: metric.color || roleTheme.accent }}>
+                  <p className="mt-3 text-3xl font-semibold tracking-tight text-[#163F42]">
                     {metric.value}
                   </p>
                 </div>
-                <Icon className="size-6" style={{ color: metric.color || roleTheme.accent }} />
+                <div className="grid size-11 shrink-0 place-items-center rounded-[8px] bg-[#E1F2EF]" style={{ color }}>
+                  <Icon className="size-5" />
+                </div>
               </div>
-            </div>
+            </article>
           );
         })}
       </section>
 
-      {/* Trends */}
-      <section>
-        <h2 className="mb-4 text-lg font-semibold" style={{ color: roleTheme.text }}>Key Trends</h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          {trends.map((trend) => (
-            <div key={trend.metric} className="rounded-2xl border-2 p-5" style={{ borderColor: roleTheme.border }}>
-              <div className="flex items-start justify-between">
+      <section className="grid gap-4 md:grid-cols-2">
+        {trends.map((trend) => {
+          const Icon = trend.change.startsWith("-") ? TrendingDown : TrendingUp;
+
+          return (
+            <article key={trend.metric} className="rounded-[8px] border border-[#D5E7E4] bg-white/[0.94] p-5 shadow-sm">
+              <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: roleTheme.text }}>{trend.metric}</p>
-                  <p className="mt-2 text-2xl font-bold" style={{ color: roleTheme.text }}>{trend.current}</p>
-                  <p className="mt-1 text-sm" style={{ color: roleTheme.text }}>Previous: {trend.previous}</p>
+                  <p className="text-sm font-semibold text-[#163F42]">{trend.metric}</p>
+                  <p className="mt-2 text-2xl font-semibold text-[#163F42]">{trend.current}</p>
+                  <p className="mt-1 text-sm text-[#648386]">Previous: {trend.previous}</p>
                 </div>
-                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  trend.positive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                }`}>
+                <span className="inline-flex items-center gap-1 rounded-[8px] bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                  <Icon className="size-3.5" />
                   {trend.change}
                 </span>
               </div>
-            </div>
-          ))}
-        </div>
+            </article>
+          );
+        })}
       </section>
 
-      {/* Facility Performance */}
-      <section>
-        <h2 className="mb-4 text-lg font-semibold" style={{ color: roleTheme.text }}>Facility Performance Ranking</h2>
-        <div className="space-y-2">
-          <div className="grid grid-cols-5 gap-4 rounded-2xl border-2 p-4 font-semibold text-sm" style={{ borderColor: roleTheme.border, backgroundColor: roleTheme.accentSoft, color: roleTheme.text }}>
-            <div>Facility Name</div>
-            <div>Mothers</div>
-            <div>Coverage</div>
-            <div>Visits</div>
-            <div>Status</div>
+      <section className="rounded-[8px] border border-[#D5E7E4] bg-white/[0.94] p-5 shadow-sm">
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#5B8784]">
+              Facility ranking
+            </p>
+            <h2 className="mt-1 text-lg font-semibold text-[#163F42]">
+              Facility Performance
+            </h2>
           </div>
-          {facilityPerformance.map((facility, idx) => (
-            <div key={idx} className="grid grid-cols-5 gap-4 rounded-2xl border p-4 items-center text-sm" style={{ borderColor: roleTheme.border }}>
-              <div className="font-medium" style={{ color: roleTheme.text }}>{facility.name}</div>
-              <div style={{ color: roleTheme.text }}>{facility.mothers}</div>
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-16 rounded-full" style={{ backgroundColor: roleTheme.border }}>
-                  <div className="h-full rounded-full" style={{ width: `${facility.coverage}%`, backgroundColor: roleTheme.accent }} />
-                </div>
-                <span style={{ color: roleTheme.text }}>{facility.coverage}%</span>
-              </div>
-              <div style={{ color: roleTheme.text }}>{facility.visits}</div>
-              <div>
-                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  facility.status === "Excellent" ? "bg-green-100 text-green-700" :
-                  facility.status === "Good" ? "bg-blue-100 text-blue-700" :
-                  "bg-yellow-100 text-yellow-700"
-                }`}>
-                  {facility.status}
-                </span>
-              </div>
-            </div>
-          ))}
+          <div className="grid size-10 shrink-0 place-items-center rounded-[8px] bg-[#E1F2EF] text-[#226D68]">
+            <Building2 className="size-5" />
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-[8px] border border-[#D5E7E4]">
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse text-left text-sm">
+              <thead className="bg-[#F7FBFA] text-xs uppercase tracking-[0.14em] text-[#4B6F6D]">
+                <tr>
+                  <th className="px-4 py-3">Facility</th>
+                  <th className="px-4 py-3">Mothers</th>
+                  <th className="px-4 py-3">Coverage</th>
+                  <th className="px-4 py-3">Visits</th>
+                  <th className="px-4 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E9F2F1] bg-white">
+                {facilityPerformance.map((facility) => (
+                  <tr key={facility.name} className="transition hover:bg-[#F4FBFA]">
+                    <td className="px-4 py-4 font-medium text-[#163F42]">{facility.name}</td>
+                    <td className="px-4 py-4 text-[#54797C]">{facility.mothers}</td>
+                    <td className="px-4 py-4">
+                      <div className="flex min-w-32 items-center gap-2">
+                        <div className="h-2 w-20 rounded-full bg-[#D5E7E4]">
+                          <div className="h-full rounded-full bg-[#226D68]" style={{ width: `${facility.coverage}%` }} />
+                        </div>
+                        <span className="font-medium text-[#163F42]">{facility.coverage}%</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-[#54797C]">{facility.visits}</td>
+                    <td className="px-4 py-4">
+                      <span className={`inline-flex rounded-[8px] px-2.5 py-1 text-xs font-semibold ${statusStyles[facility.status]}`}>
+                        {facility.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </div>

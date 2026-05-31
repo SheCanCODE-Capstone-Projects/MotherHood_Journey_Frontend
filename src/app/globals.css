@@ -50,25 +50,38 @@
 :root {
   --font-sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-geist-mono: "Consolas", "SFMono-Regular", "Liberation Mono", monospace;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: #F4F8F7;
+  --foreground: #163F42;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.25 0.05 200);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.25 0.05 200);
-  --primary: oklch(0.28 0.06 200); /* Deep Teal #0D474F approx */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.95 0.02 200);
-  --secondary-foreground: oklch(0.28 0.06 200);
-  --muted: oklch(0.95 0.01 200);
-  --muted-foreground: oklch(0.5 0.03 200);
-  --accent: oklch(0.92 0.05 200);
-  --accent-foreground: oklch(0.28 0.06 200);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: #226D68;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E8F3F1;
+  --secondary-foreground: #1F5357;
+  --muted: #EEF5F4;
+  --muted-foreground: #648386;
+  --accent: #DDEDEA;
+  --accent-foreground: #1F5357;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.9 0.02 200);
-  --input: oklch(0.9 0.02 200);
-  --ring: oklch(0.28 0.06 200);
-  --radius: 1rem;
+  --border: #D5E7E4;
+  --input: #C9DFDC;
+  --ring: #5DCAA5;
+  --chart-1: #226D68;
+  --chart-2: #5DCAA5;
+  --chart-3: #F59E0B;
+  --chart-4: #5570C6;
+  --chart-5: #EF6F6C;
+  --radius: 0.5rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
 .dark {
@@ -98,6 +111,10 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(244, 248, 247, 0.96)),
+      radial-gradient(circle at 12% 0%, rgba(93, 202, 165, 0.16), transparent 30%),
+      radial-gradient(circle at 100% 10%, rgba(34, 109, 104, 0.1), transparent 28%);
   }
   html {
     @apply font-sans;

@@ -208,7 +208,7 @@ export default function FacilityStaffPage() {
         title="Staff Management"
         subtitle={`Review and manage HEALTH_WORKER accounts for ${organizationName}. Deactivated staff are kept at the bottom for quick scanning.`}
         action={
-          <Button asChild className="h-10 rounded-full px-5">
+          <Button asChild className="h-10 rounded-[8px] bg-[#064F56] px-5 text-white">
             <Link href="/login?mode=signup">
               <UserCog className="size-4" />
               New staff account
@@ -219,7 +219,7 @@ export default function FacilityStaffPage() {
 
       <section className="grid gap-4 md:grid-cols-3">
         <article
-          className="rounded-3xl border bg-white p-5 shadow-sm"
+          className="rounded-[8px] border bg-white p-5 shadow-sm"
           style={{ borderColor: roleTheme.border }}
         >
           <div className="flex items-center justify-between gap-3">
@@ -231,14 +231,14 @@ export default function FacilityStaffPage() {
                 {activeCount}
               </p>
             </div>
-            <div className="rounded-2xl bg-emerald-50 p-3 text-emerald-700">
+            <div className="grid size-11 place-items-center rounded-[8px] bg-emerald-50 text-emerald-700">
               <Users className="size-5" />
             </div>
           </div>
         </article>
 
         <article
-          className="rounded-3xl border bg-white p-5 shadow-sm"
+          className="rounded-[8px] border bg-white p-5 shadow-sm"
           style={{ borderColor: roleTheme.border }}
         >
           <div className="flex items-center justify-between gap-3">
@@ -250,14 +250,14 @@ export default function FacilityStaffPage() {
                 {inactiveCount}
               </p>
             </div>
-            <div className="rounded-2xl bg-slate-100 p-3 text-slate-600">
+            <div className="grid size-11 place-items-center rounded-[8px] bg-slate-100 text-slate-600">
               <ShieldAlert className="size-5" />
             </div>
           </div>
         </article>
 
         <article
-          className="rounded-3xl border bg-white p-5 shadow-sm"
+          className="rounded-[8px] border bg-white p-5 shadow-sm"
           style={{ borderColor: roleTheme.border }}
         >
           <div className="flex items-center justify-between gap-3">
@@ -269,14 +269,14 @@ export default function FacilityStaffPage() {
                 {lastLoginLabel}
               </p>
             </div>
-            <div className="rounded-2xl bg-[#E7F3F1] p-3" style={{ color: roleTheme.accent }}>
+            <div className="grid size-11 place-items-center rounded-[8px] bg-[#E7F3F1]" style={{ color: roleTheme.accent }}>
               <Clock3 className="size-5" />
             </div>
           </div>
         </article>
       </section>
 
-      <section className="overflow-hidden rounded-3xl border border-[#D5E9E6] bg-white shadow-sm">
+      <section className="overflow-hidden rounded-[8px] border border-[#D5E7E4] bg-white shadow-sm">
         <div className="flex items-center justify-between gap-3 border-b border-[#D5E9E6] px-5 py-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#5B8784]">
@@ -287,7 +287,7 @@ export default function FacilityStaffPage() {
             </h2>
           </div>
 
-          <div className="flex items-center gap-2 rounded-full bg-[#F3FAF8] px-4 py-2 text-sm text-[#54797C]">
+          <div className="flex items-center gap-2 rounded-[8px] bg-[#F3FAF8] px-4 py-2 text-sm text-[#54797C]">
             <CalendarClock className="size-4" />
             <span>{visibleStaffMembers.length} visible / {staffMembers.length} total members</span>
           </div>
@@ -297,7 +297,7 @@ export default function FacilityStaffPage() {
           <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[#5B8784]">
             Search roster
           </label>
-          <div className="mt-2 flex items-center gap-3 rounded-2xl border border-[#D5E9E6] bg-[#F8FCFB] px-4 py-3 shadow-sm">
+          <div className="mt-2 flex items-center gap-3 rounded-[8px] border border-[#D5E9E6] bg-[#F8FCFB] px-4 py-3 shadow-sm">
             <Users className="size-4 shrink-0 text-[#5B8784]" />
             <input
               value={searchTerm}
@@ -331,7 +331,7 @@ export default function FacilityStaffPage() {
               Demo data is still available, so you can continue managing staff while the backend catches up.
             </p>
             <div className="flex justify-center">
-              <Button asChild variant="outline" className="rounded-full">
+              <Button asChild variant="outline" className="rounded-[8px]">
                 <Link href="/login?mode=signup">
                   <ArrowRight className="size-4" />
                   Continue to new staff account
@@ -348,7 +348,7 @@ export default function FacilityStaffPage() {
               Create the first staff account to start assigning facility users.
             </p>
             <div className="flex justify-center">
-              <Button asChild className="rounded-full">
+              <Button asChild className="rounded-[8px] bg-[#064F56] text-white">
                 <Link href="/login?mode=signup">
                   <UserCog className="size-4" />
                   New staff account
@@ -366,7 +366,7 @@ export default function FacilityStaffPage() {
             </p>
             {searchTerm ? (
               <div className="flex justify-center">
-                <Button variant="outline" className="rounded-full" onClick={() => setSearchTerm("") }>
+                <Button variant="outline" className="rounded-[8px]" onClick={() => setSearchTerm("") }>
                   Clear search
                 </Button>
               </div>
@@ -401,7 +401,7 @@ export default function FacilityStaffPage() {
                         <div className="flex items-center gap-3">
                           <div
                             className={cn(
-                              "flex size-11 shrink-0 items-center justify-center rounded-2xl text-sm font-semibold",
+                              "flex size-11 shrink-0 items-center justify-center rounded-[8px] text-sm font-semibold",
                               member.active
                                 ? "bg-[#E3F3F0] text-[#1D5551]"
                                 : "bg-slate-100 text-slate-500",
@@ -437,7 +437,7 @@ export default function FacilityStaffPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="rounded-full border-[#D5E9E6] bg-white text-[#1D5052]"
+                              className="rounded-[8px] border-[#D5E9E6] bg-white text-[#1D5052]"
                               onClick={() => openDeactivateDialog(member)}
                               disabled={deactivateMutation.isPending}
                             >
@@ -446,7 +446,7 @@ export default function FacilityStaffPage() {
                           ) : (
                             <Button
                               size="sm"
-                              className="rounded-full"
+                              className="rounded-[8px] bg-[#064F56] text-white"
                               onClick={() => activateMutation.mutate(member.id)}
                               disabled={activateMutation.isPending}
                             >
@@ -466,9 +466,9 @@ export default function FacilityStaffPage() {
 
       {selectedMember ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6 backdrop-blur-sm">
-          <div className="w-full max-w-xl rounded-[28px] border border-[#D5E9E6] bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-xl rounded-[8px] border border-[#D5E9E6] bg-white p-6 shadow-2xl">
             <div className="flex items-start gap-4">
-              <div className="rounded-2xl bg-amber-50 p-3 text-amber-700">
+              <div className="rounded-[8px] bg-amber-50 p-3 text-amber-700">
                 <AlertTriangle className="size-5" />
               </div>
               <div className="min-w-0 flex-1">
@@ -482,7 +482,7 @@ export default function FacilityStaffPage() {
                   This will mark the account inactive immediately. The health worker will lose access to the facility portal until you activate the account again.
                 </p>
 
-                <div className="mt-5 rounded-2xl border border-amber-100 bg-amber-50/70 p-4 text-sm text-amber-900">
+                <div className="mt-5 rounded-[8px] border border-amber-100 bg-amber-50/70 p-4 text-sm text-amber-900">
                   <div className="flex items-start gap-3">
                     <ShieldAlert className="mt-0.5 size-4 shrink-0" />
                     <p>
@@ -494,7 +494,7 @@ export default function FacilityStaffPage() {
                 <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                   <Button
                     variant="outline"
-                    className="rounded-full border-[#D5E9E6]"
+                    className="rounded-[8px] border-[#D5E9E6]"
                     onClick={closeDeactivateDialog}
                     disabled={deactivateMutation.isPending}
                   >
@@ -503,7 +503,7 @@ export default function FacilityStaffPage() {
                   </Button>
                   <Button
                     variant="destructive"
-                    className="rounded-full"
+                    className="rounded-[8px]"
                     onClick={confirmDeactivate}
                     disabled={deactivateMutation.isPending}
                   >
