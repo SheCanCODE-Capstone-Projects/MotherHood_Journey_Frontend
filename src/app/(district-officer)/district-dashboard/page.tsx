@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
@@ -131,7 +132,7 @@ export default function DistrictDashboardPage() {
   });
 
   const facilities = facilitiesQuery.data ?? [];
-  const heatmapData = heatmapQuery.data ?? [];
+  const heatmapData = useMemo(() => heatmapQuery.data ?? [], [heatmapQuery.data]);
 
   const criticalAlerts = useMemo(
     () =>
@@ -207,6 +208,53 @@ export default function DistrictDashboardPage() {
           </button>
         }
       />
+
+      <section className="overflow-hidden rounded-xl border border-[#D9ECE9] bg-white shadow-sm">
+        <div className="grid gap-0 lg:grid-cols-[1fr_360px]">
+          <div className="p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5B8784]">
+              District Command Center
+            </p>
+            <h2 className="mt-2 text-xl font-bold text-[#1D5052]">
+              Coordinating facility performance across the district
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#54797C]">
+              Review sector-level maternal health signals, spot facilities that
+              need support, and keep district teams aligned around timely care.
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-xl bg-[#E8F6F3] p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5B8784]">
+                  Scope
+                </p>
+                <p className="mt-1 text-sm font-bold text-[#1D5052]">District facilities</p>
+              </div>
+              <div className="rounded-xl bg-[#FFF7E8] p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9A6B18]">
+                  Focus
+                </p>
+                <p className="mt-1 text-sm font-bold text-[#6F4A10]">No-show risk</p>
+              </div>
+              <div className="rounded-xl bg-[#EEF5FF] p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#4267A8]">
+                  Reporting
+                </p>
+                <p className="mt-1 text-sm font-bold text-[#24487F]">Weekly trends</p>
+              </div>
+            </div>
+          </div>
+          <div className="relative min-h-64 border-t border-[#D9ECE9] lg:border-l lg:border-t-0">
+            <Image
+              src="/images/appointment-header.svg"
+              alt="District office building"
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 360px"
+              className="object-cover"
+            />
+          </div>
+        </div>
+      </section>
 
       <section className="rounded-xl border border-[#E5F3F2] bg-white overflow-hidden">
         <div className="flex items-center justify-between px-6 py-5 border-b border-[#E5F3F2]">

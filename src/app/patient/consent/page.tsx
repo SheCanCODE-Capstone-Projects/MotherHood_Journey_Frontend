@@ -110,8 +110,9 @@ export default function PatientConsentPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Consent Management"
-        subtitle="Manage your data sharing preferences and consents."
+        eyebrow="Privacy compliance"
+        title="Consent & Privacy Audit"
+        subtitle="Manage data sharing preferences and review consent status."
       />
 
       {/* Consent Cards Grid */}
@@ -140,9 +141,9 @@ export default function PatientConsentPage() {
       {/* Warning Dialog for GOV_DATA_SHARE Revocation */}
       {warningDialog.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="mx-4 max-w-md rounded-3xl border border-[#D5E9E6] bg-white p-6 shadow-lg">
+          <div className="mx-4 max-w-md rounded-[8px] border border-[#D5E9E6] bg-white p-6 shadow-lg">
             <div className="mb-4 flex items-center gap-3">
-              <div className="rounded-full bg-red-100 p-2">
+              <div className="rounded-[8px] bg-red-100 p-2">
                 <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
               <h3 className="text-lg font-semibold text-[#1D5052]">
@@ -159,14 +160,14 @@ export default function PatientConsentPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setWarningDialog({ isOpen: false, consent: null })}
-                className="flex-1 rounded-lg border border-[#D5E9E6] bg-white px-4 py-2 text-sm font-medium text-[#1D5052] hover:bg-[#F8FCFB]"
+                className="flex-1 rounded-[8px] border border-[#D5E9E6] bg-white px-4 py-2 text-sm font-medium text-[#1D5052] hover:bg-[#F8FCFB]"
                 disabled={revokeMutation.isPending}
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmRevoke}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                className="flex-1 rounded-[8px] bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
                 disabled={revokeMutation.isPending}
               >
                 {revokeMutation.isPending ? "Revoking..." : "Revoke Consent"}
@@ -204,7 +205,7 @@ function ConsentCard({
 }: ConsentCardProps) {
   return (
     <article
-      className={`rounded-3xl border p-5 transition-all duration-200 ${
+      className={`rounded-[8px] border p-5 shadow-sm transition-all duration-200 ${
         isGranted
           ? "border-[#1D5052] bg-[#F8FCFB]"
           : "border-[#D5E9E6] bg-white"
@@ -238,12 +239,12 @@ function ConsentCard({
       {/* Status Badge */}
       <div className="mb-4 flex items-center gap-2">
         {isGranted ? (
-          <span className="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+          <span className="flex items-center gap-1 rounded-[8px] bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
             <CheckCircle className="h-3 w-3" />
             GRANTED
           </span>
         ) : (
-          <span className="flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+          <span className="flex items-center gap-1 rounded-[8px] bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
             <XCircle className="h-3 w-3" />
             REVOKED
           </span>
