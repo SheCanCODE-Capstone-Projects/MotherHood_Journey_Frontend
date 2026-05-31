@@ -96,5 +96,12 @@ export type VaccinationSessionData = ChildVaccinationSessionResponse;
 export type VaccinationSessionRecord = ChildVaccinationSessionRecord;
 
 export type AdministerVaccinationRequest = {
-	lotNumber: string;
+	lot_number: string;
+};
+
+// Aliases used by utils/validators.ts
+export type VaccinationSessionChild = ChildVaccinationSessionChild;
+export type VaccinationSessionData = {
+	child: ChildVaccinationSessionChild;
+	dueVaccines: ChildVaccinationSessionRecord[];
 };

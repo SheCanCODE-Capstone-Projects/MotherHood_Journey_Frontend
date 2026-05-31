@@ -119,6 +119,14 @@ export default function VaccinationSessionPage() {
       return;
     }
 
+    const trimmedLotNumber = adminDialog.lotNumber.trim();
+    if (!trimmedLotNumber) {
+      setAdminDialog((current) =>
+        current ? { ...current, error: "Lot number is required." } : current
+      );
+      return;
+    }
+
     administerMutation.mutate(
       {
         vaccinationId: adminDialog.vaccination.id,
@@ -133,7 +141,10 @@ export default function VaccinationSessionPage() {
           });
         },
         onError: (error) => {
-          const message = error instanceof ApiError ? error.message : "Unable to administer vaccination.";
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : "Unable to administer vaccination.";
           setToast({ tone: "error", message });
         },
       }

@@ -11,6 +11,10 @@ import {
   LayoutDashboard,
   LogOut,
   RefreshCcw,
+<<<<<<< HEAD
+  ShieldCheck,
+=======
+>>>>>>> main
   Stethoscope,
   Users,
   Lightbulb,
@@ -30,28 +34,81 @@ type SidebarProps = {
 
 const iconByHref: Record<string, LucideIcon> = {
   "/dashboard": LayoutDashboard,
+<<<<<<< HEAD
+  "/hw-dashboard": LayoutDashboard,
+  "/facility-dashboard": LayoutDashboard,
+=======
   "/patient/dashboard": Home,
+>>>>>>> main
   "/mothers": Users,
   "/visits": CalendarDays,
   "/diagnoses": Stethoscope,
+  "/vaccinations": Baby,
   "/pregnancies": Baby,
   "/patient/pregnancies": FileText,
   "/children": Baby,
+<<<<<<< HEAD
+  "/my-children": Baby,
+  "/appointments": CalendarDays,
+  "/schedule": CalendarDays,
+=======
   "/patient/children": Users,
   "/appointments": CalendarDays,
   "/patient/appointments": CalendarDays,
   "/patient/chat": MessageCircle,
   "/tips": Lightbulb,
+>>>>>>> main
   "/staff": Users,
   "/service-requests": ClipboardList,
   "/reports": FileText,
+  "/district-dashboard": LayoutDashboard,
+  "/facilities": ClipboardList,
   "/analytics": LayoutDashboard,
+<<<<<<< HEAD
+  "/national-dashboard": LayoutDashboard,
+  "/national-reports": FileText,
+  "/sync-log": RefreshCcw,
+  "/users": Users,
+  "/service-requests": ClipboardList,
+  "/consent": ShieldCheck,
+  "/documents": FileText,
+=======
   "/sync": RefreshCcw,
   "/sync-log": RefreshCcw,
+>>>>>>> main
 };
 
 const mainNavItems = [
   "/dashboard",
+<<<<<<< HEAD
+  "/hw-dashboard",
+  "/facility-dashboard",
+  "/mothers",
+  "/visits",
+  "/diagnoses",
+  "/vaccinations",
+  "/pregnancies",
+  "/children",
+  "/my-children",
+  "/appointments",
+  "/schedule",
+  "/service-requests",
+  "/staff",
+  "/reports",
+  "/district-dashboard",
+  "/facilities",
+  "/analytics",
+  "/national-dashboard",
+  "/national-reports",
+  "/sync-log",
+  "/users",
+  "/consent",
+  "/documents",
+];
+
+export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
+  const { role, roleLabel, organizationName, navItems, displayName } = useRole({
+=======
   "/mothers",
   "/children",
   "/visits",
@@ -68,6 +125,7 @@ const mainNavItems = [
 
 export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
   const { roleLabel, roleTheme, organizationName, navItems, displayName } = useRole({
+>>>>>>> main
     fallbackRole,
     previewRole,
   });
@@ -109,8 +167,13 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
 
   return (
     <aside
+<<<<<<< HEAD
+      className="hidden w-72 shrink-0 border-r border-[#163E43] lg:flex lg:flex-col print:hidden"
+      style={{ backgroundColor: "#1D5052" }}
+=======
       className="hidden w-72 shrink-0 border-r border-[#E4EFED] bg-white lg:flex lg:flex-col print:hidden"
       style={{ borderColor: roleTheme.border }}
+>>>>>>> main
     >
       <div className="border-b border-[#E4EFED] px-6 py-6">
         <div className="flex items-center gap-3">
@@ -127,11 +190,19 @@ export function Sidebar({ fallbackRole, previewRole }: SidebarProps) {
         <p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-[#8AA2A4]">
           Workspace
         </p>
+<<<<<<< HEAD
+        <h2 className="mt-2 text-2xl font-semibold text-white">
+          {roleLabel} Portal
+        </h2>
+        <p className="mt-2 text-sm text-white/70">
+          Role-aware navigation for {role.replaceAll("_", " ")} workflows.
+=======
         <h3 className="mt-2 text-xl font-semibold text-[#153F42]">
           {roleLabel} Portal
         </h3>
         <p className="mt-2 text-sm leading-6 text-[#6D8587]">
           {organizationName}
+>>>>>>> main
         </p>
       </div>
 

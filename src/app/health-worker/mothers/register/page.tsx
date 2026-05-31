@@ -1,39 +1,32 @@
 "use client";
 
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { MotherRegistrationForm } from "@/features/maternal/components";
-
-
+import { useRole } from "@/shared/hooks/useRole";
 
 export default function MotherRegistrationPage() {
+  const { roleTheme } = useRole({ fallbackRole: "health_worker" });
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Mother Registration
-          </h1>
-          <p className="text-lg text-gray-600">
-            Register a new mother in the maternal health tracking system
-          </p>
-        </div>
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+      <Link
+        href="/mothers"
+        className="inline-flex items-center gap-2 text-sm transition-colors hover:opacity-80"
+        style={{ color: roleTheme.text }}
+      >
+        <ArrowLeft className="size-4" />
+        Back to Mothers
+      </Link>
 
-        {/* Form */}
-        <MotherRegistrationForm />
-
-        {/* Footer */}
-        <div className="mt-12 text-center text-sm text-gray-600">
-          <p>
-            Need help?{" "}
-            <a
-              href="mailto:support@motherhood.rw"
-              className="text-blue-600 hover:underline font-semibold"
-            >
-              Contact support
-            </a>
-          </p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Register New Mother</h1>
+        <p className="mt-1 text-sm text-gray-500">
+          Complete all steps to register a new mother in the maternal health tracking system.
+        </p>
       </div>
-    </main>
+
+      <MotherRegistrationForm />
+    </div>
   );
 }

@@ -41,6 +41,11 @@ export function VaccinationCoverageChart({ data }: VaccinationCoverageChartProps
             axisLine={false}
             tickLine={false}
           />
+<<<<<<< HEAD
+          <Tooltip formatter={(value) => `${Number(value).toFixed(1)}%`} />
+          <Bar dataKey="coverage" fill="#1D5052" radius={[10, 10, 0, 0]}>
+            <LabelList dataKey="coverage" position="top" formatter={(value: unknown) => `${Number(value).toFixed(0)}%`} style={{ fill: "#1D5052", fontSize: 12 }} />
+=======
           <Tooltip
             formatter={(value) => [`${Number(value ?? 0).toFixed(1)}%`, "Coverage"]}
             contentStyle={{
@@ -52,6 +57,7 @@ export function VaccinationCoverageChart({ data }: VaccinationCoverageChartProps
           />
           <Bar dataKey="coverage" fill="url(#vaccinationBar)" radius={[8, 8, 0, 0]}>
             <LabelList dataKey="coverage" position="top" formatter={(value) => formatPercentage(value, 0)} style={{ fill: "#163F42", fontSize: 12, fontWeight: 600 }} />
+>>>>>>> main
           </Bar>
         </BarChart>
       </ResponsiveContainer>

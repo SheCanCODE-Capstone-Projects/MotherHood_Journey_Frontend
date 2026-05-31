@@ -53,4 +53,7 @@ next-env.d.ts
 
 # unwanted root-level package-lock
 ../package-lock.json
+<<<<<<< HEAD
+=======
 >>>>>>> 4b6fa88936ca66280b994491656bd48b4e627a90
+>>>>>>> main
