@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 const ROW_ONE = [
-  { src: "/images/hero-1.png",      caption: "Prenatal care at your fingertips" },
+  { src: "/images/hero-1-updated.png",      caption: "Prenatal care at your fingertips" },
   { src: "/images/hero-2-updated.png",      caption: "Mother & child health tracking" },
   { src: "/images/hero-3.png",      caption: "Healthy milestones for every child" },
   { src: "/images/hero-4.png",      caption: "Community-driven maternal support" },
