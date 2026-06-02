@@ -18,27 +18,16 @@ export function useMother() {
   });
 
   return {
-    // Trigger the registration
     mutate: mutation.mutate,
-    // Loading state while request is in progress
     isPending: mutation.isPending,
-    // Successful response data with health_id
     data: mutation.data,
-    // Error if registration fails
     error: mutation.error,
-    // Reset state if needed
     reset: mutation.reset,
-    // Check if request was successful
     isSuccess: mutation.isSuccess,
-    // Check if request failed
     isError: mutation.isError,
   };
 }
 
-/**
- * Custom hook for searching mothers
- * Usage: const { data, isLoading, error } = useMotherSearch("searchTerm");
- */
 export function useMotherSearch(
   searchTerm?: string,
   page: number = 1,
@@ -51,10 +40,6 @@ export function useMotherSearch(
   });
 }
 
-/**
- * Custom hook for listing all mothers
- * Usage: const { data, isLoading, error } = useMothers();
- */
 export function useMothers(page: number = 1, size: number = 10) {
   return useQuery<MotherPageResponse, Error>({
     queryKey: ["mothers", "list", page, size],

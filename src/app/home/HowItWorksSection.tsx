@@ -17,7 +17,7 @@ const STEPS = [
     desc: "Create your free profile and link instantly to your nearest health facility. Takes under 3 minutes no credit card, no paperwork required.",
     detail:
       "Supports Kinyarwanda, French and English. Works on any smartphone.",
-    image: "/images/hero-2.png",
+    image: "/images/hero-2-updated.png",
     accentColor: "#226D68",
     bgColor: "rgba(34,109,104,0.08)",
     outcome: "Profile created in 3 min",

@@ -81,3 +81,38 @@ export interface MotherPageResponse {
   totalPages: number;
   last: boolean;
 }
+
+// ─── Pregnancy types (backend-aligned) ────────────────────────────────────────
+
+export interface BackendPregnancy {
+  id: string;
+  motherId: string;
+  lmpDate: string;
+  edd: string;
+  status: PregnancyStatus;
+  gravida: number;
+  para: number;
+  assignedChwId?: string;
+  outcomeNotes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatePregnancyRequest {
+  motherId: string;
+  lmpDate: string;
+  edd?: string;
+  gravida?: number;
+  para?: number;
+  assignedChwId?: string;
+}
+
+export interface UpdatePregnancyRequest {
+  status?: PregnancyStatus;
+  lmpDate?: string;
+  edd?: string;
+  gravida?: number;
+  para?: number;
+  assignedChwId?: string;
+  outcomeNotes?: string;
+}

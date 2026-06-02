@@ -74,16 +74,6 @@ export default function NavBar() {
             >
               Log in
             </Link>
-            <Link
-              href="/login"
-              className="rounded-xl px-5 py-2 text-[13px] font-bold text-white transition-all hover:brightness-110 active:scale-95"
-              style={{
-                background: "linear-gradient(135deg, #226D68, #2D8A84)",
-                boxShadow: "0 4px 14px rgba(34,109,104,0.35)",
-              }}
-            >
-              Get Started Free
-            </Link>
           </div>
 
           {/* Mobile toggle */}
