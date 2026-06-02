@@ -28,14 +28,14 @@ const SECTOR_IDS: Record<string, number> = {
 
 function filterByScope(
   facilities: FacilityStatsDTO[],
-  geoScopeIds?: number[],
+  geoScopeIds?: string[],
 ): FacilityStatsDTO[] {
   if (!geoScopeIds || geoScopeIds.length === 0) return facilities;
-  return facilities.filter((f) => geoScopeIds.includes(f.sectorId));
+  return facilities.filter((f) => geoScopeIds.includes(String(f.sectorId)));
 }
 
 export async function getFacilityStats(
-  geoScopeIds?: number[],
+  geoScopeIds?: string[],
   signal?: AbortSignal,
 ): Promise<FacilityStatsDTO[]> {
   const response = await apiClient.get<FacilityStatsDTO[]>(
@@ -62,7 +62,7 @@ export async function getFacilityStatsById(
 }
 
 export async function getFacilityNoShowHeatmap(
-  geoScopeIds?: number[],
+  geoScopeIds?: string[],
   signal?: AbortSignal,
 ): Promise<FacilityNoShowHeatmapDTO[]> {
   const response = await apiClient.get<FacilityNoShowHeatmapDTO[]>(
