@@ -19,6 +19,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "https://motherhoodjourneyba
 
 export const authOptions: NextAuthConfig = {
   secret: process.env.NEXTAUTH_SECRET ?? "motherhood-journey-secret-2026",
+  trustHost: true,
 
   providers: [
     CredentialsProvider({
