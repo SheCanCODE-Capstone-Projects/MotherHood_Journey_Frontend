@@ -90,6 +90,12 @@ export type ChildVaccinationSessionResponse = {
 	searchMatchedBy: "healthId" | "birthCertificateNo";
 };
 
+// Backwards-compatible aliases used by validators and other modules
+export type VaccinationSessionChild = ChildVaccinationSessionChild;
+export type VaccinationSessionData = ChildVaccinationSessionResponse;
+export type VaccinationSessionRecord = ChildVaccinationSessionRecord;
+
 export type AdministerVaccinationRequest = {
-	lotNumber: string;
+	lot_number: string;
 };
+

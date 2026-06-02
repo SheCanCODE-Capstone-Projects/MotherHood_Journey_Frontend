@@ -10,41 +10,64 @@ type ProtectedRouteMatch = {
   roles: UserRole[];
 };
 
+/* Build a path → allowed-roles lookup from ROLE_ROUTE_MAP */
 const PROTECTED_ROUTES = Object.entries(ROLE_ROUTE_MAP).reduce<
   Record<string, UserRole[]>
->((accumulator, [role, paths]) => {
+>((acc, [role, paths]) => {
   for (const path of paths) {
-    const currentRoles = accumulator[path] ?? [];
-    currentRoles.push(role as UserRole);
-    accumulator[path] = currentRoles;
+    const current = acc[path] ?? [];
+    current.push(role as UserRole);
+    acc[path] = current;
   }
-
-  return accumulator;
+  return acc;
 }, {});
 
-const PROTECTED_ROUTE_MATCHES: ProtectedRouteMatch[] = Object.entries(PROTECTED_ROUTES)
+/* Sort longest path first so more-specific routes win */
+const PROTECTED_ROUTE_MATCHES: ProtectedRouteMatch[] = Object.entries(
+  PROTECTED_ROUTES,
+)
   .map(([path, roles]) => ({ path, roles }))
-  .sort((left, right) => right.path.length - left.path.length);
+  .sort((a, b) => b.path.length - a.path.length);
+
+/* Public paths that NEVER require auth */
+const PUBLIC_PATHS = ["/", "/login", "/signup", "/unauthorized", "/api"];
+
+/* NextAuth v5 uses "authjs.session-token" (HTTP) or "__Secure-authjs.session-token" (HTTPS) */
+const SESSION_COOKIE_NAMES = [
+  "__Secure-authjs.session-token",
+  "authjs.session-token",
+  /* v4 fallback names in case still present */
+  "__Secure-next-auth.session-token",
+  "next-auth.session-token",
+];
 
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
+
+  // Skip middleware for public paths and Next.js internals
+  if (
+    PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`)) ||
+    pathname.startsWith("/_next") ||
+    pathname.includes(".")
+  ) {
+    return NextResponse.next();
+  }
+
   const match = getProtectedRoute(pathname);
 
-  if (!match) {
-    return NextResponse.next();
+  // Route not in the protected list → allow
+  if (!match) return NextResponse.next();
+
+  const secret = process.env.NEXTAUTH_SECRET ?? "motherhood-journey-secret-2026";
+
+  // Try each known cookie name until we get a valid token
+  let token = null;
+  for (const cookieName of SESSION_COOKIE_NAMES) {
+    token = await getToken({ req, secret, cookieName }).catch(() => null);
+    if (token) break;
   }
 
-  const token = await getToken({
-    req,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  const cookieRole = req.cookies.get("mh_role")?.value as UserRole | undefined;
-
-  if (!token && cookieRole && match.roles.includes(cookieRole)) {
-    return NextResponse.next();
-  }
-
+  // Not authenticated → redirect to login
   if (!token) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", `${pathname}${search}`);
@@ -53,6 +76,7 @@ export async function middleware(req: NextRequest) {
 
   const userRole = token.role as UserRole | undefined;
 
+  // Authenticated but wrong role → unauthorized
   if (!userRole || !match.roles.includes(userRole)) {
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
@@ -62,32 +86,23 @@ export async function middleware(req: NextRequest) {
 
 function getProtectedRoute(pathname: string): ProtectedRouteMatch | null {
   for (const route of PROTECTED_ROUTE_MATCHES) {
-    if (matchesPath(pathname, route.path)) {
+    if (
+      pathname === route.path ||
+      pathname.startsWith(`${route.path}/`)
+    ) {
       return route;
     }
   }
-
   return null;
 }
 
-function matchesPath(pathname: string, protectedPath: string) {
-  return pathname === protectedPath || pathname.startsWith(`${protectedPath}/`);
-}
-
 export const config = {
-  // Next.js route groups like `(patient)` are filesystem-only and do not
-  // appear in the request pathname, so the matcher must target the real URL paths.
   matcher: [
-    "/dashboard/:path*",
-    "/pregnancies/:path*",
-    "/children/:path*",
-    "/appointments/:path*",
-    "/mothers/:path*",
-    "/visits/:path*",
-    "/diagnoses/:path*",
-    "/staff/:path*",
-    "/reports/:path*",
-    "/analytics/:path*",
-    "/sync/:path*",
+    /*
+     * Match all paths EXCEPT:
+     * - _next/static, _next/image, favicon.ico, public files
+     * - api routes (handled separately)
+     */
+    "/((?!_next/static|_next/image|favicon.ico|images/|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)",
   ],
 };

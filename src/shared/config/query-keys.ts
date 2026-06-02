@@ -20,6 +20,11 @@ export const queryKeys = {
     analytics: ["government", "analytics"] as const,
   },
   geo: {
+    provinces: ["geo", "provinces"] as const,
+    districts: ["geo", "districts"] as const,
+    sectors: ["geo", "sectors"] as const,
+    cells: ["geo", "cells"] as const,
+    villages: ["geo", "villages"] as const,
     facilities: ["geo", "facilities"] as const,
   },
   facilityStats: {

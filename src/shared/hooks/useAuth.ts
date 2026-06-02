@@ -1,25 +1,40 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+import { canAccess } from "@/shared/lib/rbac";
+import { type Resource } from "@/shared/config/rbac";
 import type {
-	AuthActionResult,
-	AuthenticatedUser,
-	RegisteredAccount,
-	SignInPayload,
-	SignUpPayload,
+  AuthActionResult,
+  AuthenticatedUser,
+  RegisteredAccount,
+  SignInPayload,
+  SignUpPayload,
 } from "@/shared/types/auth";
 
 type AuthState = {
-	accounts: RegisteredAccount[];
-	currentUser: AuthenticatedUser | null;
-	signUp: (payload: SignUpPayload) => AuthActionResult;
-	signIn: (payload: SignInPayload) => AuthActionResult;
-	logout: () => AuthActionResult;
+  accounts: RegisteredAccount[];
+  currentUser: AuthenticatedUser | null;
+  signUp: (payload: SignUpPayload) => AuthActionResult;
+  signIn: (payload: SignInPayload) => AuthActionResult;
+  logout: () => AuthActionResult;
 };
 
-const normalizePhone = (phone: string) => phone.trim();
+function normalizePhone(phone: string): string {
+  return phone.replace(/\s+/g, "").replace(/^0/, "+250");
+}
+
+export function useCanAccess(resource: Resource): boolean {
+  const { data: session } = useSession();
+  return canAccess(session, resource);
+}
+
+export function useIsAuthenticated(): boolean {
+  const { data: session, status } = useSession();
+  return status === "authenticated" && !!session?.user;
+}
 
 export const useAuth = create<AuthState>()(
 	persist(

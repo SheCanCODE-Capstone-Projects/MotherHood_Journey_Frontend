@@ -107,7 +107,7 @@ export function useCancelAppointment() {
     }: {
       appointmentId: string;
       request?: CancelAppointmentRequest;
-    }) => cancelAppointment(appointmentId, request),
+    }) => cancelAppointment(appointmentId, request?.reason),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.appointment.appointments,

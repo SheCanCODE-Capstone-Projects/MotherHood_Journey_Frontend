@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 export type ServiceTypeId =
   | "BIRTH_CERT"
   | "VACCINATION_CARD"
@@ -12,13 +14,13 @@ export interface ServiceType {
   label: string;
   description: string;
   requiredDocs: DocKey[];
-  icon: React.ReactNode;
+  icon: ReactNode;
 }
   
 export interface DocMeta {
   label: string;
   sub: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }
   
 export interface UploadedFiles {

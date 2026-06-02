@@ -14,20 +14,22 @@ export interface MotherRegistrationRequest {
   phone_number: string;
   home_location: string;
   education_level: string;
+  facility_id?: string;
 }
 
-export interface MotherRegistrationResponse {
-  success: boolean;
-  data: {
-    mother_id: string;
-    health_id: string;
-    national_id: string;
-    first_name: string;
-    last_name: string;
-    created_at: string;
-  };
-  message: string;
+// The apiClient unwraps the {success, data, message} envelope automatically,
+// so the actual return value is the inner data object.
+export interface MotherRegistrationResult {
+  mother_id: string;
+  health_id: string;
+  national_id: string;
+  first_name: string;
+  last_name: string;
+  created_at: string;
 }
+
+// Keep the old name as an alias so existing imports still compile.
+export type MotherRegistrationResponse = MotherRegistrationResult;
 
 export type NidaStatus = "PENDING" | "VERIFIED" | "FAILED" | "MANUAL";
 

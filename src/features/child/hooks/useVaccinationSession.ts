@@ -30,7 +30,7 @@ export function useAdministerVaccination() {
 
   return useMutation({
     mutationFn: ({ vaccinationId, lotNumber }: { vaccinationId: string; lotNumber: string }) =>
-      administerVaccination(vaccinationId, { lotNumber }),
+      administerVaccination(vaccinationId, { lot_number: lotNumber }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: vaccinationSessionQueryKeys.all });
     },

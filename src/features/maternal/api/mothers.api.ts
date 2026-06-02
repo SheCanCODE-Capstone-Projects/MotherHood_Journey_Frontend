@@ -1,88 +1,98 @@
 import { apiClient } from "@/lib/api/client";
+import { resolveGeoLocation } from "@/lib/api/geo";
 import type { PageResponse } from "@/shared/types/api";
-import type { Mother, MotherPageResponse, MotherRegistrationRequest, MotherRegistrationResponse } from "../types";
+import type {
+  Mother,
+  MotherPageResponse,
+  MotherRegistrationRequest,
+  MotherRegistrationResult,
+} from "../types";
 
-/**
- * Register a new mother
- * POST /api/v1/mothers
- */
-export async function registerMother(
-  data: MotherRegistrationRequest
-): Promise<MotherRegistrationResponse> {
-  return apiClient.post<MotherRegistrationResponse>(
-    "/api/v1/mothers",
-    {
-      national_id: data.national_id,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      date_of_birth: data.date_of_birth,
-      phone_number: data.phone_number,
-      home_location: data.home_location,
-      education_level: data.education_level,
-    }
-  );
+const DEFAULT_FACILITY_ID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+
+async function resolveGeoId(homeLocation: string): Promise<string> {
+  const parts = homeLocation.split(" > ").map((p) => p.trim());
+  const result = await resolveGeoLocation({
+    province: parts[0] ?? "",
+    district: parts[1] ?? "",
+    sector:   parts[2] ?? "",
+    cell:     parts[3] ?? "",
+    village:  parts[4] ?? "",
+  });
+  if (!result?.id) throw new Error("Could not resolve home location. Please reselect your location.");
+  return result.id;
 }
 
-/**
- * Search mothers by health_id, name, or NID
- * GET /api/v1/mothers/search
- * NOTE: This endpoint may not exist on backend yet — kept for future use.
- */
+export async function registerMother(
+  data: MotherRegistrationRequest,
+): Promise<MotherRegistrationResult> {
+  const facilityId = data.facility_id || DEFAULT_FACILITY_ID;
+  const geoLocationId = await resolveGeoId(data.home_location);
+
+  // Step 1 — create the user account for this mother
+  const userResponse = await apiClient.post<{ id: string; role: string; active: boolean }>(
+    "/api/v1/auth/register",
+    {
+      phoneNumber: data.phone_number,
+      nationalId:  data.national_id,
+      password:    "Password123!",
+      firstName:   data.first_name,
+      lastName:    data.last_name,
+      role:        "PATIENT",
+      geoLocationId,
+      facilityId,
+    },
+  );
+
+  if (!userResponse?.id) {
+    throw new Error("Failed to register user account for the mother.");
+  }
+
+  const userId = userResponse.id;
+
+  // Step 2 — create the mother record linked to that user
+  const response = await apiClient.post<MotherRegistrationResult>("/api/v1/mothers", {
+    userId,
+    facilityId,
+    nationalId:     data.national_id,
+    geoLocationId,
+    dateOfBirth:    data.date_of_birth,
+    educationLevel: data.education_level?.toUpperCase() || "NONE",
+  });
+
+  return response;
+}
+
 export async function searchMothers(
   searchTerm?: string,
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
 ): Promise<MotherPageResponse> {
   const params = new URLSearchParams();
-  if (searchTerm) {
-    params.append("search_term", searchTerm);
-  }
+  if (searchTerm) params.append("search_term", searchTerm);
   params.append("page", (page - 1).toString());
-  params.append("page_size", pageSize.toString());
+  params.append("size", pageSize.toString());
 
   return apiClient.get<MotherPageResponse>(
-    `/api/v1/mothers/search?${params.toString()}`
+    `/api/v1/mothers/search?${params.toString()}`,
   );
 }
 
-/**
- * Get all mothers with pagination
- * GET /api/v1/mothers
- * NOTE: This endpoint may not exist on backend yet — kept for future use.
- */
 export async function getMothers(
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
 ): Promise<MotherPageResponse> {
   const params = new URLSearchParams();
   params.append("page", (page - 1).toString());
-  params.append("page_size", pageSize.toString());
+  params.append("size", pageSize.toString());
 
-  return apiClient.get<MotherPageResponse>(
-    `/api/v1/mothers?${params.toString()}`
-  );
+  return apiClient.get<MotherPageResponse>(`/api/v1/mothers?${params.toString()}`);
 }
 
-/**
- * Get a mother by UUID
- * GET /api/v1/mothers/{id}
- */
 export async function getMotherById(id: string): Promise<Mother> {
   return apiClient.get<Mother>(`/api/v1/mothers/${id}`);
 }
 
-/**
- * Look up a mother by health ID
- * GET /api/v1/mothers/health/{healthId}
- */
 export async function getMotherByHealthId(healthId: string): Promise<Mother> {
   return apiClient.get<Mother>(`/api/v1/mothers/health/${healthId}`);
-}
-
-/**
- * List mothers awaiting NIDA verification
- * GET /api/v1/mothers/pending-nida
- */
-export async function getPendingNidaMothers(): Promise<Mother[]> {
-  return apiClient.get<Mother[]>("/api/v1/mothers/pending-nida");
 }

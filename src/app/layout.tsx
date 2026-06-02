@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ServiceWorkerRegistration } from "@/shared/components/layout/ServiceWorkerRegistration";
 import { Providers } from "./providers";
+import { PortalShell } from "@/shared/components/layout";
+import { Toaster } from "@/shared/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Motherhood Journey",
@@ -14,9 +16,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <Providers>
+          <PortalShell fallbackRole="patient">
+            {children}
+          </PortalShell>
+          <Toaster position="top-right" richColors />
+        </Providers>
         <ServiceWorkerRegistration />
       </body>
     </html>

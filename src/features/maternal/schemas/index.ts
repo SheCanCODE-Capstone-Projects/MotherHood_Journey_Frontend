@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 /**
- * Rwanda NID validation: 16-digit number
+ * Rwanda NID validation: 16 digits, must start with 1 or 2 (backend enforces ^[12]\d{15}$)
  */
-const rwandaNIDRegex = /^\d{16}$/;
+const rwandaNIDRegex = /^[12]\d{15}$/;
 
 /**
  * Step 1 Validation Schema

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c4c84492-8d0b-4908-bd6f-ba915c0acfca" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(government)/reports/[reportId]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(government)/reports/[reportId]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/analytics/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dashboard/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/diagnoses/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/health-worker/children/[childId]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/health-worker/children/[childId]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/health-worker/vaccinations/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/health-worker/vaccinations/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/reports/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/sync/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/sync/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/visits/new/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/visits/new/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/charts/AncAttendanceTrend.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/charts/AncAttendanceTrend.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/charts/VaccinationCoverageChart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/charts/VaccinationCoverageChart.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/appointment/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/appointment/constants.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/appointment/hooks/useAppointments.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/appointment/hooks/useAppointments.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/appointment/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/appointment/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/child/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/child/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/useReports.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useReports.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/api/appointments.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api/appointments.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/api/children.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api/children.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/api/consent.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api/consent.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/api/government.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api/government.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shared/components/layout/MobileNav.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/shared/components/layout/MobileNav.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shared/components/layout/PageHeader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/shared/components/layout/PageHeader.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shared/components/layout/PortalShell.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/shared/components/layout/PortalShell.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shared/components/layout/Sidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/shared/components/layout/Sidebar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shared/components/layout/TopBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/shared/components/layout/TopBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shared/config/rbac.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/shared/config/rbac.ts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="230" />
+    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
+  </component>
+  <component name="Git.Settings">
+    <option name="PUSH_TAGS">
+      <GitPushTagMode>
+        <option name="argument" value="--follow-tags" />
+        <option name="title" value="Current Branch" />
+      </GitPushTagMode>
+    </option>
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Derrick-MUGISHA&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/SheCanCODE-Capstone-Projects/MotherHood_Journey_Frontend.git&quot;,
+    &quot;accountId&quot;: &quot;fcc6ef9c-cded-4ac0-8a2d-fb4e2253a902&quot;
+  }
+}</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.4321323451953742" />
+      <entry key="MS500" value="3.8164994397018" />
+      <entry key="S2" value="6.799941733091131" />
+      <entry key="S5" value="7.993152264009737" />
+      <entry key="S10" value="8.472103354027604" />
+      <entry key="S30" value="8.818240513640353" />
+      <entry key="S60" value="8.908378859485108" />
+      <entry key="M2" value="8.980552422516165" />
+      <entry key="M5" value="13.868665238487955" />
+      <entry key="M10" value="38.67507232909109" />
+      <entry key="M15" value="63.95039568824692" />
+      <entry key="M30" value="116.05071200197821" />
+      <entry key="H1" value="173.19831632607423" />
+      <entry key="H2" value="225.90416103934413" />
+      <entry key="H4" value="264.5219858355723" />
+      <entry key="D1" value="306.31829411217495" />
+      <entry key="W1" value="314.5866503541518" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="3.3257680337690235E-206" />
+      <entry key="S5" value="6.438086121273378E-83" />
+      <entry key="S10" value="8.023768516896149E-42" />
+      <entry key="S30" value="2.0019787513672187E-14" />
+      <entry key="S60" value="1.4149129836732775E-7" />
+      <entry key="M2" value="3.7615329104944415E-4" />
+      <entry key="M5" value="0.04267231259316548" />
+      <entry key="M10" value="0.20678687861219502" />
+      <entry key="M15" value="0.35395739203304455" />
+      <entry key="M30" value="0.6861129352199739" />
+      <entry key="H1" value="1.20468252614998" />
+      <entry key="H2" value="1.8104674561028529" />
+      <entry key="H4" value="2.302871731487847" />
+      <entry key="D1" value="2.8660824488124583" />
+      <entry key="W1" value="2.9803798285567975" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="1.2820980068423984" />
+      <entry key="MS500" value="3.718262497019333" />
+      <entry key="S2" value="6.753531061959133" />
+      <entry key="S5" value="7.971244833689155" />
+      <entry key="S10" value="8.460488423348112" />
+      <entry key="S30" value="8.814210614496414" />
+      <entry key="S60" value="8.906343501865829" />
+      <entry key="M2" value="8.979886848036895" />
+      <entry key="M5" value="13.909931023030857" />
+      <entry key="M10" value="38.87902005707071" />
+      <entry key="M15" value="64.30110592644407" />
+      <entry key="M30" value="116.73368926748665" />
+      <entry key="H1" value="174.40034588884376" />
+      <entry key="H2" value="227.7126989102964" />
+      <entry key="H4" value="266.82365250961766" />
+      <entry key="D1" value="309.1841303834182" />
+      <entry key="W1" value="317.5669937062866" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3DzyRSBNqOikOaMg8w00qOy9GxJ" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Rebasing feat/redesigned-ui&quot;,
+    &quot;git.auto.fetch.suggestion.counter&quot;: &quot;1&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kronk.content.tree.expanded.paths&quot;: &quot;&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/derrick/Documents/GitHub/MotherHood_Journey_Frontend&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.Next.js: server-side.executor&quot;: &quot;Run&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/home/derrick/.local/share/JetBrains/Toolbox/apps/webstorm/plugins/javascript-plugin/jsLanguageServicesImpl/external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager" selected="npm.Next.js: server-side">
+    <configuration name="Next.js: debug client-side" type="JavascriptDebugType" uri="http://localhost:3000/">
+      <method v="2" />
+    </configuration>
+    <configuration name="Next.js: server-side" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-WS-261.24374.125" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c4c84492-8d0b-4908-bd6f-ba915c0acfca" name="Changes" comment="" />
+      <created>1779299184936</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1779299184936</updated>
+      <workItem from="1779299186404" duration="1518000" />
+      <workItem from="1779788127545" duration="41000" />
+      <workItem from="1779788197229" duration="5525000" />
+      <workItem from="1780051966475" duration="3178000" />
+      <workItem from="1780263437370" duration="16000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

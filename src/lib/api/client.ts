@@ -2,26 +2,6 @@
 
 import { ApiError as ApiErrorClass } from "@/shared/types/api";
 import type { ErrorResponseDTO } from "@/shared/types/api";
-import { useAuth } from "@/shared/hooks/useAuth";
-
-type SessionTokenCarrier = {
-  accessToken?: string;
-  token?: string;
-  user?: {
-    accessToken?: string;
-    token?: string;
-  };
-};
-
-/**
- * Typed fetch client with automatic bearer token attachment
- * Throws ApiError on non-2xx responses with detailed error information
- * 
- * Usage:
- *   const client = createApiClient();
- *   const data = await client.get<UserResponse>('/api/users/profile');
- *   const created = await client.post<CreatedItem>('/api/items', { name: 'test' });
- */
 
 type RequestInit = Omit<globalThis.RequestInit, "headers">;
 
@@ -39,221 +19,153 @@ export interface ApiClient {
   put<T>(endpoint: string, body?: unknown, options?: FetchOptions): Promise<T>;
   patch<T>(endpoint: string, body?: unknown, options?: FetchOptions): Promise<T>;
   delete<T = void>(endpoint: string, options?: FetchOptions): Promise<T>;
+  postForm<T>(endpoint: string, form: FormData, options?: FetchOptions): Promise<T>;
   getToken(): string | null;
 }
 
-export function createApiClient(): ApiClient {
-  /**
-   * Resolve token from local persisted auth state.
-   */
-  function getFallbackToken(): string | null {
-    try {
-      const authStore = useAuth.getState();
-      if (authStore.currentUser) {
-        return localStorage.getItem("auth_token");
-      }
-      return null;
-    } catch {
-      return null;
+/* ── Token resolution ──────────────────────────────────────────────
+   Priority order:
+   1. next-auth session (primary — populated after real login)
+   2. in-memory override (set by token-refresh logic)
+   3. localStorage fallback (legacy zustand store)
+──────────────────────────────────────────────────────────────────── */
+let _tokenOverride: string | null = null;
+
+export function setClientToken(token: string | null) {
+  _tokenOverride = token;
+}
+
+async function resolveToken(): Promise<string | null> {
+  // 1. In-memory override (e.g. freshly refreshed token)
+  if (_tokenOverride) return _tokenOverride;
+
+  // 2. next-auth session via dynamic import (safe in RSC + client)
+  try {
+    const { getSession } = await import("next-auth/react");
+    const session = await getSession();
+    const t = session?.user?.accessToken;
+    if (t) return t;
+  } catch {
+    // not in a browser context or next-auth not initialised
+  }
+
+  // 3. Legacy localStorage fallback
+  try {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("auth_token");
+      if (stored) return stored;
     }
+  } catch {
+    // localStorage blocked
   }
 
-  /**
-   * Resolve bearer token from persisted auth state.
-   *
-   * The app currently serves local demo API routes for routes that do not have
-   * backend coverage yet, so we avoid probing NextAuth session endpoints here.
-   */
-  async function getBearerToken(): Promise<string | null> {
-    return getFallbackToken();
-  }
+  return null;
+}
 
-  /**
-   * Parse response and handle errors
-   */
-  async function parseResponse<T>(response: Response): Promise<T> {
-    const contentType = response.headers.get("content-type");
-    let data: unknown;
+/* ── Response parsing ────────────────────────────────────────────── */
+async function parseResponse<T>(response: Response): Promise<T> {
+  const contentType = response.headers.get("content-type") ?? "";
+  let data: unknown;
 
-    if (contentType?.includes("application/json")) {
+  if (contentType.includes("application/json")) {
+    try {
       data = await response.json();
-    } else {
-      data = await response.text();
+    } catch {
+      data = await response.text().catch(() => "");
     }
-
-    // If response is not OK (non-2xx), throw ApiError
-    if (!response.ok) {
-      const errorData = isErrorResponseDTO(data) ? data : null;
-      const statusCode = errorData?.statusCode ?? errorData?.status ?? response.status;
-      const errorMessage =
-        errorData?.message ||
-        (typeof data === "string" ? data : `HTTP ${response.status}`);
-
-      const normalizedError = errorData
-        ? {
-            ...errorData,
-            statusCode,
-          }
-        : undefined;
-
-      throw new ApiErrorClass(statusCode, errorMessage, normalizedError);
-    }
-
-    return data as T;
+  } else {
+    data = await response.text().catch(() => "");
   }
 
-  /**
-   * Make a typed fetch request with automatic bearer token attachment
-   */
-  async function request<T>(
-    endpoint: string,
-    options: FetchOptions = {},
-  ): Promise<T> {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
-
-    if (!endpoint.startsWith("http") && !apiBaseUrl) {
-      throw new ApiErrorClass(
-        500,
-        `NEXT_PUBLIC_API_URL is not configured for backend API request: ${endpoint}`,
-      );
-    }
-
-    const url = endpoint.startsWith("http") ? endpoint : `${apiBaseUrl}${endpoint}`;
-
-    const bodyIsFormData = options.body instanceof FormData;
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...options.headers,
-    };
-
-    // For FormData, let the browser set Content-Type with boundary
-    if (bodyIsFormData) {
-      delete headers["Content-Type"];
-    }
-
-    // Auto-attach bearer token if available
-    const token = await getBearerToken();
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-      });
-
-      return await parseResponse<T>(response);
-    } catch (error) {
-      // Re-throw ApiError as-is, wrap other errors
-      if (error instanceof ApiErrorClass) {
-        throw error;
-      }
-
-      if (error instanceof TypeError) {
-        throw new ApiErrorClass(
-          0,
-          `Network error: ${error.message}`,
-        );
-      }
-
-      throw new ApiErrorClass(
-        500,
-        error instanceof Error ? error.message : "Unknown error",
-      );
-    }
+  if (!response.ok) {
+    const errorData = isErrorResponseDTO(data) ? data : null;
+    const statusCode = errorData?.statusCode ?? errorData?.status ?? response.status;
+    const errorMessage =
+      errorData?.message ??
+      (typeof data === "string" && data.length > 0 ? data : `HTTP ${response.status}`);
+    throw new ApiErrorClass(statusCode, errorMessage, errorData ?? undefined);
   }
 
+  // Unwrap backend ApiResponse<T> envelope: { success, message, data }
+  if (
+    data !== null &&
+    typeof data === "object" &&
+    "success" in (data as object) &&
+    "data" in (data as object)
+  ) {
+    const envelope = data as { success: boolean; message?: string; data: unknown };
+    if (!envelope.success) {
+      throw new ApiErrorClass(
+        response.status,
+        envelope.message ?? "Request failed",
+      );
+    }
+    return envelope.data as T;
+  }
+
+  return data as T;
+}
+
+/* ── Core request function ───────────────────────────────────────── */
+async function request<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
+  const apiBase = process.env.NEXT_PUBLIC_API_URL?.trim() ?? "https://motherhoodjourneybackend-production.up.railway.app";
+
+  const url = endpoint.startsWith("http") ? endpoint : `${apiBase}${endpoint}`;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...options.headers,
+  };
+
+  const token = await resolveToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  try {
+    const response = await fetch(url, { ...options, headers });
+    return await parseResponse<T>(response);
+  } catch (err) {
+    if (err instanceof ApiErrorClass) throw err;
+    if (err instanceof TypeError) {
+      throw new ApiErrorClass(0, `Network error: ${err.message}`);
+    }
+    throw new ApiErrorClass(500, err instanceof Error ? err.message : "Unknown error");
+  }
+}
+
+/* ── Multipart/form-data request ─────────────────────────────────── */
+async function requestForm<T>(endpoint: string, form: FormData, options: FetchOptions = {}): Promise<T> {
+  const apiBase = process.env.NEXT_PUBLIC_API_URL?.trim() ?? "https://motherhoodjourneybackend-production.up.railway.app";
+  const url = endpoint.startsWith("http") ? endpoint : `${apiBase}${endpoint}`;
+
+  // Do NOT set Content-Type — browser sets it with the boundary automatically
+  const headers: Record<string, string> = { ...options.headers };
+  const token = await resolveToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  try {
+    const response = await fetch(url, { ...options, method: "POST", headers, body: form });
+    return await parseResponse<T>(response);
+  } catch (err) {
+    if (err instanceof ApiErrorClass) throw err;
+    throw new ApiErrorClass(0, err instanceof Error ? err.message : "Network error");
+  }
+}
+
+/* ── Public singleton ────────────────────────────────────────────── */
+export function createApiClient(): ApiClient {
   return {
-    /**
-     * GET request
-     * @example
-     *   const users = await client.get<User[]>('/api/users');
-     */
-    async get<T>(endpoint: string, options?: FetchOptions): Promise<T> {
-      return request<T>(endpoint, { ...options, method: "GET" });
-    },
-
-    /**
-     * POST request with body
-     * @example
-     *   const created = await client.post<User>('/api/users', { name: 'John' });
-     */
-    async post<T>(
-      endpoint: string,
-      body?: unknown,
-      options?: FetchOptions,
-    ): Promise<T> {
-      return request<T>(endpoint, {
-        ...options,
-        method: "POST",
-        body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
-      });
-    },
-
-    /**
-     * PUT request with body
-     * @example
-     *   const updated = await client.put<User>('/api/users/123', { name: 'Jane' });
-     */
-    async put<T>(
-      endpoint: string,
-      body?: unknown,
-      options?: FetchOptions,
-    ): Promise<T> {
-      return request<T>(endpoint, {
-        ...options,
-        method: "PUT",
-        body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
-      });
-    },
-
-    /**
-     * PATCH request with body
-     * @example
-     *   const patched = await client.patch<User>('/api/users/123', { role: 'admin' });
-     */
-    async patch<T>(
-      endpoint: string,
-      body?: unknown,
-      options?: FetchOptions,
-    ): Promise<T> {
-      return request<T>(endpoint, {
-        ...options,
-        method: "PATCH",
-        body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
-      });
-    },
-
-    /**
-     * DELETE request
-     * @example
-     *   await client.delete('/api/users/123');
-     */
-    async delete<T = void>(endpoint: string, options?: FetchOptions): Promise<T> {
-      return request<T>(endpoint, { ...options, method: "DELETE" });
-    },
-
-    /**
-     * Get current bearer token
-     * Useful for direct fetch or debugging
-     */
-    getToken(): string | null {
-      return getFallbackToken();
-    },
+    get:    <T>(e: string, o?: FetchOptions) => request<T>(e, { ...o, method: "GET" }),
+    post:   <T>(e: string, b?: unknown, o?: FetchOptions) => request<T>(e, { ...o, method: "POST",  body: b ? JSON.stringify(b) : undefined }),
+    put:    <T>(e: string, b?: unknown, o?: FetchOptions) => request<T>(e, { ...o, method: "PUT",   body: b ? JSON.stringify(b) : undefined }),
+    patch:  <T>(e: string, b?: unknown, o?: FetchOptions) => request<T>(e, { ...o, method: "PATCH", body: b ? JSON.stringify(b) : undefined }),
+    delete: <T = void>(e: string, o?: FetchOptions)       => request<T>(e, { ...o, method: "DELETE" }),
+    postForm: <T>(e: string, f: FormData, o?: FetchOptions) => requestForm<T>(e, f, o),
+    getToken: () => _tokenOverride ?? null,
   };
 }
 
-/**
- * Singleton API client instance
- * Use this instead of creating new instances
- */
 export const apiClient = createApiClient();
 
-/**
- * Type helper for API errors
- */
 export function isApiError(error: unknown): error is ApiErrorClass {
   return error instanceof ApiErrorClass;
 }

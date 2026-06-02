@@ -1,111 +1,96 @@
 import { apiClient } from "./client";
 import type {
+  AdministerVaccinationRequest,
   ChildDTO,
   ChildRegistrationResponse,
+  ChildVaccinationSessionResponse,
   MotherSearchResult,
 } from "@/features/child/types";
 import type { ChildFormData } from "@/lib/schemas/childSchema";
+import { VACCINATION_API } from "@/features/child/api/constants";
 
 const CHILDREN_BASE_PATH = "/api/v1/children";
 
-export function registerChild(data: ChildFormData): Promise<ChildRegistrationResponse> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const child: ChildDTO = {
-        id: `child-${Date.now()}`,
-        mother_id: data.mother_health_id,
-        first_name: data.first_name,
-        gender: data.gender,
-        date_of_birth: data.date_of_birth,
-        birth_weight: data.birth_weight,
-        delivery_type: data.delivery_type,
-        birth_certificate_number: data.birth_certificate_number,
-        created_at: new Date().toISOString(),
-      };
+export type ChildHealthStatus = "HEALTHY" | "AT_RISK" | "CRITICAL";
 
-      const vaccination_schedule = [
-        {
-          id: "vax-1",
-          vaccine_name: "BCG",
-          due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          status: "pending" as const,
-        },
-        {
-          id: "vax-2",
-          vaccine_name: "Hepatitis B",
-          due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          status: "pending" as const,
-        },
-        {
-          id: "vax-3",
-          vaccine_name: "Polio (OPV 0)",
-          due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          status: "pending" as const,
-        },
-        {
-          id: "vax-4",
-          vaccine_name: "DPT-HepB-Hib (Pentavalent 1)",
-          due_date: new Date(Date.now() + 42 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          status: "pending" as const,
-        },
-        {
-          id: "vax-5",
-          vaccine_name: "Polio (OPV 1)",
-          due_date: new Date(Date.now() + 42 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          status: "pending" as const,
-        },
-        {
-          id: "vax-6",
-          vaccine_name: "Rotavirus 1",
-          due_date: new Date(Date.now() + 42 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          status: "pending" as const,
-        },
-      ];
+export interface VaccinationRow {
+  id: string;
+  vaccine_name: string;
+  antigen_code: string;
+  due_date: string;
+  window_days: number;
+  status: "PENDING" | "ADMINISTERED" | "MISSED" | "OVERDUE";
+  administered_date: string | null;
+  lot_number: string | null;
+}
 
-      resolve({
-        child,
-        vaccination_schedule,
-      });
-    }, 1000);
+export interface ChildProfileDTO {
+  id: string;
+  health_id: string;
+  first_name: string;
+  gender: "MALE" | "FEMALE";
+  date_of_birth: string;
+  birth_weight: number;
+  delivery_type: "NORMAL" | "CAESAREAN" | "ASSISTED";
+  birth_certificate_number: string | null;
+  health_status: ChildHealthStatus;
+  mother_id: string;
+  mother_name: string;
+  facility_name: string;
+  created_at: string;
+  vaccinations: VaccinationRow[];
+}
+
+export async function getChildren(search?: string): Promise<ChildProfileDTO[]> {
+  const query = search ? `?search=${encodeURIComponent(search)}` : "";
+  return apiClient.get<ChildProfileDTO[]>(`${CHILDREN_BASE_PATH}${query}`);
+}
+
+export async function getChildProfile(childId: string): Promise<ChildProfileDTO> {
+  return apiClient.get<ChildProfileDTO>(`${CHILDREN_BASE_PATH}/${encodeURIComponent(childId)}`);
+}
+
+/**
+ * Register a new child with the backend API
+ * Returns the child data along with the vaccination schedule
+ */
+export async function registerChild(data: ChildFormData): Promise<ChildRegistrationResponse> {
+  return apiClient.post<ChildRegistrationResponse>(CHILDREN_BASE_PATH, {
+    mother_health_id: data.mother_health_id,
+    first_name: data.first_name,
+    gender: data.gender,
+    date_of_birth: data.date_of_birth,
+    birth_weight: data.birth_weight,
+    delivery_type: data.delivery_type,
+    birth_certificate_number: data.birth_certificate_number,
   });
 }
 
-export function searchMothers(query: string): Promise<MotherSearchResult[]> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const mockMothers: MotherSearchResult[] = [
-        { health_id: "MTH-001", name: "Uwimana Marie", phone: "+250 788 000 000" },
-        { health_id: "MTH-002", name: "Mukamana Jeanne", phone: "+250 788 111 111" },
-        { health_id: "MTH-003", name: "Nyiramongi Alice", phone: "+250 788 222 222" },
-        { health_id: "MTH-004", name: "Uwase Beatrice", phone: "+250 788 333 333" },
-        { health_id: "MTH-005", name: "Nyirahabimana Claudine", phone: "+250 788 444 444" },
-      ].filter(
-        (m) =>
-          m.health_id.toLowerCase().includes(query.toLowerCase()) ||
-          m.name.toLowerCase().includes(query.toLowerCase())
-      );
-      resolve(mockMothers);
-    }, 300);
-  });
-}
+/**
+ * Search mothers by health ID or name
+ * Used for linking child to mother during registration
+ */
+export async function searchMothers(query: string): Promise<MotherSearchResult[]> {
+  const params = new URLSearchParams();
+  params.set("search_term", query.trim());
 
-import type {
-  AdministerVaccinationRequest,
-  ChildVaccinationSessionResponse,
-} from "@/features/child/types";
+  return apiClient.get<MotherSearchResult[]>(
+    `/api/v1/mothers/search?${params.toString()}`
+  );
+}
 
 export async function searchChildVaccinationSession(searchTerm: string) {
   const params = new URLSearchParams();
-  params.set("search_term", searchTerm.trim());
+  params.set(VACCINATION_API.QUERY_PARAMS.SEARCH_TERM, searchTerm.trim());
 
   return apiClient.get<ChildVaccinationSessionResponse>(
-    `/api/v1/children/search?${params.toString()}`,
+    `${VACCINATION_API.ENDPOINTS.SESSION_SEARCH}?${params.toString()}`,
   );
 }
 
 export async function getChildVaccinationSession(childId: string) {
   return apiClient.get<ChildVaccinationSessionResponse>(
-    `/api/v1/children/${encodeURIComponent(childId)}/vaccinations`,
+    VACCINATION_API.ENDPOINTS.VACCINATION_CARD(childId),
   );
 }
 
@@ -114,7 +99,7 @@ export async function administerVaccination(
   body: AdministerVaccinationRequest,
 ) {
   return apiClient.put<{ success: boolean; message: string }>(
-    `/api/v1/vaccinations/${encodeURIComponent(vaccinationId)}/administer`,
+    VACCINATION_API.ENDPOINTS.ADMINISTER(vaccinationId),
     body,
   );
 }

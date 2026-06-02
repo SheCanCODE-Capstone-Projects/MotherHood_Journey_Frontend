@@ -1,20 +1,25 @@
+/// <reference lib="webworker" />
 // Service Worker for vaccination data caching
 // This file is copied to public/sw.js during build
 // DO NOT use ES6 modules - this runs in a service worker context
+
+/* eslint-disable no-restricted-globals */
+declare const self: ServiceWorkerGlobalScope;
+export {};
 
 const CACHE_NAME = "motherhood-vaccination-card-v1";
 const VACCINATION_ROUTE_PATTERN = /\/api\/patient\/children\/[^/]+\/vaccinations$/;
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
-self.addEventListener("install", (event: ExtendableEvent) => {
+self.addEventListener("install", (event: any) => {
   event.waitUntil(self.skipWaiting());
 });
 
-self.addEventListener("activate", (event: ExtendableEvent) => {
+self.addEventListener("activate", (event: any) => {
   event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener("fetch", (event: FetchEvent) => {
+self.addEventListener("fetch", (event: any) => {
   const requestUrl = new URL(event.request.url);
 
   if (event.request.method !== "GET" || !VACCINATION_ROUTE_PATTERN.test(requestUrl.pathname)) {
