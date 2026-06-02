@@ -9,6 +9,19 @@ import type {
 } from "@/features/visit/types";
 import type { HealthVisitResponse, CreateHealthVisitRequest } from "@/shared/types/backend";
 
+// ─── Auth context (call after login) ─────────────────────────────────────────
+
+let _facilityId: string | null = null;
+let _healthWorkerId: string | null = null;
+
+export function setVisitAuthContext(opts: {
+  facilityId: string;
+  healthWorkerId?: string;
+}) {
+  _facilityId = opts.facilityId;
+  if (opts.healthWorkerId) _healthWorkerId = opts.healthWorkerId;
+}
+
 export interface VisitSummary {
   visit_id: string;
   patient_health_id: string;
@@ -211,10 +224,10 @@ export function searchICD10Codes(query: string): Promise<ICD10Code[]> {
 }
 
 export async function submitVisit(data: VisitFormData): Promise<VisitResponse> {
-  let facilityId = "";
-  let healthWorkerId = "";
+  let facilityId = _facilityId ?? "";
+  let healthWorkerId = _healthWorkerId ?? "";
 
-  if (typeof window !== "undefined") {
+  if (!facilityId && typeof window !== "undefined") {
     try {
       const { getSession } = await import("next-auth/react");
       const session = await getSession();
