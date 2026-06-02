@@ -13,7 +13,7 @@ const DISPLAY = "'Playfair Display', Georgia, serif";
 const HERO_FEATURE = {
   title: "Complete Pregnancy Tracking",
   desc: "From your very first ANC visit to postpartum recovery every milestone, every measurement, every appointment in one beautifully organised timeline. Share instantly with your health worker.",
-  image: "/images/hero-8.png",
+  image: "/images/hero-8-updated.png",
   tags: ["ANC Visits", "Fetal Growth", "Vital Signs", "Lab Results"],
 };
 
