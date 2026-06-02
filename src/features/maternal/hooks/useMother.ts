@@ -2,16 +2,15 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { registerMother, searchMothers, getMothers } from "../api/mothers.api";
-import type { MotherRegistrationRequest, MotherRegistrationResponse, MotherPageResponse } from "../types";
+import type {
+  MotherRegistrationRequest,
+  MotherRegistrationResult,
+  MotherPageResponse,
+} from "../types";
 
-/**
- * Custom hook for mother registration
- * Handles loading, error, and success states
- * Usage: const { mutate, isPending, data, error } = useMother();
- */
 export function useMother() {
   const mutation = useMutation<
-    MotherRegistrationResponse,
+    MotherRegistrationResult,
     Error,
     MotherRegistrationRequest
   >({

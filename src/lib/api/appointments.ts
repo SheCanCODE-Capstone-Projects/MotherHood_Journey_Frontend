@@ -7,12 +7,7 @@ import type {
 } from "@/lib/schemas/appointmentSchema";
 import type {
   Appointment,
-  AppointmentDetail,
-  AppointmentListResponse,
-  CancelAppointmentRequest,
-  CancelAppointmentResponse,
 } from "@/features/appointment/types";
-import { createDemoAppointments } from "@/features/appointment/mock";
 
 const APPOINTMENTS_BASE_PATH = "/api/v1/appointments";
 
@@ -68,107 +63,6 @@ export async function getAppointmentByReference(
   return response;
 }
 
-<<<<<<< HEAD
-// ─── Patient appointment list functions ───────────────────────────────────────
-
-export async function getAppointments(
-  page = 1,
-  pageSize = 10
-): Promise<AppointmentListResponse> {
-  try {
-    const res = await apiClient.get<AppointmentListResponse>(
-      `${APPOINTMENTS_BASE_PATH}?page=${page}&size=${pageSize}`
-    );
-    return res;
-  } catch {
-    const all = createDemoAppointments();
-    const start = (page - 1) * pageSize;
-    return {
-      content: all.slice(start, start + pageSize),
-      totalPages: Math.ceil(all.length / pageSize),
-      totalElements: all.length,
-      pageNumber: page,
-      pageSize,
-    };
-  }
-}
-
-export async function getAppointmentDetail(id: string): Promise<AppointmentDetail> {
-  try {
-    return await apiClient.get<AppointmentDetail>(
-      `${APPOINTMENTS_BASE_PATH}/${encodeURIComponent(id)}`
-    );
-  } catch {
-    const found = createDemoAppointments().find((a) => a.id === id);
-    if (!found) throw new Error(`Appointment ${id} not found`);
-    return { ...found, providerName: found.providerName ?? "—" };
-  }
-}
-
-export async function getUpcomingAppointments(
-  pageSize = 10
-): Promise<AppointmentListResponse> {
-  try {
-    return await apiClient.get<AppointmentListResponse>(
-      `${APPOINTMENTS_BASE_PATH}?status=SCHEDULED&upcoming=true&size=${pageSize}`
-    );
-  } catch {
-    const now = new Date();
-    const upcoming = createDemoAppointments().filter(
-      (a) => new Date(`${a.scheduledDate}T${a.scheduledTime}`) > now
-    );
-    return {
-      content: upcoming.slice(0, pageSize),
-      totalPages: 1,
-      totalElements: upcoming.length,
-      pageNumber: 1,
-      pageSize,
-    };
-  }
-}
-
-export async function getPastAppointments(
-  pageSize = 10
-): Promise<AppointmentListResponse> {
-  try {
-    return await apiClient.get<AppointmentListResponse>(
-      `${APPOINTMENTS_BASE_PATH}?past=true&size=${pageSize}`
-    );
-  } catch {
-    const now = new Date();
-    const past = createDemoAppointments().filter(
-      (a) => new Date(`${a.scheduledDate}T${a.scheduledTime}`) <= now
-    );
-    return {
-      content: past.slice(0, pageSize),
-      totalPages: 1,
-      totalElements: past.length,
-      pageNumber: 1,
-      pageSize,
-    };
-  }
-}
-
-export async function cancelAppointment(
-  id: string,
-  request?: CancelAppointmentRequest
-): Promise<CancelAppointmentResponse> {
-  try {
-    return await apiClient.post<CancelAppointmentResponse>(
-      `${APPOINTMENTS_BASE_PATH}/${encodeURIComponent(id)}/cancel`,
-      request ?? {}
-    );
-  } catch {
-    return {
-      id,
-      status: "CANCELLED",
-      cancelledAt: new Date().toISOString(),
-    };
-  }
-}
-
-export { apiClient };
-=======
 /**
  * Get appointments list with pagination
  * Supports filtering by status and date range
@@ -184,7 +78,7 @@ export async function getAppointments(
   if (status) {
     params.set("status", status);
   }
-  
+
   const response = await apiClient.get<{
     content: Appointment[];
     totalPages: number;
@@ -192,7 +86,7 @@ export async function getAppointments(
     number: number;
     size: number;
   }>(`${APPOINTMENTS_BASE_PATH}?${params.toString()}`);
-  
+
   return {
     content: response.content,
     totalPages: response.totalPages,
@@ -254,7 +148,7 @@ export async function cancelAppointment(
   }>(`${APPOINTMENTS_BASE_PATH}/${encodeURIComponent(appointmentId)}/cancel`, {
     reason,
   });
-  
+
   return {
     ok: response.success,
     id: appointmentId,
@@ -280,4 +174,3 @@ export async function updateAppointmentStatus(
   );
   return response;
 }
->>>>>>> main

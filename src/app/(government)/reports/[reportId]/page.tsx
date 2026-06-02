@@ -321,6 +321,7 @@ export default function ReportDetailPage() {
   };
 
   const handleExport = () => {
+    if (!report) return;
     const payload = JSON.stringify(report, null, 2);
     const blob = new Blob([payload], { type: "application/json" });
     const url = URL.createObjectURL(blob);

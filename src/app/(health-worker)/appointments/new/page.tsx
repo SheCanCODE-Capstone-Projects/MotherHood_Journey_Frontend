@@ -83,12 +83,6 @@ const APPOINTMENT_TYPES: AppointmentTypeOption[] = [
   },
 ];
 
-// Mock health worker data (would come from JWT in real app)
-const MOCK_HEALTH_WORKER = {
-  facilityId: "FAC-001",
-  facilityName: "Nyagatare Health Centre",
-};
-
 export default function NewAppointmentPage() {
   const router = useRouter();
 

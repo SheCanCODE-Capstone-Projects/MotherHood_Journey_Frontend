@@ -5,6 +5,11 @@ import en from "./en.json";
 import fr from "./fr.json";
 import rw from "./rw.json";
 
+function getInitialLanguage(): string {
+  if (typeof window === "undefined") return "en";
+  return localStorage.getItem("mh_language") ?? "en";
+}
+
 if (!i18n.isInitialized) {
   i18n.use(initReactI18next).init({
     resources: {
@@ -12,11 +17,16 @@ if (!i18n.isInitialized) {
       fr: { translation: fr },
       rw: { translation: rw },
     },
-    lng: "en",
+    lng: getInitialLanguage(),
     fallbackLng: "en",
-    interpolation: {
-      escapeValue: false,
-    },
+    interpolation: { escapeValue: false },
+  });
+
+  // Persist language changes to localStorage
+  i18n.on("languageChanged", (lng) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("mh_language", lng);
+    }
   });
 }
 

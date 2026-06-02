@@ -1,90 +1,85 @@
-/**
- * Mothers API endpoints
- * Handles all mother/patient data operations
- * Based on backend: com.motherhood.journey.maternal.controller.MotherController
- */
-
 import { apiClient } from "@/lib/api/client";
 import type { PageResponse } from "@/shared/types/api";
-import type { Mother, MotherPageResponse, MotherRegistrationRequest, MotherRegistrationResponse } from "../types";
+import type {
+  Mother,
+  MotherPageResponse,
+  MotherRegistrationRequest,
+  MotherRegistrationResult,
+} from "../types";
 
-/**
- * Create a new mother registration
- * Sends POST request to /api/v1/mothers with mother data
- * Returns health_id and other registration details
- */
+const DEFAULT_FACILITY_ID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+
 export async function registerMother(
-  data: MotherRegistrationRequest
-): Promise<MotherRegistrationResponse> {
-  const response = await apiClient.post<MotherRegistrationResponse>(
-    "/api/v1/mothers",
+  data: MotherRegistrationRequest,
+): Promise<MotherRegistrationResult> {
+  const facilityId = data.facility_id || DEFAULT_FACILITY_ID;
+
+  // Step 1 — create the user account for this mother
+  const userResponse = await apiClient.post<{ id: string; role: string; active: boolean }>(
+    "/api/v1/auth/register",
     {
-      national_id: data.national_id,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      date_of_birth: data.date_of_birth,
-      phone_number: data.phone_number,
-      home_location: data.home_location,
-      education_level: data.education_level,
-    }
+      phoneNumber: data.phone_number,
+      nationalId: data.national_id,
+      password: "Password123!",
+      firstName: data.first_name,
+      lastName: data.last_name,
+      role: "PATIENT",
+      geoLocationId: data.home_location,
+      facilityId,
+    },
   );
+
+  // apiClient already unwraps {success, data} envelopes, so userResponse IS the inner object
+  if (!userResponse?.id) {
+    throw new Error("Failed to register user account for the mother.");
+  }
+
+  const userId = userResponse.id;
+
+  // Step 2 — create the mother record linked to that user
+  const response = await apiClient.post<MotherRegistrationResult>("/api/v1/mothers", {
+    userId,
+    facilityId,
+    nationalId: data.national_id,
+    geoLocationId: data.home_location,
+    dateOfBirth: data.date_of_birth,
+    educationLevel: data.education_level?.toUpperCase() || "NONE",
+  });
 
   return response;
 }
 
-/**
- * Search mothers by health_id, name, or NID
- * Endpoint: GET /api/v1/mothers/search
- * Returns paginated results using backend PageResponse shape
- */
 export async function searchMothers(
   searchTerm?: string,
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
 ): Promise<MotherPageResponse> {
   const params = new URLSearchParams();
-  if (searchTerm) {
-    params.append("search_term", searchTerm);
-  }
-  // Backend typically uses 0-based page indexing
+  if (searchTerm) params.append("search_term", searchTerm);
   params.append("page", (page - 1).toString());
-  params.append("page_size", pageSize.toString());
-
-  const response = await apiClient.get<MotherPageResponse>(
-    `/api/v1/mothers/search?${params.toString()}`
-  );
-  return response;
-}
-
-/**
- * Get all mothers with pagination
- * Endpoint: GET /api/v1/mothers
- */
-export async function getMothers(
-  page: number = 1,
-  pageSize: number = 10
-): Promise<MotherPageResponse> {
-  const params = new URLSearchParams();
-  params.append("page", (page - 1).toString());
-  params.append("page_size", pageSize.toString());
+  params.append("size", pageSize.toString());
 
   return apiClient.get<MotherPageResponse>(
-    `/api/v1/mothers?${params.toString()}`
+    `/api/v1/mothers/search?${params.toString()}`,
   );
 }
 
-/**
- * Get a single mother by ID
- * Endpoint: GET /api/v1/mothers/{id}
- */
+export async function getMothers(
+  page: number = 1,
+  pageSize: number = 10,
+): Promise<MotherPageResponse> {
+  const params = new URLSearchParams();
+  params.append("page", (page - 1).toString());
+  params.append("size", pageSize.toString());
+
+  return apiClient.get<MotherPageResponse>(`/api/v1/mothers?${params.toString()}`);
+}
+
 export async function getMotherById(id: string): Promise<Mother> {
   return apiClient.get<Mother>(`/api/v1/mothers/${id}`);
 }
 
-/**
- * Get mother by health ID
- * Endpoint: GET /api/v1/mothers/health-id/{healthId}
- */
+// Correct endpoint per API docs: /api/v1/mothers/health/{healthId}
 export async function getMotherByHealthId(healthId: string): Promise<Mother> {
-  return apiClient.get<Mother>(`/api/v1/mothers/health-id/${healthId}`);
+  return apiClient.get<Mother>(`/api/v1/mothers/health/${healthId}`);
 }

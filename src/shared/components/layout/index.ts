@@ -1,3 +1,5 @@
+export { AppSidebar } from "@/shared/components/layout/AppSidebar";
+export { LangSync } from "@/shared/components/layout/LangSync";
 export { MobileNav } from "@/shared/components/layout/MobileNav";
 export { PageHeader } from "@/shared/components/layout/PageHeader";
 export { PortalShell } from "@/shared/components/layout/PortalShell";

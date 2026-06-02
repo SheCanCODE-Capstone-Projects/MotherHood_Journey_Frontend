@@ -3,11 +3,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://motherhoodjourneybackend-production.up.railway.app}
+        NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-motherhood-journey-secret-2026-rwanda-moh}
+        NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
       - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-motherhood-journey-secret-2026-rwanda-moh}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://motherhoodjourneybackend-production.up.railway.app}
     restart: unless-stopped

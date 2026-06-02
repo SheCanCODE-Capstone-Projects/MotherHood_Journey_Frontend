@@ -60,13 +60,10 @@ export function GeoLocationSelect({
 
   // Notify parent of changes
   const updateSelection = useCallback((updates: Partial<LocationSelection>) => {
-    setSelection(prev => {
-      const newSelection = { ...prev, ...updates };
-      const locationString = buildLocationString(newSelection);
-      onChange(locationString);
-      return newSelection;
-    });
-  }, [buildLocationString, onChange]);
+    const newSelection = { ...selection, ...updates };
+    setSelection(newSelection);
+    onChange(buildLocationString(newSelection));
+  }, [selection, buildLocationString, onChange]);
 
   // Fetch provinces
   const { data: provinces, isLoading: loadingProvinces } = useQuery({

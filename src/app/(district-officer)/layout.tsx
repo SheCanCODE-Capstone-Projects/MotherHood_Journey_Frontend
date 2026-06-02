@@ -1,13 +1,6 @@
 import type { ReactNode } from "react";
 
-import { PortalShell } from "@/shared/components/layout";
-
-type DistrictOfficerLayoutProps = {
-  children: ReactNode;
-};
-
-export default function DistrictOfficerLayout({
-  children,
-}: DistrictOfficerLayoutProps) {
-  return <PortalShell fallbackRole="district_officer">{children}</PortalShell>;
+// PortalShell is provided by the root layout — no double-wrapping.
+export default function DistrictOfficerLayout({ children }: { children: ReactNode }) {
+  return <>{children}</>;
 }

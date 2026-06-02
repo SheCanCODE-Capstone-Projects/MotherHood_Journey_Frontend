@@ -25,27 +25,6 @@ type MobileNavProps = {
 };
 
 const mobileIconByHref: Record<string, LucideIcon> = {
-<<<<<<< HEAD
-  "/dashboard":        LayoutGrid,
-  "/pregnancies":      Baby,
-  "/children":         Baby,
-  "/appointments":     CalendarDays,
-  "/schedule":         CalendarDays,
-  "/mothers":          Baby,
-  "/visits":           CalendarDays,
-  "/diagnoses":        Stethoscope,
-  "/service-requests": ClipboardList,
-  "/staff":            Users,
-  "/reports":          FileText,
-  "/district-dashboard":  LayoutGrid,
-  "/facilities":          ClipboardList,
-  "/analytics":           LayoutGrid,
-  "/national-dashboard":  LayoutGrid,
-  "/national-reports":    FileText,
-  "/users":               Users,
-  "/sync":             RefreshCcw,
-  "/sync-log":         RefreshCcw,
-=======
   "/dashboard": LayoutGrid,
   "/pregnancies": Baby,
   "/children": Baby,
@@ -54,7 +33,6 @@ const mobileIconByHref: Record<string, LucideIcon> = {
   "/mothers": Baby,
   "/visits": CalendarDays,
   "/diagnoses": Stethoscope,
->>>>>>> main
 };
 
 export function MobileNav({ fallbackRole, previewRole }: MobileNavProps) {

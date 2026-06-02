@@ -3,6 +3,7 @@ import "./globals.css";
 import { ServiceWorkerRegistration } from "@/shared/components/layout/ServiceWorkerRegistration";
 import { Providers } from "./providers";
 import { PortalShell } from "@/shared/components/layout";
+import { Toaster } from "@/shared/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Motherhood Journey",
@@ -15,11 +16,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased text-[13px]">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className="min-h-full flex flex-col">
-        <PortalShell fallbackRole="patient">
-          <Providers>{children}</Providers>
-        </PortalShell>
+        <Providers>
+          <PortalShell fallbackRole="patient">
+            {children}
+          </PortalShell>
+          <Toaster position="top-right" richColors />
+        </Providers>
         <ServiceWorkerRegistration />
       </body>
     </html>

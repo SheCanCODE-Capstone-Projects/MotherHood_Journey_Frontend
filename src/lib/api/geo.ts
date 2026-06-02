@@ -71,3 +71,22 @@ export function getVillages(
     }),
   );
 }
+
+export interface GeoResolveResult {
+  id: string;
+  province: string;
+  district: string;
+  sector: string;
+  cell: string;
+  village: string;
+}
+
+export function resolveGeoLocation(params: {
+  province: string;
+  district: string;
+  sector: string;
+  cell: string;
+  village: string;
+}): Promise<GeoResolveResult> {
+  return apiClient.get<GeoResolveResult>(buildGeoPath("/resolve", params));
+}

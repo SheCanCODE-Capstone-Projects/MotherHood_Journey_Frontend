@@ -1,7 +1,4 @@
 import { apiClient } from "@/lib/api/client";
-<<<<<<< HEAD
-import type { ReportType, ReportStatus } from "@/shared/types/report";
-=======
 import type { Report, ReportStatus, ReportType } from "@/shared/types/report";
 
 export type GovReportRequest = {
@@ -11,13 +8,10 @@ export type GovReportRequest = {
   geoLocationId: string;
   aggregates: Record<string, unknown>;
 };
->>>>>>> main
 
 export type GovSyncTargetSystem = "NIDA" | "HMIS" | "IREMBO";
 export type GovSyncStatus = "PENDING" | "IN_FLIGHT" | "SUCCEEDED" | "FAILED" | "DEAD_LETTER";
 
-<<<<<<< HEAD
-=======
 export type ProvinceId = "northern" | "eastern" | "kigali" | "southern" | "western";
 export type DashboardMetric = "vaccination_coverage" | "anc_attendance" | "birth_registration";
 
@@ -142,7 +136,6 @@ export async function getNationalDashboardMetrics(
   }
 }
 
->>>>>>> main
 export type GovSyncLog = {
   id: string;
   createdAt: string;
@@ -713,6 +706,22 @@ export async function getGovReport(reportId: string): Promise<GovReport> {
 export async function getGovReportsByUser(userId: string): Promise<GovReport[]> {
   const response = await apiClient.get<unknown>(`/api/v1/gov-reports/by-user/${userId}?page=0&size=50`);
   return normalizeReportListResponse(response);
+}
+
+export async function pushGovReportToHmis(reportId: string): Promise<{ success: boolean; message: string; pushedAt?: string }> {
+  try {
+    const response = await apiClient.post<{ success?: boolean; message?: string; pushedAt?: string }>(
+      `/api/v1/gov-reports/${encodeURIComponent(reportId)}/push`,
+      {},
+    );
+    return {
+      success: response.success ?? true,
+      message: response.message ?? "Report successfully pushed to HMIS",
+      pushedAt: response.pushedAt ?? new Date().toISOString(),
+    };
+  } catch {
+    return { success: false, message: "Failed to push report to HMIS" };
+  }
 }
 
 export async function generateGovReport(request: GovReportRequest): Promise<GovReport> {

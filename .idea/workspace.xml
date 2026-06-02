@@ -4,7 +4,36 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c4c84492-8d0b-4908-bd6f-ba915c0acfca" name="Changes" comment="" />
+    <list default="true" id="c4c84492-8d0b-4908-bd6f-ba915c0acfca" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(government)/reports/[reportId]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(government)/reports/[reportId]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/analytics/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dashboard/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/diagnoses/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/health-worker/children/[childId]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/health-worker/children/[childId]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/health-worker/vaccinations/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/health-worker/vaccinations/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/reports/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/sync/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/sync/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/visits/new/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/visits/new/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/charts/AncAttendanceTrend.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/charts/AncAttendanceTrend.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/charts/VaccinationCoverageChart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/charts/VaccinationCoverageChart.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/appointment/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/appointment/constants.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/appointment/hooks/useAppointments.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/appointment/hooks/useAppointments.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/appointment/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/appointment/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/child/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/child/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/useReports.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useReports.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/api/appointments.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api/appointments.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/api/children.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api/children.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/api/consent.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api/consent.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/api/government.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api/government.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shared/components/layout/MobileNav.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/shared/components/layout/MobileNav.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shared/components/layout/PageHeader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/shared/components/layout/PageHeader.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shared/components/layout/PortalShell.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/shared/components/layout/PortalShell.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shared/components/layout/Sidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/shared/components/layout/Sidebar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shared/components/layout/TopBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/shared/components/layout/TopBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shared/config/rbac.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/shared/config/rbac.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -112,34 +141,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "Rebasing feat/redesigned-ui",
-    "git.auto.fetch.suggestion.counter": "1",
-    "js.debugger.nextJs.config.created.client": "true",
-    "js.debugger.nextJs.config.created.server": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kronk.content.tree.expanded.paths": "",
-    "last_opened_file_path": "/home/derrick/Documents/GitHub/MotherHood_Journey_Frontend",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "npm.Next.js: server-side.executor": "Run",
-    "to.speed.mode.migration.done": "true",
-    "ts.external.directory.path": "/home/derrick/.local/share/JetBrains/Toolbox/apps/webstorm/plugins/javascript-plugin/jsLanguageServicesImpl/external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Rebasing feat/redesigned-ui&quot;,
+    &quot;git.auto.fetch.suggestion.counter&quot;: &quot;1&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kronk.content.tree.expanded.paths&quot;: &quot;&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/derrick/Documents/GitHub/MotherHood_Journey_Frontend&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.Next.js: server-side.executor&quot;: &quot;Run&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/home/derrick/.local/share/JetBrains/Toolbox/apps/webstorm/plugins/javascript-plugin/jsLanguageServicesImpl/external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="npm.Next.js: server-side">
     <configuration name="Next.js: debug client-side" type="JavascriptDebugType" uri="http://localhost:3000/">
       <method v="2" />
@@ -173,6 +202,7 @@
       <workItem from="1779788127545" duration="41000" />
       <workItem from="1779788197229" duration="5525000" />
       <workItem from="1780051966475" duration="3178000" />
+      <workItem from="1780263437370" duration="16000" />
     </task>
     <servers />
   </component>

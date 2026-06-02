@@ -1,10 +1,17 @@
 import { apiClient } from "./client";
+import type { PregnancyResponse, ChildResponse, AppointmentResponse, MeResponse } from "@/shared/types/backend";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type PregnancyStatus = "ACTIVE" | "COMPLETED" | "LOST";
 export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED" | "MISSED";
-export type AppointmentType = "ANC" | "PNC" | "IMMUNIZATION" | "SICK_CHILD" | "GROWTH_MONITORING" | "GENERAL";
+export type AppointmentType =
+  | "ANC"
+  | "PNC"
+  | "IMMUNIZATION"
+  | "SICK_CHILD"
+  | "GROWTH_MONITORING"
+  | "GENERAL";
 
 export interface ChwContact {
   name: string;
@@ -62,184 +69,216 @@ export interface PatientProfile {
   children: PatientChild[];
 }
 
-// ─── Mock data ─────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const today = new Date();
-const addDays = (d: Date, n: number) => new Date(d.getTime() + n * 86400000);
-const fmt = (d: Date) => d.toISOString().split("T")[0];
+function calcGestationalWeeks(lmpDate: string): number {
+  const lmp = new Date(lmpDate);
+  return Math.max(0, Math.floor((Date.now() - lmp.getTime()) / (7 * 24 * 60 * 60 * 1000)));
+}
 
-const MOCK_PREGNANCY: PatientPregnancy = {
-  id: "preg-001",
-  gestational_age_weeks: 28,
-  estimated_due_date: fmt(addDays(today, 84)),
-  status: "ACTIVE",
-  anc_visits_completed: 4,
-  anc_visits_total: 8,
-  last_visit_date: fmt(addDays(today, -14)),
-  next_visit_date: fmt(addDays(today, 14)),
-  next_visit_provider: "Dr. Murenzi Jean",
-  facility_name: "Nyamata Health Center",
-  chw: {
-    name: "Uwase Claudine",
-    phone: "+250 788 123 456",
-    sector: "Nyamata Sector",
-  },
-};
+function normalizePregnancyStatus(raw: string): PregnancyStatus {
+  const s = raw.toUpperCase();
+  if (s === "ACTIVE") return "ACTIVE";
+  if (s === "LOST") return "LOST";
+  return "COMPLETED";
+}
 
-const MOCK_APPOINTMENTS: PatientAppointment[] = [
-  // ── Upcoming ──────────────────────────────────────────────────────────────
-  {
-    id: "apt-001",
-    appointment_type: "ANC",
-    scheduled_date: fmt(addDays(today, 7)),
-    scheduled_time: "09:00",
-    facility_name: "Nyamata Health Center",
-    provider_name: "Dr. Murenzi Jean",
-    status: "SCHEDULED",
-    notes: "Bring your ANC card and maternity booklet.",
-  },
-  {
-    id: "apt-002",
-    appointment_type: "IMMUNIZATION",
-    scheduled_date: fmt(addDays(today, 14)),
-    scheduled_time: "10:30",
-    facility_name: "Nyamata Health Center",
-    provider_name: "Nurse Uwase Claudine",
-    status: "SCHEDULED",
-    notes: null,
-  },
-  {
-    id: "apt-003",
-    appointment_type: "GROWTH_MONITORING",
-    scheduled_date: fmt(addDays(today, 28)),
-    scheduled_time: "08:00",
-    facility_name: "Bugesera District Hospital",
-    provider_name: "Nurse Kagabo Eric",
-    status: "SCHEDULED",
-    notes: null,
-  },
-  // ── Past — all statuses ───────────────────────────────────────────────────
-  {
-    id: "apt-004",
-    appointment_type: "ANC",
-    scheduled_date: fmt(addDays(today, -14)),
-    scheduled_time: "09:00",
-    facility_name: "Nyamata Health Center",
-    provider_name: "Dr. Murenzi Jean",
-    status: "COMPLETED",
-    notes: null,
-  },
-  {
-    id: "apt-005",
-    appointment_type: "PNC",
-    scheduled_date: fmt(addDays(today, -30)),
-    scheduled_time: "11:00",
-    facility_name: "Nyamata Health Center",
-    provider_name: "Dr. Murenzi Jean",
-    status: "COMPLETED",
-    notes: null,
-  },
-  {
-    id: "apt-006",
-    appointment_type: "SICK_CHILD",
-    scheduled_date: fmt(addDays(today, -45)),
-    scheduled_time: "14:00",
-    facility_name: "Bugesera District Hospital",
-    provider_name: "Dr. Habimana Alice",
-    status: "CANCELLED",
-    notes: null,
-  },
-  {
-    id: "apt-007",
-    appointment_type: "GENERAL",
-    scheduled_date: fmt(addDays(today, -60)),
-    scheduled_time: "08:30",
-    facility_name: "Nyamata Health Center",
-    provider_name: "Nurse Uwase Claudine",
-    status: "MISSED",
-    notes: null,
-  },
-  {
-    id: "apt-008",
-    appointment_type: "GROWTH_MONITORING",
-    scheduled_date: fmt(addDays(today, -90)),
-    scheduled_time: "10:00",
-    facility_name: "Nyamata Health Center",
-    provider_name: "Nurse Kagabo Eric",
-    status: "COMPLETED",
-    notes: null,
-  },
-];
+function mapToPatientPregnancy(raw: PregnancyResponse): PatientPregnancy {
+  return {
+    id: raw.id,
+    gestational_age_weeks: calcGestationalWeeks(raw.lmpDate),
+    estimated_due_date: raw.edd,
+    status: normalizePregnancyStatus(raw.status),
+    anc_visits_completed: 0,
+    anc_visits_total: 8,
+    last_visit_date: null,
+    next_visit_date: null,
+    next_visit_provider: null,
+    facility_name: "",
+    chw: null,
+  };
+}
 
-const MOCK_CHILDREN: PatientChild[] = [
-  {
-    id: "child-001",
-    health_id: "CHD-001",
-    first_name: "Amara",
-    gender: "FEMALE",
-    date_of_birth: "2024-11-20",   // ~18 months — first child, mother now pregnant again
-    health_status: "HEALTHY",
-    vaccinations_completed: 9,
+function normalizeAppointmentStatus(raw: string): AppointmentStatus {
+  const s = raw.toUpperCase();
+  if (s === "CONFIRMED") return "SCHEDULED";
+  if (s === "NO_SHOW") return "MISSED";
+  if (s === "SCHEDULED" || s === "COMPLETED" || s === "CANCELLED" || s === "MISSED") {
+    return s as AppointmentStatus;
+  }
+  return "SCHEDULED";
+}
+
+function mapToPatientAppointment(raw: AppointmentResponse): PatientAppointment {
+  const dt = new Date(raw.scheduledAt);
+  const date = dt.toISOString().split("T")[0];
+  const time = `${String(dt.getHours()).padStart(2, "0")}:${String(dt.getMinutes()).padStart(2, "0")}`;
+  return {
+    id: raw.id,
+    appointment_type: raw.appointmentType as AppointmentType,
+    scheduled_date: date,
+    scheduled_time: time,
+    facility_name: "",
+    provider_name: "",
+    status: normalizeAppointmentStatus(raw.status),
+    notes: raw.notes ?? null,
+  };
+}
+
+function mapToPatientChild(raw: ChildResponse): PatientChild {
+  const hs = raw.healthStatus as string | undefined;
+  return {
+    id: raw.id,
+    health_id: raw.id,
+    first_name: raw.firstName,
+    gender: raw.gender,
+    date_of_birth: raw.dateOfBirth,
+    health_status:
+      hs === "MALNOURISHED" || hs === "SICK" ? "AT_RISK" : (hs as "HEALTHY" | "AT_RISK" | "CRITICAL") ?? "HEALTHY",
+    vaccinations_completed: 0,
     vaccinations_total: 13,
-    vaccination_status: "DUE_SOON",
-    next_vaccination_name: "Measles-Rubella 2",
-    next_vaccination_date: fmt(addDays(today, 7)),
-  },
-];
+    vaccination_status: "UP_TO_DATE",
+    next_vaccination_name: null,
+    next_vaccination_date: null,
+  };
+}
 
-const MOCK_PROFILE: PatientProfile = {
-  health_id: "MTH-001",
-  full_name: "Uwimana Marie",
-  facility_name: "Nyamata Health Center",
-  pregnancy: MOCK_PREGNANCY,
-  upcoming_appointment: MOCK_APPOINTMENTS[0],
-  children: MOCK_CHILDREN,
-};
+function extractList<T>(response: unknown): T[] {
+  if (Array.isArray(response)) return response as T[];
+  if (response && typeof response === "object") {
+    const r = response as Record<string, unknown>;
+    if (Array.isArray(r.content)) return r.content as T[];
+    if (Array.isArray(r.data)) return r.data as T[];
+  }
+  return [];
+}
+
+// ─── Internal: resolve current patient's motherId + facilityId ────────────────
+
+interface MotherInfo {
+  motherId: string;
+  facilityId: string;
+}
+
+// Cached per page load to avoid triple-calling /me and /mothers/search
+let _cachedMotherInfo: MotherInfo | null | undefined = undefined;
+
+async function getCurrentMotherInfo(): Promise<MotherInfo | null> {
+  if (_cachedMotherInfo !== undefined) return _cachedMotherInfo;
+
+  try {
+    const me = await apiClient.get<MeResponse & { healthId?: string; motherId?: string }>(
+      "/api/v1/me",
+    );
+    if (!me) { _cachedMotherInfo = null; return null; }
+
+    const facilityId = me.facilityId ?? "";
+
+    // Some backends return motherId directly on the /me response
+    if (me.motherId) {
+      _cachedMotherInfo = { motherId: me.motherId, facilityId };
+      return _cachedMotherInfo;
+    }
+
+    // Fall back: search by phone number to find the mother record
+    if (me.phoneNumber) {
+      const searchRes = await apiClient.get<unknown>(
+        `/api/v1/mothers/search?search_term=${encodeURIComponent(me.phoneNumber)}`,
+      );
+      const items = extractList<Record<string, unknown>>(searchRes);
+      if (items.length > 0) {
+        const motherId = String(items[0].id ?? "");
+        if (motherId) {
+          _cachedMotherInfo = { motherId, facilityId };
+          return _cachedMotherInfo;
+        }
+      }
+    }
+
+    _cachedMotherInfo = null;
+    return null;
+  } catch {
+    _cachedMotherInfo = null;
+    return null;
+  }
+}
 
 // ─── API functions ─────────────────────────────────────────────────────────────
 
-export async function getPatientProfile(): Promise<PatientProfile> {
+export async function getPatientProfile(): Promise<PatientProfile | null> {
   try {
-    const res = await apiClient.get<unknown>("/api/v1/patient/profile");
-    return res as PatientProfile;
+    const me = await apiClient.get<Record<string, unknown>>("/api/v1/me");
+    return {
+      health_id: String(me.id ?? ""),
+      full_name: `${me.firstName ?? ""} ${me.lastName ?? ""}`.trim(),
+      facility_name: String(me.facilityName ?? ""),
+      pregnancy: null,
+      upcoming_appointment: null,
+      children: [],
+    };
   } catch {
-    return MOCK_PROFILE;
+    return null;
   }
 }
 
 export async function getPatientPregnancy(): Promise<PatientPregnancy | null> {
+  // Reset cache on each fresh query so stale data doesn't persist across logins
+  _cachedMotherInfo = undefined;
   try {
-    const res = await apiClient.get<unknown>("/api/v1/patient/pregnancy");
-    return res as PatientPregnancy;
+    const info = await getCurrentMotherInfo();
+    if (!info) return null;
+    const { motherId, facilityId } = info;
+
+    const qs = facilityId ? `?facilityId=${encodeURIComponent(facilityId)}` : "";
+    const res = await apiClient.get<unknown>(
+      `/api/v1/pregnancies/by-mother/${encodeURIComponent(motherId)}${qs}`,
+    );
+    const items = extractList<PregnancyResponse>(res);
+    const active = items.find((p) => p.status === "ACTIVE");
+    return active ? mapToPatientPregnancy(active) : items[0] ? mapToPatientPregnancy(items[0]) : null;
   } catch {
-    return MOCK_PREGNANCY;
+    return null;
   }
 }
 
 export async function getPatientAppointments(): Promise<PatientAppointment[]> {
   try {
-    const res = await apiClient.get<unknown>("/api/v1/patient/appointments");
-    if (Array.isArray(res)) return res as PatientAppointment[];
+    const info = await getCurrentMotherInfo();
+    if (!info) {
+      // Fallback: try the generic appointments list
+      const res = await apiClient.get<unknown>("/api/v1/appointments?page=0&size=20");
+      return extractList<AppointmentResponse>(res).map(mapToPatientAppointment);
+    }
+    const { motherId, facilityId } = info;
+
+    const params = new URLSearchParams({ patientType: "MOTHER" });
+    if (facilityId) params.append("facilityId", facilityId);
+
+    const res = await apiClient.get<unknown>(
+      `/api/v1/appointments/patient/${encodeURIComponent(motherId)}?${params}`,
+    );
+    return extractList<AppointmentResponse>(res).map(mapToPatientAppointment);
   } catch {
-    // fall through
+    return [];
   }
-  return [...MOCK_APPOINTMENTS];
 }
 
 export async function cancelAppointment(appointmentId: string): Promise<void> {
-  try {
-    await apiClient.delete(`/api/v1/appointments/${encodeURIComponent(appointmentId)}`);
-  } catch {
-    // mock: just resolve
-  }
+  await apiClient.delete(`/api/v1/appointments/${encodeURIComponent(appointmentId)}`);
 }
 
 export async function getPatientChildren(): Promise<PatientChild[]> {
   try {
-    const res = await apiClient.get<unknown>("/api/v1/patient/children");
-    if (Array.isArray(res)) return res as PatientChild[];
+    const info = await getCurrentMotherInfo();
+    if (!info) return [];
+    const { motherId, facilityId } = info;
+
+    const qs = facilityId ? `?facilityId=${encodeURIComponent(facilityId)}` : "";
+    const res = await apiClient.get<unknown>(
+      `/api/v1/children/by-mother/${encodeURIComponent(motherId)}${qs}`,
+    );
+    return extractList<ChildResponse>(res).map(mapToPatientChild);
   } catch {
-    // fall through
+    return [];
   }
-  return [...MOCK_CHILDREN];
 }

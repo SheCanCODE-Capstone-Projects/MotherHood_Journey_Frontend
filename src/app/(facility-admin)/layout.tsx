@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
-import { PortalShell } from "@/shared/components/layout";
-
+// PortalShell is provided by the root layout — no double-wrapping.
 export default function FacilityAdminLayout({ children }: { children: ReactNode }) {
-  return <PortalShell fallbackRole="facility_admin">{children}</PortalShell>;
+  return <>{children}</>;
 }

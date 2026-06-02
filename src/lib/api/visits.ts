@@ -1,10 +1,13 @@
 import { apiClient } from "./client";
+import { getVisitsByFacility, createHealthVisit } from "./health-visits";
+import { searchMothers, getChildren } from "./children";
 import type {
   PatientSearchResult,
   ICD10Code,
   VisitFormData,
   VisitResponse,
 } from "@/features/visit/types";
+import type { HealthVisitResponse, CreateHealthVisitRequest } from "@/shared/types/backend";
 
 export interface VisitSummary {
   visit_id: string;
@@ -17,71 +20,89 @@ export interface VisitSummary {
   recorded_at: string;
 }
 
-const MOCK_VISITS: VisitSummary[] = [
-  { visit_id: "VIS-001", patient_health_id: "MTH-001", patient_name: "Uwimana Marie", patient_type: "MOTHER", visit_type: "ANC", primary_diagnosis_code: "Z34", primary_diagnosis_name: "Supervision of normal pregnancy", recorded_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
-  { visit_id: "VIS-002", patient_health_id: "CHD-001", patient_name: "Habimana Jean", patient_type: "CHILD", visit_type: "IMMUNIZATION", primary_diagnosis_code: "Z23", primary_diagnosis_name: "Immunization", recorded_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
-  { visit_id: "VIS-003", patient_health_id: "MTH-003", patient_name: "Nyiramongi Alice", patient_type: "MOTHER", visit_type: "PNC", primary_diagnosis_code: "Z39", primary_diagnosis_name: "Postpartum care and examination", recorded_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
-  { visit_id: "VIS-004", patient_health_id: "CHD-002", patient_name: "Ishimwe David", patient_type: "CHILD", visit_type: "SICK_CHILD", primary_diagnosis_code: "J18", primary_diagnosis_name: "Pneumonia, unspecified", recorded_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-  { visit_id: "VIS-005", patient_health_id: "MTH-002", patient_name: "Mukamana Jeanne", patient_type: "MOTHER", visit_type: "ANC", primary_diagnosis_code: "O14", primary_diagnosis_name: "Pre-eclampsia", recorded_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-  { visit_id: "VIS-006", patient_health_id: "MTH-005", patient_name: "Nyirahabimana Claudine", patient_type: "MOTHER", visit_type: "GROWTH_MONITORING", primary_diagnosis_code: "Z10", primary_diagnosis_name: "Routine general health check", recorded_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
-  { visit_id: "VIS-007", patient_health_id: "CHD-003", patient_name: "Uwimana Grace", patient_type: "CHILD", visit_type: "IMMUNIZATION", primary_diagnosis_code: "Z23", primary_diagnosis_name: "Immunization", recorded_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
-];
+function mapToVisitSummary(v: HealthVisitResponse): VisitSummary {
+  const primaryDx = v.diagnoses?.find((d) => d.isPrimary) ?? v.diagnoses?.[0] ?? null;
+  return {
+    visit_id: v.id,
+    patient_health_id: v.patientRefId,
+    patient_name: v.patientRefId,
+    patient_type: v.patientType,
+    visit_type: v.visitType,
+    primary_diagnosis_code: primaryDx?.icd10Code ?? null,
+    primary_diagnosis_name: primaryDx?.icd10Name ?? null,
+    recorded_at: v.visitDatetime ?? v.createdAt,
+  };
+}
 
-export async function getVisits(search?: string): Promise<VisitSummary[]> {
+export async function getVisits(facilityId?: string, search?: string): Promise<VisitSummary[]> {
   try {
-    const query = search ? `?search=${encodeURIComponent(search)}` : "";
-    const response = await apiClient.get<unknown>(`/api/v1/visits${query}`);
-    if (Array.isArray(response) && (response as VisitSummary[]).length > 0) {
-      return response as VisitSummary[];
+    let visits: VisitSummary[] = [];
+
+    if (facilityId) {
+      const page = await getVisitsByFacility(facilityId, 0, 50);
+      visits = (page.content ?? []).map(mapToVisitSummary);
+    } else {
+      const response = await apiClient.get<unknown>("/api/v1/health-visits?page=0&size=50");
+      if (Array.isArray(response)) {
+        visits = (response as HealthVisitResponse[]).map(mapToVisitSummary);
+      } else {
+        const page = response as { content?: HealthVisitResponse[] };
+        visits = (page.content ?? []).map(mapToVisitSummary);
+      }
     }
-  } catch {
-    // fall through to mock
-  }
-  const q = search?.toLowerCase() ?? "";
-  return q
-    ? MOCK_VISITS.filter(
+
+    if (search) {
+      const q = search.toLowerCase();
+      return visits.filter(
         (v) =>
           v.patient_name.toLowerCase().includes(q) ||
           v.patient_health_id.toLowerCase().includes(q) ||
           v.visit_type.toLowerCase().includes(q),
-      )
-    : [...MOCK_VISITS];
+      );
+    }
+    return visits;
+  } catch {
+    return [];
+  }
 }
 
-export function searchPatients(
+export async function searchPatients(
   query: string,
   patientType: "MOTHER" | "CHILD",
 ): Promise<PatientSearchResult[]> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const allPatients = [
-        { health_id: "MTH-001", name: "Uwimana Marie", patient_type: "MOTHER" as const, age: 28 },
-        { health_id: "MTH-002", name: "Mukamana Jeanne", patient_type: "MOTHER" as const, age: 32 },
-        { health_id: "MTH-003", name: "Nyiramongi Alice", patient_type: "MOTHER" as const, age: 24 },
-        { health_id: "MTH-004", name: "Uwase Beatrice", patient_type: "MOTHER" as const, age: 30 },
-        { health_id: "MTH-005", name: "Nyirahabimana Claudine", patient_type: "MOTHER" as const, age: 27 },
-        { health_id: "MTH-006", name: "Mukandayisenga Olive", patient_type: "MOTHER" as const, age: 35 },
-        { health_id: "MTH-007", name: "Uwimana Angelique", patient_type: "MOTHER" as const, age: 22 },
-        { health_id: "CHD-001", name: "Habimana Jean", patient_type: "CHILD" as const, age: 3 },
-        { health_id: "CHD-002", name: "Ishimwe David", patient_type: "CHILD" as const, age: 1 },
-        { health_id: "CHD-003", name: "Uwimana Grace", patient_type: "CHILD" as const, age: 5 },
-        { health_id: "CHD-004", name: "Hakizimana Eric", patient_type: "CHILD" as const, age: 2 },
-        { health_id: "CHD-005", name: "Mukamana Alice", patient_type: "CHILD" as const, age: 4 },
-      ].filter(
-        (p) =>
-          p.patient_type === patientType &&
-          (p.health_id.toLowerCase().includes(query.toLowerCase()) ||
-            p.name.toLowerCase().includes(query.toLowerCase())),
-      );
-      resolve(allPatients);
-    }, 300);
-  });
+  try {
+    if (patientType === "MOTHER") {
+      const results = await searchMothers(query);
+      return results.map((m) => {
+        const raw = m as unknown as Record<string, unknown>;
+        return {
+          health_id: String(raw.health_id ?? raw.healthId ?? raw.id ?? ""),
+          name: String(raw.name ?? raw.firstName ?? ""),
+          patient_type: "MOTHER" as const,
+          age: Number(raw.age ?? 0),
+        };
+      });
+    } else {
+      const results = await getChildren(query);
+      return results.map((c) => ({
+        health_id: c.health_id ?? c.id,
+        name: c.first_name,
+        patient_type: "CHILD" as const,
+        age: Math.floor(
+          (Date.now() - new Date(c.date_of_birth).getTime()) /
+            (365.25 * 24 * 60 * 60 * 1000),
+        ),
+      }));
+    }
+  } catch {
+    return [];
+  }
 }
 
 export function searchICD10Codes(query: string): Promise<ICD10Code[]> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const mockCodes: ICD10Code[] = [
+      const codes: ICD10Code[] = [
         // A00-B99 — Infectious diseases
         { code: "A00", name: "Cholera" },
         { code: "A01", name: "Typhoid and paratyphoid fevers" },
@@ -154,89 +175,88 @@ export function searchICD10Codes(query: string): Promise<ICD10Code[]> {
         { code: "P05", name: "Slow fetal growth and fetal malnutrition" },
         { code: "P07", name: "Disorders related to short gestation" },
         { code: "P08", name: "Disorders related to long gestation" },
-        { code: "P15", name: "Birth injuries" },
         { code: "P22", name: "Respiratory distress of newborn" },
         { code: "P23", name: "Congenital pneumonia" },
-        { code: "P24", name: "Neonatal aspiration syndromes" },
         { code: "P36", name: "Bacterial sepsis of newborn" },
-        { code: "P37", name: "Other congenital infectious diseases" },
-        { code: "P39", name: "Other infections specific to perinatal period" },
-        { code: "P55", name: "Hemolytic disease of newborn" },
         { code: "P59", name: "Neonatal jaundice" },
-        { code: "P61", name: "Perinatal hematological disorders" },
-        { code: "P70", name: "Transitory disorders of glucose metabolism" },
-        { code: "P71", name: "Transitory neonatal calcium/magnesium disorders" },
-        { code: "P74", name: "Other transitory electrolyte disturbances" },
-        { code: "P78", name: "Perinatal digestive system disorders" },
-        { code: "P80", name: "Hypothermia of newborn" },
-        { code: "P83", name: "Other integument disorders specific to newborn" },
         { code: "P92", name: "Feeding problems of newborn" },
-        { code: "P96", name: "Other perinatal conditions" },
         // R00-R99 — Symptoms
         { code: "R50", name: "Fever of unknown origin" },
         { code: "R51", name: "Headache" },
         { code: "R52", name: "Pain, unspecified" },
         { code: "R53", name: "Malaise and fatigue" },
-        { code: "R55", name: "Syncope and collapse" },
         { code: "R56", name: "Convulsions" },
-        { code: "R57", name: "Shock" },
-        { code: "R59", name: "Enlarged lymph nodes" },
         { code: "R60", name: "Edema" },
         { code: "R62", name: "Lack of expected normal physiological development" },
         { code: "R63", name: "Symptoms concerning food and fluid intake" },
-        { code: "R73", name: "Elevated blood glucose level" },
-        { code: "R74", name: "Abnormal serum enzyme levels" },
-        { code: "R80", name: "Isolated proteinuria" },
-        { code: "R81", name: "Glycosuria" },
-        { code: "R82", name: "Other abnormal urine findings" },
-        { code: "R91", name: "Abnormal findings on lung imaging" },
         // Z00-Z99 — Factors influencing health
         { code: "Z00", name: "Encounter for general examination" },
-        { code: "Z01", name: "Encounter for other special examination" },
-        { code: "Z03", name: "Encounter for medical observation" },
         { code: "Z09", name: "Follow-up examination after treatment" },
         { code: "Z10", name: "Routine general health check" },
-        { code: "Z20", name: "Contact with infectious diseases" },
-        { code: "Z21", name: "Asymptomatic HIV infection status" },
         { code: "Z23", name: "Immunization" },
-        { code: "Z29", name: "Need for other prophylactic measures" },
         { code: "Z30", name: "Contraceptive management" },
         { code: "Z32", name: "Encounter for pregnancy test" },
-        { code: "Z33", name: "Pregnant state" },
         { code: "Z34", name: "Supervision of normal pregnancy" },
         { code: "Z35", name: "Supervision of high-risk pregnancy" },
         { code: "Z36", name: "Antenatal screening" },
-        { code: "Z37", name: "Outcome of delivery" },
-        { code: "Z38", name: "Liveborn infants" },
         { code: "Z39", name: "Postpartum care and examination" },
-        { code: "Z50", name: "Care involving rehabilitation" },
-        { code: "Z51", name: "Other medical care" },
-        { code: "Z71", name: "Health counseling" },
-        { code: "Z72", name: "Problems related to lifestyle" },
-        { code: "Z76", name: "Persons encountering health services" },
       ].filter(
         (c) =>
           c.code.toLowerCase().includes(query.toLowerCase()) ||
           c.name.toLowerCase().includes(query.toLowerCase()),
       );
-      resolve(mockCodes);
-    }, 200);
+      resolve(codes);
+    }, 100);
   });
 }
 
-export function submitVisit(data: VisitFormData): Promise<VisitResponse> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const primaryDiagnosis = data.diagnoses.find((d) => d.is_primary);
-      const patientName = primaryDiagnosis?.icd10_name ?? "Unknown";
+export async function submitVisit(data: VisitFormData): Promise<VisitResponse> {
+  let facilityId = "";
+  let healthWorkerId = "";
 
-      resolve({
-        visit_id: `VIS-${Date.now()}`,
-        patient_health_id: data.health_id,
-        patient_name: data.patient_name,
-        visit_type: data.visit_type,
-        recorded_at: new Date().toISOString(),
-      });
-    }, 1000);
-  });
+  if (typeof window !== "undefined") {
+    try {
+      const { getSession } = await import("next-auth/react");
+      const session = await getSession();
+      facilityId = session?.user?.facilityId ? String(session.user.facilityId) : "";
+      const userRec = session?.user as Record<string, unknown> | undefined;
+      healthWorkerId = userRec?.id ? String(userRec.id) : "";
+    } catch {
+      // session unavailable
+    }
+  }
+
+  const request: CreateHealthVisitRequest = {
+    patientRefId: data.health_id,
+    patientType: data.patient_type,
+    facilityId,
+    healthWorkerId,
+    visitDatetime: new Date().toISOString(),
+    visitType: data.visit_type as CreateHealthVisitRequest["visitType"],
+    weightKg: data.vitals?.weight,
+    heightCm: data.vitals?.height,
+    systolicBp: data.vitals?.systolic_bp,
+    diastolicBp: data.vitals?.diastolic_bp,
+    muacCm: data.vitals?.muac,
+    diagnoses: data.diagnoses?.map((d) => ({
+      icd10Code: d.icd10_code,
+      icd10Name: d.icd10_name,
+      isPrimary: d.is_primary,
+      notes: d.notes,
+    })),
+    prescriptions: data.prescriptions?.map((p) => ({
+      medication: p.medication_name,
+      dosage: p.dosage,
+      duration: p.duration,
+    })),
+  };
+
+  const result = await createHealthVisit(request);
+  return {
+    visit_id: result.id,
+    patient_health_id: result.patientRefId,
+    patient_name: data.patient_name,
+    visit_type: result.visitType,
+    recorded_at: result.visitDatetime ?? result.createdAt,
+  };
 }

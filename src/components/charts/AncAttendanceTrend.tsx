@@ -38,9 +38,6 @@ export function AncAttendanceTrend({ data }: AncAttendanceTrendProps) {
             axisLine={false}
             tickLine={false}
           />
-<<<<<<< HEAD
-          <Tooltip formatter={(value: any) => `${Number(value || 0).toFixed(1)}%`} />
-=======
           <Tooltip
             formatter={(value) => [`${Number(value ?? 0).toFixed(1)}%`, "Attendance"]}
             contentStyle={{
@@ -50,7 +47,6 @@ export function AncAttendanceTrend({ data }: AncAttendanceTrendProps) {
             }}
             labelStyle={{ color: "#163F42", fontWeight: 600 }}
           />
->>>>>>> main
           <Line
             type="monotone"
             dataKey="attendance"

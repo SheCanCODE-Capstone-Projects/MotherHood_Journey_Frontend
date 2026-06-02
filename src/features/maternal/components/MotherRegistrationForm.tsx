@@ -3,10 +3,9 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSession } from "next-auth/react";
 import {
   motherRegistrationSchema,
-  motherRegistrationStepOneSchema,
-  motherRegistrationStepTwoSchema,
 } from "../schemas";
 import { MotherRegistrationStep1 } from "./Step1";
 import { MotherRegistrationStep2 } from "./Step2";
@@ -14,38 +13,70 @@ import { MotherRegistrationStep3 } from "./Step3";
 import { MotherRegistrationSuccess } from "./Success";
 import { useMother } from "../hooks/useMother";
 import type { MotherRegistrationData } from "../schemas";
-import { AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { AlertCircle, ChevronLeft, ChevronRight, Check } from "lucide-react";
 
-/**
- * Main Multi-Step Form Component
- * 
- * Manages:
- * - Step navigation (1, 2, 3)
- * - Form validation using Zod
- * - State management for multi-step form
- * - API submission
- * - Success state with health ID display
- * 
- * Features:
- * - Back/Next navigation
- * - Validation at each step
- * - Final review before submission
- * - Health ID generation and display
- * - Print functionality
- */
+const STEPS = [
+  { number: 1, label: "Identity" },
+  { number: 2, label: "Location" },
+  { number: 3, label: "Review" },
+];
+
+function StepIndicator({ current }: { current: number }) {
+  return (
+    <nav aria-label="Registration progress" className="mb-8">
+      <ol className="flex items-center gap-0">
+        {STEPS.map((step, idx) => {
+          const done = step.number < current;
+          const active = step.number === current;
+          return (
+            <React.Fragment key={step.number}>
+              <li className="flex flex-col items-center gap-1.5 min-w-[72px]">
+                <div
+                  className={`flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-bold transition-all ${
+                    done
+                      ? "border-teal-600 bg-teal-600 text-white"
+                      : active
+                      ? "border-teal-600 bg-white text-teal-700 shadow-sm shadow-teal-200"
+                      : "border-gray-200 bg-white text-gray-400"
+                  }`}
+                >
+                  {done ? <Check className="h-4 w-4" /> : step.number}
+                </div>
+                <span
+                  className={`text-[11px] font-semibold uppercase tracking-wide ${
+                    active ? "text-teal-700" : done ? "text-teal-600" : "text-gray-400"
+                  }`}
+                >
+                  {step.label}
+                </span>
+              </li>
+              {idx < STEPS.length - 1 && (
+                <div
+                  className={`mb-5 h-0.5 flex-1 transition-all ${
+                    done ? "bg-teal-600" : "bg-gray-200"
+                  }`}
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
 
 export function MotherRegistrationForm() {
+  const { data: session } = useSession();
+  const facilityId = session?.user?.facilityId ? String(session.user.facilityId) : "";
+
   const [currentStep, setCurrentStep] = useState(1);
   const [submittedHealthId, setSubmittedHealthId] = useState<string | null>(null);
-  const [submittedName, setSubmittedName] = useState<{
-    first: string;
-    last: string;
-  } | null>(null);
+  const [submittedMotherId, setSubmittedMotherId] = useState<string | null>(null);
+  const [submittedName, setSubmittedName] = useState<{ first: string; last: string } | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
 
   const { mutate: submitRegistration, isPending } = useMother();
 
-  // Initialize form with react-hook-form and Zod validation
   const {
     register,
     handleSubmit,
@@ -53,6 +84,7 @@ export function MotherRegistrationForm() {
     formState: { errors },
     getValues,
     trigger,
+    reset,
   } = useForm<MotherRegistrationData>({
     resolver: zodResolver(motherRegistrationSchema),
     mode: "onBlur",
@@ -67,100 +99,65 @@ export function MotherRegistrationForm() {
     },
   });
 
-  /**
-   * Validate current step and move to next
-   */
   const handleNext = async () => {
     setGeneralError(null);
-
     let isValid = false;
-
     if (currentStep === 1) {
-      // Validate step 1 fields
-      isValid = await trigger([
-        "national_id",
-        "first_name",
-        "last_name",
-        "date_of_birth",
-        "phone_number",
-      ]);
+      isValid = await trigger(["national_id", "first_name", "last_name", "date_of_birth", "phone_number"]);
     } else if (currentStep === 2) {
-      // Validate step 2 fields
       isValid = await trigger(["home_location", "education_level"]);
     }
-
-    if (isValid) {
-      setCurrentStep(currentStep + 1);
-    }
+    if (isValid) setCurrentStep((s) => s + 1);
   };
 
-  /**
-   * Go back to previous step
-   */
   const handleBack = () => {
     setGeneralError(null);
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
+    if (currentStep > 1) setCurrentStep((s) => s - 1);
   };
 
-  /**
-   * Submit the form and call the API
-   */
-  const onSubmit = async (data: MotherRegistrationData) => {
+  const onSubmit = (data: MotherRegistrationData) => {
     setGeneralError(null);
-
-    try {
-      // Call the API to register mother
-      submitRegistration(
-        {
-          national_id: data.national_id,
-          first_name: data.first_name,
-          last_name: data.last_name,
-          date_of_birth: data.date_of_birth,
-          phone_number: data.phone_number,
-          home_location: data.home_location,
-          education_level: data.education_level,
+    submitRegistration(
+      {
+        national_id: data.national_id,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        date_of_birth: data.date_of_birth,
+        phone_number: data.phone_number,
+        home_location: data.home_location,
+        education_level: data.education_level,
+        facility_id: facilityId || undefined,
+      },
+      {
+        onSuccess: (response) => {
+          // apiClient unwraps the envelope — response IS the inner data object
+          setSubmittedHealthId(response.health_id);
+          setSubmittedMotherId(response.mother_id);
+          setSubmittedName({ first: data.first_name, last: data.last_name });
         },
-        {
-          onSuccess: (response: any) => {
-            // Store health ID and name for success screen
-            setSubmittedHealthId(response.data.health_id);
-            setSubmittedName({
-              first: data.first_name,
-              last: data.last_name,
-            });
-          },
-          onError: (error: any) => {
-            setGeneralError(
-              error.message || "An error occurred during registration. Please try again."
-            );
-          },
-        }
-      );
-    } catch (error: any) {
-      setGeneralError(
-        error.message || "An error occurred during registration. Please try again."
-      );
-    }
+        onError: (error) => {
+          setGeneralError(error.message || "Registration failed. Please try again.");
+        },
+      },
+    );
   };
 
-  /**
-   * Reset form for new registration
-   */
   const handleNewRegistration = () => {
     setCurrentStep(1);
     setSubmittedHealthId(null);
+    setSubmittedMotherId(null);
     setSubmittedName(null);
     setGeneralError(null);
+    reset();
   };
 
-  // Show success screen if registration was successful
   if (submittedHealthId && submittedName) {
     return (
-      <div className="w-full max-w-2xl mx-auto p-6">
+      <div className="w-full max-w-2xl mx-auto">
         <MotherRegistrationSuccess
           healthId={submittedHealthId}
+          motherId={submittedMotherId ?? ""}
+          facilityId={facilityId}
           firstName={submittedName.first}
           lastName={submittedName.last}
           onNewRegistration={handleNewRegistration}
@@ -170,102 +167,68 @@ export function MotherRegistrationForm() {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-6">
-      {/* Header with Step Indicator */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Mother Registration
-        </h1>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <span>Step {currentStep} of 3</span>
-          <div className="flex gap-2">
-            {[1, 2, 3].map((step) => (
-              <div
-                key={step}
-                className={`w-2 h-2 rounded-full ${
-                  step === currentStep
-                    ? "bg-blue-600"
-                    : step < currentStep
-                    ? "bg-green-600"
-                    : "bg-gray-300"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+    <div className="w-full max-w-2xl mx-auto">
+      <StepIndicator current={currentStep} />
 
-      {/* General Error Message */}
       {generalError && (
-        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3 text-red-900">
-          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+        <div className="mb-6 flex gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-900">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
           <div>
             <p className="font-semibold">Registration Error</p>
-            <p className="text-sm">{generalError}</p>
+            <p className="mt-0.5 text-sm">{generalError}</p>
           </div>
         </div>
       )}
 
-      {/* Form Container */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Step 1: Personal Information */}
         {currentStep === 1 && (
-          <MotherRegistrationStep1
-            register={register}
-            errors={errors}
-            isLoading={isPending}
-          />
+          <MotherRegistrationStep1 register={register} errors={errors} isLoading={isPending} />
         )}
-
-        {/* Step 2: Location and Education */}
         {currentStep === 2 && (
-          <MotherRegistrationStep2
-            register={register}
-            errors={errors}
-            control={control}
-            isLoading={isPending}
-          />
+          <MotherRegistrationStep2 register={register} errors={errors} control={control} isLoading={isPending} />
         )}
-
-        {/* Step 3: Confirmation */}
         {currentStep === 3 && (
-          <MotherRegistrationStep3
-            formData={getValues()}
-            isLoading={isPending}
-          />
+          <MotherRegistrationStep3 formData={getValues()} isLoading={isPending} />
         )}
 
-        {/* Navigation Buttons */}
-        <div className="flex gap-4 justify-between pt-6 border-t">
-          {/* Back Button */}
+        <div className="flex items-center justify-between border-t pt-5">
           <button
             type="button"
             onClick={handleBack}
             disabled={currentStep === 1 || isPending}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-gray-900 font-medium rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-5 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="h-4 w-4" />
             Back
           </button>
 
-          {/* Next / Submit Button */}
           {currentStep < 3 ? (
             <button
               type="button"
               onClick={handleNext}
               disabled={isPending}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 rounded-full bg-teal-600 px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
             >
-              Next
-              <ChevronRight className="w-4 h-4" />
+              Continue
+              <ChevronRight className="h-4 w-4" />
             </button>
           ) : (
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 rounded-full bg-teal-600 px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
             >
-              {isPending ? "Submitting..." : "Submit"}
+              {isPending ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  Registering…
+                </>
+              ) : (
+                <>
+                  <Check className="h-4 w-4" />
+                  Register Mother
+                </>
+              )}
             </button>
           )}
         </div>

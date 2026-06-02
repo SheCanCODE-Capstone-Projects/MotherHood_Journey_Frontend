@@ -4,38 +4,42 @@ import "next-auth/jwt";
 
 declare module "next-auth" {
   interface User {
-    token?: string;
+    /** JWT access token returned by the backend */
+    accessToken?: string;
+    /** JWT refresh token */
+    refreshToken?: string | null;
+    /** Backend role: HEALTH_WORKER, FACILITY_ADMIN, DISTRICT_OFFICER, GOVERNMENT_ANALYST, MOH_ADMIN */
     role?: string;
-    facilityId?: number;
+    facilityId?: number | null;
     geoScopeIds?: number[];
     canExport?: boolean;
     canPushHmis?: boolean;
+    /** Timestamp when token was issued (ms) */
+    tokenIssuedAt?: number;
   }
 
   interface Session {
     user: {
       accessToken?: string;
       role?: string;
-      facilityId?: number;
+      facilityId?: number | null;
       geoScopeIds?: number[];
       canExport?: boolean;
       canPushHmis?: boolean;
     } & DefaultSession["user"];
-  }
-
-  interface UserRole {
-    role : string;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     accessToken?: string;
+    refreshToken?: string | null;
     role?: string;
-    facilityId?: number;
+    facilityId?: number | null;
     geoScopeIds?: number[];
     canExport?: boolean;
     canPushHmis?: boolean;
+    tokenIssuedAt?: number;
   }
 }
 

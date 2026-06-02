@@ -202,7 +202,7 @@ export default function ChildProfilePage() {
 
   const administerMutation = useMutation({
     mutationFn: ({ vaccinationId, lotNumber }: { vaccinationId: string; lotNumber: string }) =>
-      administerVaccination(vaccinationId, { lotNumber }),
+      administerVaccination(vaccinationId, { lot_number: lotNumber }),
     onMutate: ({ vaccinationId }) => setPendingVaxId(vaccinationId),
     onSuccess: () => {
       setDialogRow(null);

@@ -1,423 +1,357 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
-import { useTranslation } from "react-i18next";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { signIn, getSession } from "next-auth/react";
+import {
+  Eye, EyeOff, Phone, Lock, AlertCircle, Heart,
+  ShieldCheck, Users, Activity, ArrowRight, Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
+import Image from "next/image";
 
-import "@/lib/i18n";
-import { useAuth } from "@/shared/hooks/useAuth";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import {
+  Card, CardContent, CardDescription, CardHeader, CardTitle,
+} from "@/shared/components/ui/card";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { Badge } from "@/shared/components/ui/badge";
+import { cn } from "@/shared/lib/utils";
 
-const signInSchema = z.object({
-  fullName: z.string().min(2, "Name must be at least 2 characters"),
-  phone: z
-    .string()
-    .regex(/^\+250\d{9}$/, "Phone number must be in format +250XXXXXXXXX"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
-
-const signUpSchema = signInSchema
-  .extend({
-    confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
-  })
-  .refine((value) => value.password === value.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords must match",
-  });
-
-type LoginForm = {
-  fullName: string;
-  phone: string;
-  password: string;
-  confirmPassword: string;
+/* ── Role → dashboard route ───────────────────────────────────── */
+const ROLE_ROUTE: Record<string, string> = {
+  HEALTH_WORKER:      "/hw-dashboard",
+  FACILITY_ADMIN:     "/facility-dashboard",
+  DISTRICT_OFFICER:   "/district-dashboard",
+  GOVERNMENT_ANALYST: "/national-dashboard",
+  MOH_ADMIN:          "/national-dashboard",
+  PATIENT:            "/dashboard",
+  health_worker:      "/hw-dashboard",
+  facility_admin:     "/facility-dashboard",
+  district_officer:   "/district-dashboard",
+  government:         "/national-dashboard",
+  patient:            "/dashboard",
 };
 
-type LanguageCode = "rw" | "en" | "fr";
-type AuthMode = "signin" | "signup";
+/* ── Zod schema ───────────────────────────────────────────────── */
+const schema = z.object({
+  phoneNumber: z
+    .string()
+    .min(9, "Enter a valid phone number")
+    .regex(/^[+\d][\d\s\-()]{7,}$/, "Enter a valid phone number"),
+  password: z.string().min(4, "Password is required"),
+});
 
-const languageOptions: Array<{ code: LanguageCode; label: string }> = [
-  { code: "rw", label: "Kinyarwanda" },
-  { code: "en", label: "English" },
-  { code: "fr", label: "Francais" },
+type FormValues = z.infer<typeof schema>;
+
+/* ── Brand panel features ─────────────────────────────────────── */
+const FEATURES = [
+  { icon: Heart,       text: "Track maternal and child health outcomes" },
+  { icon: ShieldCheck, text: "Secure, role-based access to patient data" },
+  { icon: Users,       text: "Coordinated care across facilities" },
+  { icon: Activity,    text: "Real-time health monitoring & analytics" },
 ];
 
-export default function LoginPage() {
-  const { t, i18n } = useTranslation();
-  const { currentUser, signIn, signUp, logout } = useAuth();
-  const [mode, setMode] = useState<AuthMode>(() => {
-    if (typeof window === "undefined") {
-      return "signin";
-    }
+/* ── Brand / left panel (static, no router hooks) ─────────────── */
+function BrandPanel() {
+  return (
+    <div
+      className="relative hidden lg:flex lg:w-[55%] flex-col justify-between overflow-hidden px-16 py-12"
+      style={{ background: "linear-gradient(145deg, #094544 0%, #0B5554 45%, #113638 100%)" }}
+    >
+      {/* Decorative rings with subtle animation */}
+      <div className="pointer-events-none absolute -top-32 -left-32 size-[500px] rounded-full border border-white/5 animate-pulseRing" />
+      <div className="pointer-events-none absolute -top-12 -left-12 size-[280px] rounded-full border border-white/[0.08] animate-rotate-slow" />
+      <div className="pointer-events-none absolute bottom-[-10%] -right-[15%] size-[600px] rounded-full border border-white/[0.04]" />
+      <div className="pointer-events-none absolute -bottom-20 right-20 size-[300px] rounded-full border border-white/[0.06] animate-rotate-slow" style={{ animationDirection: "reverse" }} />
+      <div className="pointer-events-none absolute top-1/4 right-1/4 size-[200px] rounded-full bg-white/[0.03] blur-3xl" />
 
-    const requestedMode = new URLSearchParams(window.location.search).get("mode");
-    return requestedMode === "signup" || requestedMode === "signin" ? requestedMode : "signin";
+      {/* Logo */}
+      <div className="relative z-10 flex items-center gap-3">
+        <div className="grid size-10 place-items-center rounded-[10px] bg-white/20 backdrop-blur-sm text-sm font-bold text-white ring-1 ring-white/30">
+          MS
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
+            Maternal
+          </p>
+          <p className="text-base font-bold text-white leading-none">Sanctuary</p>
+        </div>
+      </div>
+
+      {/* Center content */}
+      <div className="relative z-10 flex flex-col gap-10">
+        {/* Illustration */}
+        <div className="flex justify-center">
+          <div className="relative size-64 xl:size-80">
+            <Image
+              src="/images/hero-illustration.svg"
+              alt="Maternal health illustration"
+              fill
+              className="object-contain drop-shadow-2xl"
+              priority
+            />
+          </div>
+        </div>
+
+        <div className="animate-fadeSlideUp" style={{ animationDelay: "100ms", animationFillMode: "both" }}>
+          <h1 className="font-heading text-4xl xl:text-5xl font-bold text-white leading-[1.15] tracking-tight">
+            Empowering maternal<br />health through care
+          </h1>
+          <p className="mt-4 text-[17px] text-white/80 leading-relaxed max-w-md font-light">
+            A unified platform connecting health workers, facilities, and district
+            officers to deliver better outcomes for mothers and children.
+          </p>
+
+          <ul className="mt-10 space-y-4">
+            {FEATURES.map(({ icon: Icon, text }, i) => (
+              <li key={text} className="flex items-center gap-4 animate-fadeSlideUp" style={{ animationDelay: `${200 + i * 100}ms`, animationFillMode: "both" }}>
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 backdrop-blur-md border border-white/5 shadow-inner">
+                  <Icon className="size-4.5 text-white/90" />
+                </span>
+                <span className="text-[15px] text-white/90 font-medium tracking-wide">{text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <p className="relative z-10 text-xs text-white/35">
+        Ministry of Health — Rwanda &copy; {new Date().getFullYear()}
+      </p>
+    </div>
+  );
+}
+
+/* ── The actual form — uses useSearchParams, must be in Suspense ─ */
+function LoginForm() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const callbackUrl = params.get("callbackUrl");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { phoneNumber: "", password: "" },
   });
-  const [formData, setFormData] = useState<LoginForm>({
-    fullName: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [errors, setErrors] = useState<Partial<Record<keyof LoginForm, string>>>({});
-  const [hasSubmitError, setHasSubmitError] = useState(false);
-  const [status, setStatus] = useState<{
-    tone: "success" | "error";
-    key: string;
-  } | null>(null);
-  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
 
-  const activeLanguage = useMemo<LanguageCode>(() => {
-    const code = i18n.language?.slice(0, 2) as LanguageCode | undefined;
-    return code === "rw" || code === "fr" ? code : "en";
-  }, [i18n.language]);
+  const onSubmit = async (values: FormValues) => {
+    setAuthError(null);
+    setLoading(true);
 
-  const switchMode = (nextMode: AuthMode) => {
-    setMode(nextMode);
-    setErrors({});
-    setHasSubmitError(false);
-    setStatus(null);
-  };
-
-  const setRoleCookie = (role: string) => {
-    document.cookie = `mh_role=${encodeURIComponent(role)}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-  };
-
-  const onChangeField = (field: keyof LoginForm, value: string) => {
-    setFormData((previous) => ({ ...previous, [field]: value }));
-
-    if (errors[field]) {
-      setErrors((previous) => {
-        const copy = { ...previous };
-        delete copy[field];
-        return copy;
+    try {
+      const result = await signIn("credentials", {
+        phoneNumber: values.phoneNumber.replace(/\s/g, ""),
+        password: values.password,
+        redirect: false,
       });
-    }
 
-    if (hasSubmitError) {
-      setHasSubmitError(false);
-    }
-
-    if (status) {
-      setStatus(null);
-    }
-  };
-
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const schema = mode === "signup" ? signUpSchema : signInSchema;
-    const payload =
-      mode === "signup"
-        ? formData
-        : {
-            fullName: formData.fullName,
-            phone: formData.phone,
-            password: formData.password,
-          };
-    const result = schema.safeParse(payload);
-
-    if (!result.success) {
-      const fieldErrors: Partial<Record<keyof LoginForm, string>> = {};
-      for (const issue of result.error.issues) {
-        const field = issue.path[0] as keyof LoginForm;
-        if (!fieldErrors[field]) {
-          fieldErrors[field] = issue.message;
-        }
+      if (!result?.ok || result.error) {
+        setAuthError("Invalid phone number or password. Please try again.");
+        toast.error("Sign in failed", {
+          description: "Check your credentials and try again.",
+        });
+        return;
       }
-      setErrors(fieldErrors);
-      setHasSubmitError(true);
-      setStatus(null);
-      return;
+
+      toast.success("Signed in successfully");
+
+      if (callbackUrl) {
+        router.replace(callbackUrl);
+        return;
+      }
+
+      const session = await getSession();
+      const role = session?.user?.role as string | undefined;
+      const destination = (role && ROLE_ROUTE[role]) ?? "/patient/dashboard";
+      router.replace(destination);
+    } catch {
+      setAuthError("Something went wrong. Please try again.");
+      toast.error("Network error", { description: "Could not reach the server." });
+    } finally {
+      setLoading(false);
     }
-
-    const authResult =
-      mode === "signup"
-        ? signUp({ phone: formData.phone, password: formData.password })
-        : signIn({ phone: formData.phone, password: formData.password });
-
-    if (!authResult.ok) {
-      setStatus({ tone: "error", key: authResult.errorKey });
-      return;
-    }
-
-    const signedInRole = useAuth.getState().currentUser?.role;
-    if (signedInRole) {
-      setRoleCookie(signedInRole);
-    }
-
-    setErrors({});
-    setHasSubmitError(false);
-    setFormData({
-      fullName: "",
-      phone: "",
-      password: "",
-      confirmPassword: "",
-    });
-    setStatus({ tone: "success", key: authResult.messageKey });
-  };
-
-  const onLogout = () => {
-    const result = logout();
-    document.cookie = "mh_role=; Path=/; Max-Age=0; SameSite=Lax";
-    if (result.ok) {
-      setStatus({ tone: "success", key: result.messageKey });
-    }
-  };
-
-  const changeLanguage = (language: LanguageCode) => {
-    void i18n.changeLanguage(language);
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#EAF5F3]">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_15%_18%,rgba(255,255,255,0.9),transparent_18%),radial-gradient(circle_at_85%_20%,rgba(235,248,246,0.95),transparent_22%),radial-gradient(circle_at_25%_82%,rgba(187,220,215,0.6),transparent_24%),linear-gradient(135deg,#F7FBFA_0%,#EEF8F6_35%,#DCEDEB_100%)]">
-        <div className="absolute -left-28 top-20 h-72 w-72 rounded-full bg-[#BCE0DB]/35 blur-3xl" />
-        <div className="absolute -right-20 top-1/3 h-80 w-80 rounded-full bg-[#7FB7B1]/25 blur-3xl" />
-        <div className="absolute -bottom-24 left-1/4 h-96 w-96 rounded-full bg-[#2C6F73]/10 blur-3xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.55)_0%,transparent_38%,rgba(255,255,255,0.12)_100%)]" />
-      </div>
-
-      <aside className="absolute right-4 top-4 z-20 w-[min(90vw,18rem)] sm:right-6 sm:top-6">
-        <div className="rounded-2xl border border-white/30 bg-white/12 p-3 text-sm text-[#1D5052] shadow-lg backdrop-blur-md">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="font-semibold">{t("login.languageNotice")}</p>
-              <p className="text-xs text-[#4E7575]">{t("login.languageMenuHint")}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowLanguageMenu((previous) => !previous)}
-              className="rounded-full bg-[#2C6F73] px-3 py-1 text-xs font-semibold text-white shadow-sm"
-            >
-              {activeLanguage.toUpperCase()}
-            </button>
+    <div className="flex w-full lg:w-[45%] items-center justify-center bg-[#F4F8F7] px-6 py-12">
+      <div className="w-full max-w-sm">
+        {/* Mobile logo */}
+        <div className="mb-8 flex items-center gap-3 lg:hidden">
+          <div className="grid size-9 place-items-center rounded-[8px] bg-[#0B5554] text-sm font-bold text-white">
+            MS
           </div>
-
-          {showLanguageMenu && (
-            <div
-              className="mt-3 grid grid-cols-1 gap-2"
-              role="group"
-              aria-label="Language switcher"
-            >
-              {languageOptions.map((option) => {
-                const isActive = activeLanguage === option.code;
-                return (
-                  <button
-                    key={option.code}
-                    type="button"
-                    onClick={() => {
-                      changeLanguage(option.code);
-                      setShowLanguageMenu(false);
-                    }}
-                    className={`rounded-xl px-3 py-2 text-left text-xs font-semibold transition sm:text-sm ${
-                      isActive
-                        ? "bg-[#2C6F73] text-white shadow"
-                        : "bg-[#F5FBFA] text-[#2C6F73] hover:bg-[#D1ECE8]"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <p className="text-base font-bold text-[#163F42]">Motherhood Journey</p>
         </div>
-      </aside>
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-10 sm:px-6">
-        <section className="z-10 w-full max-w-md rounded-3xl border border-white/25 bg-white/12 p-7 shadow-[0_22px_60px_-28px_rgba(34,122,127,0.28)] backdrop-blur-md sm:p-9">
-          <div className="mb-7">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5B8784]">
-              Secure Access
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#1D5052]">
-              {t("login.title")}
-            </h1>
-          </div>
-
-          {status && (
-            <p
-              className={`mb-5 rounded-lg border px-3 py-2 text-sm ${
-                status.tone === "success"
-                  ? "border-[#B4DDD9] bg-[#E7F7F5] text-[#1F585B]"
-                  : "border-red-200 bg-red-50 text-red-700"
-              }`}
-            >
-              {t(status.key, { phone: currentUser?.phone ?? formData.phone })}
-            </p>
-          )}
-
-          {currentUser ? (
-            <div className="space-y-4 rounded-2xl border border-white/25 bg-white/12 p-5 text-[#1D5052] backdrop-blur-sm">
-              <p className="text-sm font-medium">
-                {t("login.loggedInAs", { phone: currentUser.phone })}
-              </p>
-              <button
-                type="button"
-                onClick={onLogout}
-                className="w-full rounded-[8px] bg-[#064F56] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.75)] transition hover:brightness-105"
+        <Card className="border border-[#E4EFED] shadow-[0_20px_60px_-15px_rgba(11,85,84,0.1)] bg-white/90 backdrop-blur-xl rounded-3xl">
+          <CardHeader className="pb-4 pt-8 px-8">
+            <div className="mb-2">
+              <Badge
+                className="rounded-full px-3 py-1 text-xs font-semibold border-0 tracking-wide uppercase"
+                style={{ backgroundColor: "#EAF4F2", color: "#0B5554" }}
               >
-                {t("login.logout")}
-              </button>
+                Secure portal
+              </Badge>
             </div>
-          ) : (
-            <>
-              <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl border border-white/20 bg-white/10 p-1 backdrop-blur-sm">
-                <button
-                  type="button"
-                  onClick={() => switchMode("signin")}
-                  className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                    mode === "signin"
-                      ? "bg-[#2C6F73] text-white shadow"
-                      : "text-[#2C6F73] hover:bg-[#D1ECE8]"
-                  }`}
-                >
-                  {t("login.signInTab")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => switchMode("signup")}
-                  className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                    mode === "signup"
-                      ? "bg-[#2C6F73] text-white shadow"
-                      : "text-[#2C6F73] hover:bg-[#D1ECE8]"
-                  }`}
-                >
-                  {t("login.signUpTab")}
-                </button>
-              </div>
+            <CardTitle className="text-3xl font-bold text-[#163F42] tracking-tight">
+              Welcome back
+            </CardTitle>
+            <CardDescription className="text-[15px] text-[#6D8587] mt-1.5">
+              Sign in to your Motherhood Journey account
+            </CardDescription>
+          </CardHeader>
 
-              <form onSubmit={onSubmit} className="space-y-5" noValidate>
-              <div>
-                <label
-                  htmlFor="fullName"
-                  className="mb-2 block text-sm font-medium text-[#1D5052]"
-                >
-                  {t("login.fullName")}
-                </label>
-                <input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  value={formData.fullName}
-                  onChange={(event) => onChangeField("fullName", event.target.value)}
-                  placeholder="Jane Doe"
-                  className={`w-full rounded-xl border border-white/35 bg-white/12 px-3 py-2.5 text-[#124548] placeholder:text-[#5C7D7D] transition outline-none backdrop-blur-sm ${
-                    errors.fullName
-                      ? "border-red-500 ring-2 ring-red-100"
-                      : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
-                  }`}
-                />
-                {errors.fullName && (
-                  <p className="mt-1.5 text-sm text-red-600">{errors.fullName}</p>
-                )}
-              </div>
+          <CardContent className="pt-4">
+            <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+              {authError && (
+                <Alert className="border-red-200 bg-red-50 text-red-700 py-3">
+                  <AlertCircle className="size-4 shrink-0" />
+                  <AlertDescription className="text-xs leading-snug">
+                    {authError}
+                  </AlertDescription>
+                </Alert>
+              )}
 
-              <div>
-                <label
-                  htmlFor="phone"
-                  className="mb-2 block text-sm font-medium text-[#1D5052]"
-                >
-                  {t("login.phone")}
-                </label>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(event) => onChangeField("phone", event.target.value)}
-                  placeholder="+250700000000"
-                  className={`w-full rounded-xl border border-white/35 bg-white/12 px-3 py-2.5 text-[#124548] placeholder:text-[#5C7D7D] transition outline-none backdrop-blur-sm ${
-                    errors.phone
-                      ? "border-red-500 ring-2 ring-red-100"
-                      : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
-                  }`}
-                />
-                {errors.phone && (
-                  <p className="mt-1.5 text-sm text-red-600">{errors.phone}</p>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="mb-2 block text-sm font-medium text-[#1D5052]"
-                >
-                  {t("login.password")}
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(event) => onChangeField("password", event.target.value)}
-                  className={`w-full rounded-xl border border-white/35 bg-white/12 px-3 py-2.5 text-[#124548] placeholder:text-[#5C7D7D] transition outline-none backdrop-blur-sm ${
-                    errors.password
-                      ? "border-red-500 ring-2 ring-red-100"
-                      : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
-                  }`}
-                />
-                {errors.password && (
-                  <p className="mt-1.5 text-sm text-red-600">{errors.password}</p>
-                )}
-              </div>
-
-              {mode === "signup" && (
-                <div>
-                  <label
-                    htmlFor="confirmPassword"
-                    className="mb-2 block text-sm font-medium text-[#1D5052]"
-                  >
-                    {t("login.confirmPassword")}
-                  </label>
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    value={formData.confirmPassword}
-                    onChange={(event) =>
-                      onChangeField("confirmPassword", event.target.value)
-                    }
-                    className={`w-full rounded-xl border border-white/35 bg-white/12 px-3 py-2.5 text-[#124548] placeholder:text-[#5C7D7D] transition outline-none backdrop-blur-sm ${
-                      errors.confirmPassword
-                        ? "border-red-500 ring-2 ring-red-100"
-                        : "border-[#BBDCD7] focus:border-[#2A7F8A] focus:ring-2 focus:ring-[#B8E2DE]"
-                    }`}
+              {/* Phone number */}
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber" className="text-[#163F42] font-semibold text-[15px]">
+                  Phone number
+                </Label>
+                <div className="relative group">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-[#8AA2A4] group-focus-within:text-[#0B5554] transition-colors" />
+                  <Input
+                    id="phoneNumber"
+                    type="tel"
+                    placeholder="+250 7XX XXX XXX"
+                    autoComplete="tel"
+                    className={cn(
+                      "h-14 pl-12 text-[15px] rounded-xl border-[#D0E8E4] bg-[#F8FBFA] hover:bg-white focus-visible:bg-white focus-visible:border-[#0B5554] focus-visible:ring-4 focus-visible:ring-[#0B5554]/10 transition-all",
+                      errors.phoneNumber &&
+                        "border-red-400 focus-visible:border-red-400 focus-visible:ring-red-400/20",
+                    )}
+                    {...register("phoneNumber")}
                   />
-                  {errors.confirmPassword && (
-                    <p className="mt-1.5 text-sm text-red-600">{errors.confirmPassword}</p>
-                  )}
                 </div>
-              )}
+                {errors.phoneNumber && (
+                  <p className="text-xs text-red-500">{errors.phoneNumber.message}</p>
+                )}
+              </div>
 
-              {hasSubmitError && (
-                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                  {t("login.error")}
-                </p>
-              )}
+              {/* Password */}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-[#163F42] font-semibold text-[15px]">
+                  Password
+                </Label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-[#8AA2A4] group-focus-within:text-[#0B5554] transition-colors" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    className={cn(
+                      "h-14 pl-12 pr-12 text-[15px] rounded-xl border-[#D0E8E4] bg-[#F8FBFA] hover:bg-white focus-visible:bg-white focus-visible:border-[#0B5554] focus-visible:ring-4 focus-visible:ring-[#0B5554]/10 transition-all",
+                      errors.password &&
+                        "border-red-400 focus-visible:border-red-400 focus-visible:ring-red-400/20",
+                    )}
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    tabIndex={-1}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8AA2A4] hover:text-[#0B5554] transition-colors"
+                  >
+                    {showPassword
+                      ? <EyeOff className="size-5" />
+                      : <Eye className="size-5" />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-xs text-red-500">{errors.password.message}</p>
+                )}
+              </div>
 
-              <button
-                type="submit"
-                className="w-full rounded-[8px] bg-[#064F56] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(42,127,138,0.75)] transition hover:brightness-105"
-              >
-                {mode === "signup" ? t("login.submitSignUp") : t("login.submitSignIn")}
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  switchMode(mode === "signin" ? "signup" : "signin")
-                }
-                className="w-full text-sm font-medium text-[#1D5052] underline underline-offset-2"
-              >
-                {mode === "signin"
-                  ? t("login.switchToSignUp")
-                  : t("login.switchToSignIn")}
-              </button>
+              {/* Submit */}
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="h-14 w-full rounded-xl text-base font-bold text-white shadow-lg shadow-[#0B5554]/20 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ backgroundColor: "#0B5554" }}
+                >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    Signing in…
+                  </>
+                ) : (
+                  <>
+                    Sign in
+                    <ArrowRight className="ml-2 size-5" />
+                  </>
+                )}
+                </Button>
+              </div>
             </form>
-            </>
-          )}
-        </section>
+
+            <div className="mt-6 flex items-center gap-3">
+              <div className="h-px flex-1 bg-[#E4EFED]" />
+              <span className="text-[11px] text-[#8AA2A4]">secured by</span>
+              <div className="h-px flex-1 bg-[#E4EFED]" />
+            </div>
+            <p className="mt-3 text-center text-[11px] text-[#9BAEB0] leading-relaxed">
+              Ministry of Health Rwanda · All data encrypted in transit
+            </p>
+          </CardContent>
+        </Card>
+
+        <p className="mt-5 text-center text-xs text-[#8AA2A4]">
+          Don&apos;t have an account?{" "}
+          <a href="/signup" className="text-[#0B5554] font-medium hover:underline">
+            Create one
+          </a>
+        </p>
+        <p className="mt-2 text-center text-xs text-[#8AA2A4]">
+          Having trouble?{" "}
+          <span className="text-[#0B5554] font-medium cursor-pointer hover:underline">
+            Contact your facility admin
+          </span>
+        </p>
       </div>
-    </main>
+    </div>
+  );
+}
+
+/* ── Page export — wraps the form in Suspense (Next.js requirement) */
+export default function LoginPage() {
+  return (
+    <div className="flex min-h-screen">
+      <BrandPanel />
+      <Suspense
+        fallback={
+          <div className="flex w-full lg:w-[45%] items-center justify-center bg-[#F4F8F7]">
+            <Loader2 className="size-8 animate-spin text-[#0B5554]" />
+          </div>
+        }
+      >
+        <LoginForm />
+      </Suspense>
+    </div>
   );
 }
