@@ -244,7 +244,7 @@ export default function HeroSection() {
               }}
             >
               <Image
-                src="/images/hero-1.png"
+                src="/images/hero-1-updated.png"
                 alt="Maternal care in Rwanda"
                 fill
                 className="object-cover object-center"
