@@ -1,7 +1,7 @@
 "use client";
 
 import { Bell, Building2, LogOut, Search } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 
 import { Button } from "@/shared/components/ui/button";
@@ -38,7 +38,6 @@ function getBreadcrumb(pathname: string): string {
 }
 
 export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
-  const router = useRouter();
   const pathname = usePathname();
   const { organizationName, roleTheme, displayName, roleLabel } = useRole({
     fallbackRole,
@@ -47,7 +46,7 @@ export function TopBar({ fallbackRole, previewRole }: TopBarProps) {
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
-    router.push("/login");
+    window.location.replace("/login");
   };
 
   const breadcrumb = getBreadcrumb(pathname);

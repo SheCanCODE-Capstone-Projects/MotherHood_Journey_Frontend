@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
   Baby, CalendarDays, ClipboardList, FileText,
@@ -65,11 +65,10 @@ export function AppSidebar({ fallbackRole, previewRole }: Props) {
   const { roleLabel, roleTheme, navItems, displayName, organizationName } =
     useRole({ fallbackRole, previewRole });
   const pathname = usePathname();
-  const router = useRouter();
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
-    router.push("/login");
+    window.location.replace("/login");
   };
 
   return (

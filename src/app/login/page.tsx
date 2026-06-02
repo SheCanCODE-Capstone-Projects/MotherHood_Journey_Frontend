@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -131,7 +131,6 @@ function BrandPanel() {
 
 /* ── The actual form — uses useSearchParams, must be in Suspense ─ */
 function LoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const callbackUrl = params.get("callbackUrl");
 
@@ -170,14 +169,19 @@ function LoginForm() {
       toast.success("Signed in successfully");
 
       if (callbackUrl) {
-        router.replace(callbackUrl);
+        window.location.replace(callbackUrl);
         return;
       }
 
-      const session = await getSession();
+      // Retry once — session cookie can take a moment to propagate on Railway
+      let session = await getSession();
+      if (!session?.user?.role) {
+        await new Promise((r) => setTimeout(r, 600));
+        session = await getSession();
+      }
       const role = session?.user?.role as string | undefined;
       const destination = (role && ROLE_ROUTE[role]) ?? "/patient/dashboard";
-      router.replace(destination);
+      window.location.replace(destination);
     } catch {
       setAuthError("Something went wrong. Please try again.");
       toast.error("Network error", { description: "Could not reach the server." });

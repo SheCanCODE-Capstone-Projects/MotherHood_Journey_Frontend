@@ -32,6 +32,15 @@ const PROTECTED_ROUTE_MATCHES: ProtectedRouteMatch[] = Object.entries(
 /* Public paths that NEVER require auth */
 const PUBLIC_PATHS = ["/", "/login", "/signup", "/unauthorized", "/api"];
 
+/* NextAuth v5 uses "authjs.session-token" (HTTP) or "__Secure-authjs.session-token" (HTTPS) */
+const SESSION_COOKIE_NAMES = [
+  "__Secure-authjs.session-token",
+  "authjs.session-token",
+  /* v4 fallback names in case still present */
+  "__Secure-next-auth.session-token",
+  "next-auth.session-token",
+];
+
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
@@ -49,10 +58,14 @@ export async function middleware(req: NextRequest) {
   // Route not in the protected list → allow
   if (!match) return NextResponse.next();
 
-  const token = await getToken({
-    req,
-    secret: process.env.NEXTAUTH_SECRET ?? "motherhood-journey-secret-2026",
-  });
+  const secret = process.env.NEXTAUTH_SECRET ?? "motherhood-journey-secret-2026";
+
+  // Try each known cookie name until we get a valid token
+  let token = null;
+  for (const cookieName of SESSION_COOKIE_NAMES) {
+    token = await getToken({ req, secret, cookieName }).catch(() => null);
+    if (token) break;
+  }
 
   // Not authenticated → redirect to login
   if (!token) {
