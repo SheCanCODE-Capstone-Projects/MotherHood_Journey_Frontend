@@ -2,6 +2,17 @@ import type { NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { UserRole } from "@/shared/types/auth";
 
+/* ── Decode JWT payload without a library ── */
+function decodeJwtPayload(token: string): Record<string, unknown> {
+  try {
+    const [, payload] = token.split(".");
+    const padded = payload.replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(Buffer.from(padded, "base64").toString("utf-8"));
+  } catch {
+    return {};
+  }
+}
+
 /* ── Normalize backend uppercase role → frontend lowercase role ── */
 function normalizeRole(backendRole: string | undefined): UserRole {
   const map: Record<string, UserRole> = {
@@ -64,12 +75,13 @@ export const authOptions: NextAuthConfig = {
             return null;
           }
 
+          const jwtPayload = decodeJwtPayload(data.accessToken);
           return {
             id:           data.userId  ?? data.id  ?? "unknown",
             accessToken:  data.accessToken,
             refreshToken: data.refreshToken ?? null,
-            role:         normalizeRole(data.role),
-            facilityId:   data.facilityId   ?? null,
+            role:         normalizeRole(data.role ?? String(jwtPayload.role ?? "")),
+            facilityId:   data.facilityId   ?? (jwtPayload.facilityId ? String(jwtPayload.facilityId) : null),
             geoScopeIds:  data.geoScopeIds  ?? [],
             canExport:    data.canExport    ?? false,
             canPushHmis:  data.canPushHmis  ?? false,
@@ -94,8 +106,8 @@ export const authOptions: NextAuthConfig = {
         token.accessToken  = (user as Record<string,unknown>).accessToken  as string;
         token.refreshToken = (user as Record<string,unknown>).refreshToken as string | null;
         token.role         = (user as Record<string,unknown>).role         as string;
-        token.facilityId   = (user as Record<string,unknown>).facilityId   as number | null;
-        token.geoScopeIds  = (user as Record<string,unknown>).geoScopeIds  as number[];
+        token.facilityId   = (user as Record<string,unknown>).facilityId   as string | null;
+        token.geoScopeIds  = (user as Record<string,unknown>).geoScopeIds  as string[];
         token.canExport    = (user as Record<string,unknown>).canExport    as boolean;
         token.canPushHmis  = (user as Record<string,unknown>).canPushHmis  as boolean;
         token.tokenIssuedAt = Date.now();
@@ -106,8 +118,8 @@ export const authOptions: NextAuthConfig = {
     async session({ session, token }) {
       session.user.accessToken  = token.accessToken  as string | undefined;
       session.user.role         = token.role         as string | undefined;
-      session.user.facilityId   = token.facilityId   as number | undefined;
-      session.user.geoScopeIds  = token.geoScopeIds  as number[] | undefined;
+      session.user.facilityId   = token.facilityId   as string | null | undefined;
+      session.user.geoScopeIds  = token.geoScopeIds  as string[] | undefined;
       session.user.canExport    = token.canExport    as boolean | undefined;
       session.user.canPushHmis  = token.canPushHmis  as boolean | undefined;
       return session;

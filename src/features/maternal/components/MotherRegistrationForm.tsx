@@ -130,9 +130,8 @@ export function MotherRegistrationForm() {
       },
       {
         onSuccess: (response) => {
-          // apiClient unwraps the envelope — response IS the inner data object
-          setSubmittedHealthId(response.health_id);
-          setSubmittedMotherId(response.mother_id);
+          setSubmittedHealthId(response.healthId);
+          setSubmittedMotherId(response.id);
           setSubmittedName({ first: data.first_name, last: data.last_name });
         },
         onError: (error) => {
@@ -157,7 +156,6 @@ export function MotherRegistrationForm() {
         <MotherRegistrationSuccess
           healthId={submittedHealthId}
           motherId={submittedMotherId ?? ""}
-          facilityId={facilityId}
           firstName={submittedName.first}
           lastName={submittedName.last}
           onNewRegistration={handleNewRegistration}

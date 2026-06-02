@@ -28,8 +28,8 @@ export interface AuthResponse {
   refreshToken: string;
   role: string;
   userId?: string;
-  facilityId?: number | null;
-  geoScopeIds?: number[];
+  facilityId?: string | null;
+  geoScopeIds?: string[];
   canExport?: boolean;
   canPushHmis?: boolean;
 }

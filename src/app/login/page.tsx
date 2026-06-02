@@ -88,15 +88,7 @@ function BrandPanel() {
       <div className="relative z-10 flex flex-col gap-10">
         {/* Illustration */}
         <div className="flex justify-center">
-          <div className="relative size-64 xl:size-80">
-            <Image
-              src="/images/hero-illustration.svg"
-              alt="Maternal health illustration"
-              fill
-              className="object-contain drop-shadow-2xl"
-              priority
-            />
-          </div>
+          
         </div>
 
         <div className="animate-fadeSlideUp" style={{ animationDelay: "100ms", animationFillMode: "both" }}>

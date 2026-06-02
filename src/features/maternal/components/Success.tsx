@@ -13,7 +13,6 @@ function calcEdd(lmp: string): string {
 interface SuccessProps {
   healthId: string;
   motherId: string;
-  facilityId: string;
   firstName: string;
   lastName: string;
   onNewRegistration: () => void;
@@ -22,7 +21,6 @@ interface SuccessProps {
 export function MotherRegistrationSuccess({
   healthId,
   motherId,
-  facilityId,
   firstName,
   lastName,
   onNewRegistration,
@@ -77,7 +75,6 @@ export function MotherRegistrationSuccess({
       const edd = calcEdd(lmpDate);
       await createPregnancy({
         motherId,
-        facilityId: facilityId || "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
         lmpDate,
         edd,
         gravida,

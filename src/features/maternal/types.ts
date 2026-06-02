@@ -17,18 +17,20 @@ export interface MotherRegistrationRequest {
   facility_id?: string;
 }
 
-// The apiClient unwraps the {success, data, message} envelope automatically,
-// so the actual return value is the inner data object.
+// Matches the MotherResponse schema returned by POST /api/v1/mothers
 export interface MotherRegistrationResult {
-  mother_id: string;
-  health_id: string;
-  national_id: string;
-  first_name: string;
-  last_name: string;
-  created_at: string;
+  id: string;
+  healthId: string;
+  userId: string;
+  facilityId?: string;
+  nationalId?: string;
+  nidaVerifiedStatus?: string;
+  dateOfBirth?: string;
+  educationLevel?: string;
+  facilityName?: string;
+  registeredAt?: string;
 }
 
-// Keep the old name as an alias so existing imports still compile.
 export type MotherRegistrationResponse = MotherRegistrationResult;
 
 export type NidaStatus = "PENDING" | "VERIFIED" | "FAILED" | "MANUAL";

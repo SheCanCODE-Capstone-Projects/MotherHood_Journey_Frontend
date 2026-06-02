@@ -10,8 +10,8 @@ declare module "next-auth" {
     refreshToken?: string | null;
     /** Backend role: HEALTH_WORKER, FACILITY_ADMIN, DISTRICT_OFFICER, GOVERNMENT_ANALYST, MOH_ADMIN */
     role?: string;
-    facilityId?: number | null;
-    geoScopeIds?: number[];
+    facilityId?: string | null;
+    geoScopeIds?: string[];
     canExport?: boolean;
     canPushHmis?: boolean;
     /** Timestamp when token was issued (ms) */
@@ -22,8 +22,8 @@ declare module "next-auth" {
     user: {
       accessToken?: string;
       role?: string;
-      facilityId?: number | null;
-      geoScopeIds?: number[];
+      facilityId?: string | null;
+      geoScopeIds?: string[];
       canExport?: boolean;
       canPushHmis?: boolean;
     } & DefaultSession["user"];
@@ -35,8 +35,8 @@ declare module "next-auth/jwt" {
     accessToken?: string;
     refreshToken?: string | null;
     role?: string;
-    facilityId?: number | null;
-    geoScopeIds?: number[];
+    facilityId?: string | null;
+    geoScopeIds?: string[];
     canExport?: boolean;
     canPushHmis?: boolean;
     tokenIssuedAt?: number;

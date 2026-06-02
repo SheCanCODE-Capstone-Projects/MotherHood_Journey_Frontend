@@ -129,10 +129,9 @@ export async function getMotherProfile(motherId: string): Promise<MotherProfileD
   return { mother, pregnancies, activePregnancy };
 }
 
-// Correct endpoint: POST /api/v1/pregnancies (not /mothers/{id}/pregnancies)
 export function openPregnancy(
   motherId: string,
-  facilityId: string,
+  _facilityId: string,
   data: { lmpDate: string; gravida?: number; para?: number },
 ): Promise<PregnancyDTO> {
   const lmp = new Date(data.lmpDate);
@@ -140,7 +139,6 @@ export function openPregnancy(
   edd.setDate(edd.getDate() + 280);
   return apiClient.post<PregnancyDTO>("/api/v1/pregnancies", {
     motherId,
-    facilityId,
     lmpDate: data.lmpDate,
     edd: edd.toISOString().split("T")[0],
     gravida: data.gravida ?? 1,
