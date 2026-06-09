@@ -213,7 +213,7 @@ export default function DistrictDashboardPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const { organizationName } = useRole({ fallbackRole: "district_officer" });
-  const geoScopeIds = session?.user?.geoScopeIds as number[] | undefined;
+  const geoScopeIds = session?.user?.geoScopeIds as string[] | undefined;
 
   const facilitiesQuery = useQuery({
     queryKey: [...queryKeys.facilityStats.list, geoScopeIds],
