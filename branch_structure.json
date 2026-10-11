@@ -1,0 +1,33 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "Report_with_HMIS_push",
+    "main",
+    "registering_mother",
+    "roles",
+    "vaccination_cards",
+    "vaccinatios",
+    "vaccines",
+    "visitForm"
+  ],
+  "parent": {
+    "Report_with_HMIS_push": "main",
+    "main": null,
+    "registering_mother": "main",
+    "roles": "main",
+    "vaccination_cards": "main",
+    "vaccinatios": "main",
+    "vaccines": "main",
+    "visitForm": "main"
+  },
+  "order": [
+    "main",
+    "Report_with_HMIS_push",
+    "registering_mother",
+    "roles",
+    "vaccination_cards",
+    "vaccinatios",
+    "vaccines",
+    "visitForm"
+  ]
+}
